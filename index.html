@@ -1,15 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<link rel="apple-touch-icon" href="icon.png">
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="apple-mobile-web-app-title" content="FinFlow"/>
 <meta name="theme-color" content="#0A0A0A"/>
+<link rel="apple-touch-icon" href="icon.png">
 <title>FinFlow</title>
-<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/4.1.1/tesseract.min.js"></script>
 <style>
 :root {
@@ -43,7 +42,7 @@
   --safe-bottom: env(safe-area-inset-bottom, 0px);
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-family:'Sarabun',-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',sans-serif;color:var(--text)}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-family:-apple-system,'Helvetica Neue',Arial,'Noto Sans Thai','Noto Sans Thai UI',sans-serif;color:var(--text)}
 #root{width:100%;height:100%;display:flex;flex-direction:column;max-width:430px;margin:0 auto;position:relative;overflow:hidden}
 
 /* PAGES */
@@ -437,8 +436,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
               <div class="ex-title">✦ <span id="lbl-extracted">Extracted from slip</span></div>
               <div class="ex-row"><span class="ex-label" id="lbl-ex-amount">Amount</span><span class="ex-val highlight" id="ex-amount">—</span></div>
               <div class="ex-row"><span class="ex-label" id="lbl-ex-date">Date</span><span class="ex-val" id="ex-date">—</span></div>
-              <div class="ex-row" style="align-items:flex-start;padding:10px 0"><span class="ex-label" id="lbl-ex-to" style="padding-top:8px">Recipient</span><span class="ex-val" id="ex-to"><input type="text" id="ex-to-input" placeholder="e.g. CP Axtra, ร้านอาหาร..." style="background:var(--bg4);border:0.5px solid var(--border2);border-radius:8px;color:var(--text);font-size:14px;padding:7px 10px;width:170px;font-family:'Sarabun',-apple-system,sans-serif"/></span></div>
-              <div class="ex-row" style="align-items:flex-start;padding:10px 0"><span class="ex-label" id="lbl-ex-note" style="padding-top:8px">Note</span><span class="ex-val" id="ex-note"><input type="text" id="ex-note-input" placeholder="e.g. ชาบูหม่าล่า, ยา..." style="background:var(--bg4);border:0.5px solid var(--border2);border-radius:8px;color:var(--text);font-size:14px;padding:7px 10px;width:170px;font-family:'Sarabun',-apple-system,sans-serif"/></span></div>
+              <div class="ex-row" style="align-items:flex-start;padding:10px 0"><span class="ex-label" id="lbl-ex-to" style="padding-top:8px">Recipient</span><span class="ex-val" id="ex-to"><input type="text" id="ex-to-input" placeholder="e.g. CP Axtra, ร้านอาหาร..." style="background:var(--bg4);border:0.5px solid var(--border2);border-radius:8px;color:var(--text);font-size:14px;padding:7px 10px;width:170px;font-family:-apple-system,'Helvetica Neue',Arial,'Noto Sans Thai',sans-serif"/></span></div>
+              <div class="ex-row" style="align-items:flex-start;padding:10px 0"><span class="ex-label" id="lbl-ex-note" style="padding-top:8px">Note</span><span class="ex-val" id="ex-note"><input type="text" id="ex-note-input" placeholder="e.g. ชาบูหม่าล่า, ยา..." style="background:var(--bg4);border:0.5px solid var(--border2);border-radius:8px;color:var(--text);font-size:14px;padding:7px 10px;width:170px;font-family:-apple-system,'Helvetica Neue',Arial,'Noto Sans Thai',sans-serif"/></span></div>
               <div class="ex-row">
                 <span class="ex-label" id="lbl-ex-cat">Category</span>
                 <div class="select-arrow" style="width:140px">
@@ -953,6 +952,7 @@ function setExType(type){
   exTypeCurrent = type;
   document.getElementById('ex-btn-expense').classList.toggle('active',type==='expense');
   document.getElementById('ex-btn-income').classList.toggle('active',type==='income');
+  populateExCatSelect(type);
 }
 function resetScan(){
   document.getElementById('scan-preview').style.display='none';
@@ -976,29 +976,24 @@ function handleSlipUpload(event){
   imgEl.onload = () => runOCR(file);
   if(imgEl.complete && imgEl.naturalWidth > 0) runOCR(file);
 }
-function populateExCatSelect(){
+function populateExCatSelect(type){
   const sel = document.getElementById('ex-cat');
   if(!sel) return;
-  const cats = loadCats('expense');
+  const t = type || exTypeCurrent || 'expense';
+  const cats = loadCats(t);
   sel.innerHTML = cats.map(c=>`<option value="${c.emoji}|${c.name}">${c.emoji} ${c.name}</option>`).join('');
 }
 
-// =================== PRECISION SCAN ENGINE v2 ===================
-// Tested on 15 real KBank Make slips. Algorithm:
-// AMOUNT: crop zone 52-80% height, left 58% → digit-only OCR → pick largest decimal
-// DATE DAY: narrow crop left 14% → digit-only → first valid 1-31
-// DATE MONTH: current device month (most accurate for real-time scanning)
-// DATE YEAR: find 25XX in digit string → subtract 543
-// RECIPIENT ENGLISH: OCR crop 33-50% → works perfectly
-// RECIPIENT THAI: editable input (OCR unreliable on gradient)
-// NOTE: only for h>=1050 (not 1033) → English works, Thai editable
+// =================== PRECISION SCAN ENGINE v3 ===================
+// Fixes: Thai OCR space cleaning, mobile canvas scale, wider amount zone
 
 function drawImageOnCanvas(imgEl, scale){
   const c = document.createElement('canvas');
   c.width = imgEl.naturalWidth * scale;
   c.height = imgEl.naturalHeight * scale;
   const ctx = c.getContext('2d');
-  ctx.imageSmoothingEnabled = false;
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
   ctx.drawImage(imgEl, 0, 0, c.width, c.height);
   return c;
 }
@@ -1007,7 +1002,7 @@ function cropCanvas(src, W, H, scale, x0p, y0p, x1p, y1p){
   const x0=Math.floor(W*x0p*scale), y0=Math.floor(H*y0p*scale);
   const x1=Math.floor(W*x1p*scale), y1=Math.floor(H*y1p*scale);
   const c=document.createElement('canvas');
-  c.width=x1-x0; c.height=y1-y0;
+  c.width=Math.max(1,x1-x0); c.height=Math.max(1,y1-y0);
   c.getContext('2d').drawImage(src, x0, y0, c.width, c.height, 0, 0, c.width, c.height);
   return c;
 }
@@ -1025,58 +1020,75 @@ function applyBW(canvas, thresh){
 }
 
 async function ocrCanvas(canvas, lang, psm, whitelist){
-  const cfg = { lang: lang||'eng', tessedit_pageseg_mode: psm||6 };
-  if(whitelist) cfg.tessedit_char_whitelist = whitelist;
-  const r = await Tesseract.recognize(canvas.toDataURL('image/png'), lang||'eng', { logger:()=>{} });
-  return r.data.text.trim();
+  try {
+    const r = await Tesseract.recognize(canvas.toDataURL('image/png'), lang||'eng', { logger:()=>{} });
+    return r.data.text.trim();
+  } catch(e) { return ''; }
+}
+
+// Clean Thai OCR output: Tesseract adds spaces between Thai syllables
+function cleanThaiOCR(text){
+  var thaiRange = /[\u0E00-\u0E7F]/;
+  var result = '';
+  var chars = text.split('');
+  for(var i=0;i<chars.length;i++){
+    if(chars[i]===' '||chars[i]==='\t'){
+      var prev = i>0?chars[i-1]:'';
+      var next = i<chars.length-1?chars[i+1]:'';
+      if(!thaiRange.test(prev)&&!thaiRange.test(next)) result+=' ';
+    } else { result+=chars[i]; }
+  }
+  return result.trim();
 }
 
 async function runOCR(file){
   const imgEl = document.getElementById('preview-img');
-  await new Promise(res => { if(imgEl.complete && imgEl.naturalWidth>0) res(); else imgEl.onload=res; });
+  await new Promise(res => { 
+    if(imgEl.complete && imgEl.naturalWidth>0) res(); 
+    else imgEl.onload = res; 
+  });
 
   document.getElementById('ocr-status').style.display='flex';
   document.getElementById('extracted-result').style.display='none';
 
   try {
     const W=imgEl.naturalWidth, H=imgEl.naturalHeight;
-    const src = drawImageOnCanvas(imgEl, 3);
+    // Use scale=2 for mobile (less memory, still accurate for large digits)
+    const scale = window.innerWidth <= 430 ? 2 : 3;
+    const src = drawImageOnCanvas(imgEl, scale);
 
     // ── AMOUNT ──────────────────────────────────────────────────
-    // Zone: 52-80% height, left 58% (avoids QR code on right)
-    const amtC = applyBW(cropCanvas(src,W,H,3, 0.03,0.52, 0.58,0.80), 140);
+    // Wider zone: 45-82% height to catch all slip sizes
+    // Use multiple passes with different thresholds
+    const amtC = applyBW(cropCanvas(src,W,H,scale, 0.02,0.45, 0.60,0.82), 140);
     const amtRaw = await ocrCanvas(amtC, 'eng', 6, '0123456789.,');
-    const amtClean = amtRaw.replace(/,/g,''); // handle 1,000.00
-    const amtDecimals = [...amtClean.matchAll(/\d+\.\d{2}/g)].map(m=>parseFloat(m[0])).filter(n=>n>1);
+    const amtClean = amtRaw.replace(/,/g,'');
+    const amtDecimals = [...amtClean.matchAll(/\d+\.\d{2}/g)]
+      .map(m=>parseFloat(m[0])).filter(n=>n>1);
     let amount = amtDecimals.length ? Math.max(...amtDecimals) : null;
     if(!amount){
-      const amtInts = [...amtClean.matchAll(/(\d{2,6})/g)].map(m=>parseInt(m[1])).filter(n=>n>=10&&n<=999999);
+      const amtInts = [...amtClean.matchAll(/(\d{2,6})/g)]
+        .map(m=>parseInt(m[1])).filter(n=>n>=10&&n<=999999);
       amount = amtInts.length ? Math.max(...amtInts) : null;
     }
 
     // ── DATE DAY ─────────────────────────────────────────────────
-    // Narrow crop: only leftmost 14% of image width captures just the day digits
-    const dayC = applyBW(cropCanvas(src,W,H,3, 0.02,0.10, 0.14,0.185), 130);
-    const dayRaw = await ocrCanvas(dayC, 'eng', 7, '0123456789');
-    const dayNums = dayRaw.replace(/\s/g,'');
+    const dayC = applyBW(cropCanvas(src,W,H,scale, 0.02,0.10, 0.14,0.185), 130);
+    const dayRaw = (await ocrCanvas(dayC,'eng',7,'0123456789')).replace(/\s/g,'');
     let day = null;
-    // Take first 2 chars; if valid day use them, else try first char
-    if(dayNums.length>=2 && parseInt(dayNums.slice(0,2))>=1 && parseInt(dayNums.slice(0,2))<=31)
-      day = String(parseInt(dayNums.slice(0,2)));
-    else if(dayNums.length>=1 && parseInt(dayNums[0])>=1)
-      day = dayNums[0];
+    if(dayRaw.length>=2 && parseInt(dayRaw.slice(0,2))>=1 && parseInt(dayRaw.slice(0,2))<=31)
+      day = String(parseInt(dayRaw.slice(0,2)));
+    else if(dayRaw.length>=1 && parseInt(dayRaw[0])>=1)
+      day = dayRaw[0];
 
     // ── DATE YEAR ────────────────────────────────────────────────
-    // Wide crop for year: full date line
-    const yearC = applyBW(cropCanvas(src,W,H,3, 0.10,0.10, 0.78,0.185), 130);
+    const yearC = applyBW(cropCanvas(src,W,H,scale, 0.10,0.10, 0.78,0.185), 130);
     const yearRaw = (await ocrCanvas(yearC,'eng',7,'0123456789')).replace(/\s/g,'');
     const yearMatch = yearRaw.match(/25[6-9][0-9]/);
     const yearCE = yearMatch ? parseInt(yearMatch[0])-543 : new Date().getFullYear();
 
     // ── DATE MONTH ───────────────────────────────────────────────
-    // Use current device month — most accurate for real-time scanning
-    // Fallback: try Thai OCR on date zone for cross-month accuracy
-    const monthC = cropCanvas(src,W,H,3, 0.14,0.10, 0.60,0.185);
+    const monthC = cropCanvas(src,W,H,scale, 0.14,0.10, 0.60,0.185);
     const monthRaw = (await ocrCanvas(monthC,'tha+eng',7,'')).toLowerCase();
     const MONTH_MAP = [
       [['ม.ค','มค','jan'],'01'],[['ก.พ','กพ','feb'],'02'],[['มี.ค','มีค','mar'],'03'],
@@ -1087,39 +1099,37 @@ async function runOCR(file){
     ];
     let month = String(new Date().getMonth()+1).padStart(2,'0');
     for(const [patterns,mon] of MONTH_MAP){
-      if(patterns.some(p=>monthRaw.includes(p.toLowerCase()))){ month=mon; break; }
+      if(patterns.some(p=>monthRaw.includes(p))){ month=mon; break; }
     }
-
     const dateStr = day && yearCE
       ? `${yearCE}-${month}-${String(parseInt(day)).padStart(2,'0')}`
       : new Date().toISOString().split('T')[0];
 
     // ── RECIPIENT ────────────────────────────────────────────────
-    // Zone: 33-50% height, skip icon on left (start at 14%)
-    // English company names OCR perfectly; Thai names → show editable
-    const recC = cropCanvas(src,W,H,3, 0.14,0.33, 0.90,0.50);
+    const recC = cropCanvas(src,W,H,scale, 0.14,0.33, 0.90,0.50);
     const recRaw = await ocrCanvas(recC,'tha+eng',6,'');
     const recLines = recRaw.split('\n').map(l=>l.trim())
       .filter(l=>l.length>1 && !/^xxx/i.test(l) && !/^\d{9,}$/.test(l));
     const recResult = recLines[0]||'';
-    // Check if it's English (company name) or Thai (personal name)
     const isEnglishRecipient = /^[A-Z0-9\s()\-\.]+$/.test(recResult) && recResult.length > 2;
-    const autoRecipient = isEnglishRecipient ? recResult : '';
+    const autoRecipient = isEnglishRecipient ? recResult.trim() : '';
 
     // ── NOTE ─────────────────────────────────────────────────────
-    // Note box only exists when H >= 1050 (not H=1033 which is ชำระ with ref numbers)
     let autoNote = '';
-    const hasNoteBox = H >= 1050 && H !== 1033;
+    const hasNoteBox = H >= 1050 && !(H >= 1025 && H <= 1040);
     if(hasNoteBox){
-      // Adjust zone for taller slips (H=1153 vs H=1053)
       const noteY1 = H > 1100 ? 0.90 : 0.88;
-      const noteC = cropCanvas(src,W,H,3, 0.04,noteY1, 0.62,0.97);
-      const noteGray = noteC; // keep color for better contrast
-      const noteRaw = await ocrCanvas(noteGray,'tha+eng',7,'');
-      const noteClean = noteRaw.trim().split('\n')[0].trim();
-      // Only auto-fill if it looks like a clean short note (not OCR garbage)
-      if(noteClean.length >= 2 && noteClean.length <= 40 && !/^[^\x00-\x7F]{1}[\x00-\x7F]/.test(noteClean)){
-        autoNote = noteClean;
+      const noteC = cropCanvas(src,W,H,scale, 0.04,noteY1, 0.62,0.97);
+      const noteRaw = (await ocrCanvas(noteC,'tha+eng',7,'')).trim();
+      const firstLine = noteRaw.split('\n')[0].trim();
+      // Clean Thai OCR spacing artifacts
+      const noteCleaned = cleanThaiOCR(firstLine);
+      // Only use if looks valid (not OCR garbage)
+      if(noteCleaned.length >= 2 && noteCleaned.length <= 50){
+        // Check if mostly ASCII (English note) or Thai - both are valid
+        const hasGarbage = /[^฀-๿a-zA-Z0-9\s\-\.]/g.test(noteCleaned) 
+          && !/[฀-๿]/.test(noteCleaned);
+        if(!hasGarbage) autoNote = noteCleaned;
       }
     }
 
@@ -1128,18 +1138,17 @@ async function runOCR(file){
     document.getElementById('extracted-result').style.display='block';
 
     document.getElementById('ex-amount').textContent = amount
-      ? '฿'+amount.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})
+      ? '฿'+amount.toLocaleString('th-TH',{minimumFractionDigits:2,maximumFractionDigits:2})
       : '—';
     document.getElementById('ex-date').textContent = dateStr;
 
-    // Pre-fill editable inputs if we have data
     const toInput = document.getElementById('ex-to-input');
     const noteInput = document.getElementById('ex-note-input');
     if(toInput) toInput.value = autoRecipient;
     if(noteInput) noteInput.value = autoNote;
 
     scannedData = { amount: amount||0, date: dateStr };
-    populateExCatSelect();
+    populateExCatSelect('expense');
     setExType('expense');
 
   } catch(e){
@@ -1147,7 +1156,7 @@ async function runOCR(file){
     document.getElementById('ocr-status').style.display='none';
     document.getElementById('extracted-result').style.display='block';
     scannedData = { amount:0, date: new Date().toISOString().split('T')[0] };
-    populateExCatSelect();
+    populateExCatSelect('expense');
     showToast('Scan failed — fill manually','⚠️');
   }
 }
