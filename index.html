@@ -1,0 +1,145 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans)}
+.app{max-width:420px;margin:0 auto;padding:1rem}
+.header{text-align:center;padding:1rem 0 1.5rem}
+.header h1{font-size:22px;font-weight:500;color:var(--color-text-primary)}
+.header p{font-size:13px;color:var(--color-text-secondary);margin-top:4px}
+.summary-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:1.5rem}
+.stat{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:12px;text-align:center}
+.stat label{font-size:11px;color:var(--color-text-secondary);display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.04em}
+.stat span{font-size:17px;font-weight:500;color:var(--color-text-primary)}
+.stat.income span{color:#0F6E56}
+.stat.expense span{color:#993C1D}
+.stat.balance span{color:var(--color-text-primary)}
+.section-title{font-size:13px;font-weight:500;color:var(--color-text-secondary);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.04em}
+.add-form{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1rem;margin-bottom:1.5rem}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.form-row.full{grid-template-columns:1fr}
+input,select{width:100%;padding:8px 10px;font-size:14px;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);background:var(--color-background-secondary);color:var(--color-text-primary)}
+.type-toggle{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px}
+.type-btn{padding:8px;font-size:13px;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);background:var(--color-background-secondary);color:var(--color-text-secondary);cursor:pointer}
+.type-btn.active.income-btn{background:#E1F5EE;color:#085041;border-color:#5DCAA5}
+.type-btn.active.expense-btn{background:#FAECE7;color:#712B13;border-color:#F0997B}
+.add-btn{width:100%;padding:10px;font-size:14px;font-weight:500;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary);cursor:pointer}
+.add-btn:hover{background:var(--color-background-secondary)}
+.tx-list{display:flex;flex-direction:column;gap:8px}
+.tx-item{display:flex;align-items:center;gap:10px;background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:12px}
+.tx-icon{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.tx-icon.income{background:#E1F5EE}
+.tx-icon.expense{background:#FAECE7}
+.tx-info{flex:1;min-width:0}
+.tx-name{font-size:14px;font-weight:500;color:var(--color-text-primary)}
+.tx-cat{font-size:12px;color:var(--color-text-secondary);margin-top:1px}
+.tx-amount{font-size:15px;font-weight:500}
+.tx-amount.income{color:#0F6E56}
+.tx-amount.expense{color:#993C1D}
+.tx-delete{background:none;border:none;cursor:pointer;color:var(--color-text-secondary);padding:4px;opacity:0.5}
+.tx-delete:hover{opacity:1}
+.empty{text-align:center;padding:2rem;color:var(--color-text-secondary);font-size:14px}
+</style>
+
+<div class="app">
+  <h2 class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)">Personal finance tracker demo app</h2>
+  <div class="header">
+    <h1><i class="ti ti-wallet" aria-hidden="true"></i> My Finance</h1>
+    <p>Personal finance tracker</p>
+  </div>
+
+  <div class="summary-grid">
+    <div class="stat income"><label>Income</label><span id="total-income">฿0</span></div>
+    <div class="stat expense"><label>Expense</label><span id="total-expense">฿0</span></div>
+    <div class="stat balance"><label>Balance</label><span id="total-balance">฿0</span></div>
+  </div>
+
+  <div class="section-title">Add transaction</div>
+  <div class="add-form">
+    <div class="type-toggle">
+      <button class="type-btn income-btn active" id="btn-income" onclick="setType('income')"><i class="ti ti-arrow-down-circle" aria-hidden="true"></i> Income</button>
+      <button class="type-btn expense-btn" id="btn-expense" onclick="setType('expense')"><i class="ti ti-arrow-up-circle" aria-hidden="true"></i> Expense</button>
+    </div>
+    <div class="form-row">
+      <input type="text" id="tx-name" placeholder="Description" />
+      <input type="number" id="tx-amount" placeholder="Amount (฿)" min="0" />
+    </div>
+    <div class="form-row full">
+      <select id="tx-cat">
+        <option value="">Select category</option>
+        <option>Salary</option><option>Freelance</option><option>Investment</option>
+        <option>Food</option><option>Transport</option><option>Bills</option>
+        <option>Shopping</option><option>Health</option><option>Other</option>
+      </select>
+    </div>
+    <button class="add-btn" onclick="addTransaction()"><i class="ti ti-plus" aria-hidden="true"></i> Add transaction</button>
+  </div>
+
+  <div class="section-title">Transactions</div>
+  <div class="tx-list" id="tx-list">
+    <div class="empty">No transactions yet. Add one above!</div>
+  </div>
+</div>
+
+<script>
+let type = 'income';
+let transactions = [
+  {id:1,type:'income',name:'Monthly salary',cat:'Salary',amount:35000},
+  {id:2,type:'expense',name:'Lunch & dinner',cat:'Food',amount:3200},
+  {id:3,type:'expense',name:'BTS & Grab',cat:'Transport',amount:800},
+];
+let nextId = 4;
+
+const catIcons = {Salary:'ti-briefcase',Freelance:'ti-device-laptop',Investment:'ti-trending-up',Food:'ti-tools-kitchen-2',Transport:'ti-car',Bills:'ti-receipt',Shopping:'ti-shopping-bag',Health:'ti-heart-rate-monitor',Other:'ti-dots'};
+
+function setType(t){
+  type=t;
+  document.getElementById('btn-income').classList.toggle('active',t==='income');
+  document.getElementById('btn-expense').classList.toggle('active',t==='expense');
+  const catSel = document.getElementById('tx-cat');
+  if(t==='income'){catSel.innerHTML='<option value="">Select category</option><option>Salary</option><option>Freelance</option><option>Investment</option><option>Other</option>';}
+  else{catSel.innerHTML='<option value="">Select category</option><option>Food</option><option>Transport</option><option>Bills</option><option>Shopping</option><option>Health</option><option>Other</option>';}
+}
+
+function addTransaction(){
+  const name=document.getElementById('tx-name').value.trim();
+  const amount=parseFloat(document.getElementById('tx-amount').value);
+  const cat=document.getElementById('tx-cat').value;
+  if(!name||!amount||amount<=0||!cat){alert('Please fill in all fields.');return;}
+  transactions.unshift({id:nextId++,type,name,cat,amount});
+  document.getElementById('tx-name').value='';
+  document.getElementById('tx-amount').value='';
+  document.getElementById('tx-cat').value='';
+  render();
+}
+
+function deleteTransaction(id){transactions=transactions.filter(t=>t.id!==id);render();}
+
+function fmt(n){return '฿'+Math.round(n).toLocaleString();}
+
+function render(){
+  const income=transactions.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
+  const expense=transactions.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
+  document.getElementById('total-income').textContent=fmt(income);
+  document.getElementById('total-expense').textContent=fmt(expense);
+  const bal=income-expense;
+  const balEl=document.getElementById('total-balance');
+  balEl.textContent=fmt(bal);
+  balEl.style.color=bal>=0?'#0F6E56':'#993C1D';
+
+  const list=document.getElementById('tx-list');
+  if(transactions.length===0){list.innerHTML='<div class="empty">No transactions yet. Add one above!</div>';return;}
+  list.innerHTML=transactions.map(t=>{
+    const icon=catIcons[t.cat]||'ti-circle';
+    return `<div class="tx-item">
+      <div class="tx-icon ${t.type}"><i class="ti ${icon}" aria-hidden="true"></i></div>
+      <div class="tx-info">
+        <div class="tx-name">${t.name}</div>
+        <div class="tx-cat">${t.cat}</div>
+      </div>
+      <div class="tx-amount ${t.type}">${t.type==='income'?'+':'-'}${fmt(t.amount)}</div>
+      <button class="tx-delete" onclick="deleteTransaction(${t.id})" aria-label="Delete transaction"><i class="ti ti-trash" style="font-size:16px" aria-hidden="true"></i></button>
+    </div>`;
+  }).join('');
+}
+render();
+</script>
