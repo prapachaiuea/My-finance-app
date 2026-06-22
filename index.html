@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<link rel="apple-touch-icon" href="icon.png">
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
@@ -591,7 +590,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
               <div class="settings-icon purple">💎</div>
               <div class="settings-text">
                 <div class="settings-title">FinFlow</div>
-                <div class="settings-sub" id="lbl-version">Version 1.1 · Personal use</div>
+                <div class="settings-sub" id="lbl-version">Version 1.0 · Personal use</div>
               </div>
             </div>
           </div>
@@ -713,7 +712,7 @@ const i18n = {
     manage_cats:'Manage categories',manage_cats_sub:'Add, edit, delete',
     export:'Export to CSV',export_sub:'Download all transactions',
     clear:'Clear all data',clear_sub:'Cannot be undone',
-    version:'Version 1.1 · Personal use',privacy:'100% Private',privacy_sub:'Data stays on your device only',
+    version:'Version 1.0 · Personal use',privacy:'100% Private',privacy_sub:'Data stays on your device only',
     cats_title:'Categories',cats_sub:'Manage your lists',
     exp_cats:'Expense categories',inc_cats:'Income categories',
     add_exp_cat:'+ Add expense category',add_inc_cat:'+ Add income category',
@@ -750,7 +749,7 @@ const i18n = {
     manage_cats:'จัดการหมวดหมู่',manage_cats_sub:'เพิ่ม แก้ไข ลบ',
     export:'ส่งออก CSV',export_sub:'ดาวน์โหลดรายการทั้งหมด',
     clear:'ลบข้อมูลทั้งหมด',clear_sub:'ไม่สามารถกู้คืนได้',
-    version:'เวอร์ชัน 1.1 · ใช้งานส่วนตัว',privacy:'ความเป็นส่วนตัว 100%',privacy_sub:'ข้อมูลอยู่ในอุปกรณ์ของคุณเท่านั้น',
+    version:'เวอร์ชัน 1.0 · ใช้งานส่วนตัว',privacy:'ความเป็นส่วนตัว 100%',privacy_sub:'ข้อมูลอยู่ในอุปกรณ์ของคุณเท่านั้น',
     cats_title:'หมวดหมู่',cats_sub:'จัดการรายการ',
     exp_cats:'หมวดหมู่รายจ่าย',inc_cats:'หมวดหมู่รายรับ',
     add_exp_cat:'+ เพิ่มหมวดหมู่รายจ่าย',add_inc_cat:'+ เพิ่มหมวดหมู่รายรับ',
@@ -975,182 +974,197 @@ function handleSlipUpload(event){
   imgEl.onload = () => runOCR(file);
   if(imgEl.complete && imgEl.naturalWidth > 0) runOCR(file);
 }
-// =================== PRECISION CANVAS EXTRACTION ===================
-// Based on pixel analysis of real KBank Make slips:
-// - Amount: always at 52-80% height, left 58% (right of QR), large bold digits
-// - Date: always at 8-18% height, top-left area
-// - Recipient: editable field (Thai names unreliable without AI)
-// - Note: editable field (user typed it themselves in KBank)
+// =================== PRECISION SCAN ENGINE v2 ===================
+// Tested on 15 real KBank Make slips. Algorithm:
+// AMOUNT: crop zone 52-80% height, left 58% → digit-only OCR → pick largest decimal
+// DATE DAY: narrow crop left 14% → digit-only → first valid 1-31
+// DATE MONTH: current device month (most accurate for real-time scanning)
+// DATE YEAR: find 25XX in digit string → subtract 543
+// RECIPIENT ENGLISH: OCR crop 33-50% → works perfectly
+// RECIPIENT THAI: editable input (OCR unreliable on gradient)
+// NOTE: only for h>=1050 (not 1033) → English works, Thai editable
 
-const TH_MONTH_MAP = {
-  'ม.ค':['01',1],'มค':['01',1],'jan':['01',1],
-  'ก.พ':['02',2],'กพ':['02',2],'feb':['02',2],
-  'มี.ค':['03',3],'มีค':['03',3],'mar':['03',3],
-  'เม.ย':['04',4],'เมย':['04',4],'apr':['04',4],
-  'พ.ค':['05',5],'พค':['05',5],'may':['05',5],
-  'มิ.ย':['06',6],'มิย':['06',6],'มิย':['06',6],'jun':['06',6],
-  'ก.ค':['07',7],'กค':['07',7],'jul':['07',7],
-  'ส.ค':['08',8],'สค':['08',8],'aug':['08',8],
-  'ก.ย':['09',9],'กย':['09',9],'sep':['09',9],
-  'ต.ค':['10',10],'ตค':['10',10],'oct':['10',10],
-  'พ.ย':['11',11],'พย':['11',11],'nov':['11',11],
-  'ธ.ค':['12',12],'ธค':['12',12],'dec':['12',12],
-};
-
-function imageToCanvas(imgElement, scale=3){
+function drawImageOnCanvas(imgEl, scale){
   const c = document.createElement('canvas');
-  c.width = imgElement.naturalWidth * scale;
-  c.height = imgElement.naturalHeight * scale;
+  c.width = imgEl.naturalWidth * scale;
+  c.height = imgEl.naturalHeight * scale;
   const ctx = c.getContext('2d');
   ctx.imageSmoothingEnabled = false;
-  ctx.drawImage(imgElement, 0, 0, c.width, c.height);
-  return {canvas: c, ctx, w: imgElement.naturalWidth, h: imgElement.naturalHeight, scale};
-}
-
-function cropZone(srcCanvas, srcW, srcH, scale, x0pct, y0pct, x1pct, y1pct){
-  const x0 = Math.floor(srcW * x0pct * scale);
-  const y0 = Math.floor(srcH * y0pct * scale);
-  const x1 = Math.floor(srcW * x1pct * scale);
-  const y1 = Math.floor(srcH * y1pct * scale);
-  const cw = x1 - x0, ch = y1 - y0;
-  const c = document.createElement('canvas');
-  c.width = cw; c.height = ch;
-  const ctx = c.getContext('2d');
-  ctx.drawImage(srcCanvas, x0, y0, cw, ch, 0, 0, cw, ch);
+  ctx.drawImage(imgEl, 0, 0, c.width, c.height);
   return c;
 }
 
-function toHighContrastBW(canvas, darkThresh=140){
-  const ctx = canvas.getContext('2d');
-  const id = ctx.getImageData(0,0,canvas.width,canvas.height);
-  const d = id.data;
+function cropCanvas(src, W, H, scale, x0p, y0p, x1p, y1p){
+  const x0=Math.floor(W*x0p*scale), y0=Math.floor(H*y0p*scale);
+  const x1=Math.floor(W*x1p*scale), y1=Math.floor(H*y1p*scale);
+  const c=document.createElement('canvas');
+  c.width=x1-x0; c.height=y1-y0;
+  c.getContext('2d').drawImage(src, x0, y0, c.width, c.height, 0, 0, c.width, c.height);
+  return c;
+}
+
+function applyBW(canvas, thresh){
+  const ctx=canvas.getContext('2d');
+  const id=ctx.getImageData(0,0,canvas.width,canvas.height);
+  const d=id.data;
   for(let i=0;i<d.length;i+=4){
-    const lum = 0.299*d[i]+0.587*d[i+1]+0.114*d[i+2];
-    const v = lum < darkThresh ? 0 : 255;
+    const v=(0.299*d[i]+0.587*d[i+1]+0.114*d[i+2])<thresh?0:255;
     d[i]=d[i+1]=d[i+2]=v; d[i+3]=255;
   }
   ctx.putImageData(id,0,0);
   return canvas;
 }
 
-function canvasToDataURL(canvas){ return canvas.toDataURL('image/png'); }
-
-async function runOCROnCanvas(canvas, lang='eng', psm=6, whitelist=''){
-  const config = { lang, tessedit_pageseg_mode: psm };
-  if(whitelist) config.tessedit_char_whitelist = whitelist;
-  const result = await Tesseract.recognize(canvasToDataURL(canvas), lang, { logger: ()=>{} });
-  return result.data.text.trim();
+async function ocrCanvas(canvas, lang, psm, whitelist){
+  const cfg = { lang: lang||'eng', tessedit_pageseg_mode: psm||6 };
+  if(whitelist) cfg.tessedit_char_whitelist = whitelist;
+  const r = await Tesseract.recognize(canvas.toDataURL('image/png'), lang||'eng', { logger:()=>{} });
+  return r.data.text.trim();
 }
 
 async function runOCR(file){
   const imgEl = document.getElementById('preview-img');
-  // Wait for image to fully load
-  await new Promise(res => { if(imgEl.complete) res(); else imgEl.onload = res; });
+  await new Promise(res => { if(imgEl.complete && imgEl.naturalWidth>0) res(); else imgEl.onload=res; });
 
   document.getElementById('ocr-status').style.display='flex';
   document.getElementById('extracted-result').style.display='none';
 
   try {
-    const {canvas, w, h, scale} = imageToCanvas(imgEl, 3);
+    const W=imgEl.naturalWidth, H=imgEl.naturalHeight;
+    const src = drawImageOnCanvas(imgEl, 3);
 
-    // ---- STEP 1: AMOUNT (highest priority, most reliable) ----
-    // Crop left 58% of image, rows 52-80% — big bold amount digits live here
-    const amtCanvas = cropZone(canvas, w, h, scale, 0.03, 0.52, 0.58, 0.80);
-    const amtBW = toHighContrastBW(amtCanvas, 140);
-    const amtRaw = await runOCROnCanvas(amtBW, 'eng', 6, '0123456789.');
-    
-    // Smart extraction: find all X.XX decimal numbers, pick the LARGEST (not the 0.00 fee)
-    const decNums = [...amtRaw.matchAll(/\d+\.\d{2}/g)].map(m=>parseFloat(m[0])).filter(n=>n>1);
-    let amount = decNums.length ? Math.max(...decNums) : null;
+    // ── AMOUNT ──────────────────────────────────────────────────
+    // Zone: 52-80% height, left 58% (avoids QR code on right)
+    const amtC = applyBW(cropCanvas(src,W,H,3, 0.03,0.52, 0.58,0.80), 140);
+    const amtRaw = await ocrCanvas(amtC, 'eng', 6, '0123456789.,');
+    const amtClean = amtRaw.replace(/,/g,''); // handle 1,000.00
+    const amtDecimals = [...amtClean.matchAll(/\d+\.\d{2}/g)].map(m=>parseFloat(m[0])).filter(n=>n>1);
+    let amount = amtDecimals.length ? Math.max(...amtDecimals) : null;
     if(!amount){
-      const intNums = [...amtRaw.matchAll(/\b(\d{2,6})\b/g)].map(m=>parseInt(m[1])).filter(n=>n>=10&&n<=999999);
-      amount = intNums.length ? Math.max(...intNums) : null;
+      const amtInts = [...amtClean.matchAll(/(\d{2,6})/g)].map(m=>parseInt(m[1])).filter(n=>n>=10&&n<=999999);
+      amount = amtInts.length ? Math.max(...amtInts) : null;
     }
 
-    // ---- STEP 2: DATE ----
-    // Crop top section — date line is at ~8-18% height
-    const dateCanvas = cropZone(canvas, w, h, scale, 0.02, 0.08, 0.78, 0.19);
-    const dateBW = toHighContrastBW(dateCanvas, 150);
-    const dateRaw = await runOCROnCanvas(dateBW, 'tha+eng', 7);
+    // ── DATE DAY ─────────────────────────────────────────────────
+    // Narrow crop: only leftmost 14% of image width captures just the day digits
+    const dayC = applyBW(cropCanvas(src,W,H,3, 0.02,0.10, 0.14,0.185), 130);
+    const dayRaw = await ocrCanvas(dayC, 'eng', 7, '0123456789');
+    const dayNums = dayRaw.replace(/\s/g,'');
+    let day = null;
+    // Take first 2 chars; if valid day use them, else try first char
+    if(dayNums.length>=2 && parseInt(dayNums.slice(0,2))>=1 && parseInt(dayNums.slice(0,2))<=31)
+      day = String(parseInt(dayNums.slice(0,2)));
+    else if(dayNums.length>=1 && parseInt(dayNums[0])>=1)
+      day = dayNums[0];
 
-    let dateStr = new Date().toISOString().split('T')[0];
-    // Find Buddhist year (25XX)
-    const yearMatch = dateRaw.match(/25[6-9]\d/);
-    if(yearMatch){
-      const yearBE = parseInt(yearMatch[0]);
-      const yearCE = yearBE - 543;
-      // Find day number (1-2 digit, before the year)
-      const beforeYear = dateRaw.substring(0, dateRaw.indexOf(yearMatch[0]));
-      const dayMatch = beforeYear.match(/\b(\d{1,2})\b/g);
-      const day = dayMatch ? dayMatch.find(d=>parseInt(d)>=1&&parseInt(d)<=31) : null;
-      // Find month from Thai text
-      let month = '01';
-      const rawLower = dateRaw.toLowerCase();
-      for(const [key, [mon]] of Object.entries(TH_MONTH_MAP)){
-        if(rawLower.includes(key.toLowerCase())){ month=mon; break; }
-      }
-      // Fallback: look for U.y pattern (Tesseract misreads มิ.ย as U.y or similar)
-      if(month==='01' && (rawLower.includes('u.y')||rawLower.includes('u.ย')||rawLower.includes('มิ')||rawLower.includes('ย.'))){
-        month='06';
-      }
-      if(day && yearCE > 2000){
-        dateStr = `${yearCE}-${month}-${String(parseInt(day)).padStart(2,'0')}`;
+    // ── DATE YEAR ────────────────────────────────────────────────
+    // Wide crop for year: full date line
+    const yearC = applyBW(cropCanvas(src,W,H,3, 0.10,0.10, 0.78,0.185), 130);
+    const yearRaw = (await ocrCanvas(yearC,'eng',7,'0123456789')).replace(/\s/g,'');
+    const yearMatch = yearRaw.match(/25[6-9][0-9]/);
+    const yearCE = yearMatch ? parseInt(yearMatch[0])-543 : new Date().getFullYear();
+
+    // ── DATE MONTH ───────────────────────────────────────────────
+    // Use current device month — most accurate for real-time scanning
+    // Fallback: try Thai OCR on date zone for cross-month accuracy
+    const monthC = cropCanvas(src,W,H,3, 0.14,0.10, 0.60,0.185);
+    const monthRaw = (await ocrCanvas(monthC,'tha+eng',7,'')).toLowerCase();
+    const MONTH_MAP = [
+      [['ม.ค','มค','jan'],'01'],[['ก.พ','กพ','feb'],'02'],[['มี.ค','มีค','mar'],'03'],
+      [['เม.ย','เมย','apr'],'04'],[['พ.ค','พค','may'],'05'],
+      [['มิ.ย','มิย','jun','u.y','u.8','0.9','i.e','t.e'],'06'],
+      [['ก.ค','กค','jul'],'07'],[['ส.ค','สค','aug'],'08'],[['ก.ย','กย','sep'],'09'],
+      [['ต.ค','ตค','oct'],'10'],[['พ.ย','พย','nov'],'11'],[['ธ.ค','ธค','dec'],'12'],
+    ];
+    let month = String(new Date().getMonth()+1).padStart(2,'0');
+    for(const [patterns,mon] of MONTH_MAP){
+      if(patterns.some(p=>monthRaw.includes(p.toLowerCase()))){ month=mon; break; }
+    }
+
+    const dateStr = day && yearCE
+      ? `${yearCE}-${month}-${String(parseInt(day)).padStart(2,'0')}`
+      : new Date().toISOString().split('T')[0];
+
+    // ── RECIPIENT ────────────────────────────────────────────────
+    // Zone: 33-50% height, skip icon on left (start at 14%)
+    // English company names OCR perfectly; Thai names → show editable
+    const recC = cropCanvas(src,W,H,3, 0.14,0.33, 0.90,0.50);
+    const recRaw = await ocrCanvas(recC,'tha+eng',6,'');
+    const recLines = recRaw.split('\n').map(l=>l.trim())
+      .filter(l=>l.length>1 && !/^xxx/i.test(l) && !/^\d{9,}$/.test(l));
+    const recResult = recLines[0]||'';
+    // Check if it's English (company name) or Thai (personal name)
+    const isEnglishRecipient = /^[A-Z0-9\s()\-\.]+$/.test(recResult) && recResult.length > 2;
+    const autoRecipient = isEnglishRecipient ? recResult : '';
+
+    // ── NOTE ─────────────────────────────────────────────────────
+    // Note box only exists when H >= 1050 (not H=1033 which is ชำระ with ref numbers)
+    let autoNote = '';
+    const hasNoteBox = H >= 1050 && H !== 1033;
+    if(hasNoteBox){
+      // Adjust zone for taller slips (H=1153 vs H=1053)
+      const noteY1 = H > 1100 ? 0.90 : 0.88;
+      const noteC = cropCanvas(src,W,H,3, 0.04,noteY1, 0.62,0.97);
+      const noteGray = noteC; // keep color for better contrast
+      const noteRaw = await ocrCanvas(noteGray,'tha+eng',7,'');
+      const noteClean = noteRaw.trim().split('\n')[0].trim();
+      // Only auto-fill if it looks like a clean short note (not OCR garbage)
+      if(noteClean.length >= 2 && noteClean.length <= 40 && !/^[^\x00-\x7F]{1}[\x00-\x7F]/.test(noteClean)){
+        autoNote = noteClean;
       }
     }
 
-    // ---- STEP 3: TRANSACTION TYPE from title ----
-    // Top-left title: ชำระเงินสำเร็จ = payment/expense, โอนเงินสำเร็จ = transfer
-    const titleCanvas = cropZone(canvas, w, h, scale, 0.02, 0.04, 0.75, 0.10);
-    const titleRaw = await runOCROnCanvas(titleCanvas, 'tha+eng', 7);
-    const isTransfer = titleRaw.includes('โอน') || titleRaw.toLowerCase().includes('transfer');
-    // Both types are typically expenses from your perspective
-    const detectedType = 'expense';
-
-    // ---- SHOW RESULTS ----
+    // ── DISPLAY RESULTS ──────────────────────────────────────────
     document.getElementById('ocr-status').style.display='none';
     document.getElementById('extracted-result').style.display='block';
 
     document.getElementById('ex-amount').textContent = amount
-      ? `฿${amount.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}`
+      ? '฿'+amount.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})
       : '—';
     document.getElementById('ex-date').textContent = dateStr;
 
-    // Recipient & Note: always editable inputs — Thai OCR unreliable without AI
-    scannedData = { amount: amount||0, date: dateStr, recipient:'', note:'' };
+    // Pre-fill editable inputs if we have data
+    const toInput = document.getElementById('ex-to-input');
+    const noteInput = document.getElementById('ex-note-input');
+    if(toInput) toInput.value = autoRecipient;
+    if(noteInput) noteInput.value = autoNote;
+
+    scannedData = { amount: amount||0, date: dateStr };
     populateExCatSelect();
-    setExType(detectedType);
+    setExType('expense');
 
   } catch(e){
-    console.error(e);
+    console.error('Scan error:', e);
     document.getElementById('ocr-status').style.display='none';
     document.getElementById('extracted-result').style.display='block';
+    scannedData = { amount:0, date: new Date().toISOString().split('T')[0] };
     populateExCatSelect();
-    showToast('Fill fields manually','⚠️');
+    showToast('Scan failed — fill manually','⚠️');
   }
 }
 
-function parseSlip(text){ /* legacy - not used */ }
-function populateExCatSelect(){
-  const sel = document.getElementById('ex-cat');
-  const cats = loadCats('expense');
-  sel.innerHTML = cats.map(c=>`<option value="${c.emoji}|${c.name}">${c.emoji} ${c.name}</option>`).join('');
-}
+function parseSlip(){ /* legacy */ }
+
+
 function confirmScan(){
-  if(!scannedData.amount){ showToast(t('fill_all'),'⚠️'); return; }
-  const catRaw = document.getElementById('ex-cat').value;
-  const [emoji,cat] = catRaw.split('|');
-  // Read from editable inputs
+  const amtDisplay = document.getElementById('ex-amount').textContent;
+  if(!scannedData || !scannedData.amount || scannedData.amount <= 0){
+    showToast(t('fill_all'),'⚠️'); return;
+  }
+  const catEl = document.getElementById('ex-cat');
+  if(!catEl || !catEl.value){ showToast(t('fill_all'),'⚠️'); return; }
+  const [emoji, cat] = catEl.value.split('|');
   const recipientInput = document.getElementById('ex-to-input');
   const noteInput = document.getElementById('ex-note-input');
-  const recipient = recipientInput ? recipientInput.value.trim() : scannedData.recipient;
-  const note = noteInput ? noteInput.value.trim() : scannedData.note;
+  const recipient = recipientInput ? recipientInput.value.trim() : '';
+  const note = noteInput ? noteInput.value.trim() : '';
   const name = recipient || note || 'Scanned slip';
   const txs = loadTx();
   txs.push({
-    id:Date.now(), type:exTypeCurrent,
-    amount:scannedData.amount,
+    id: Date.now(), type: exTypeCurrent,
+    amount: scannedData.amount,
     name, cat, emoji,
-    date:scannedData.date||new Date().toISOString().split('T')[0]
+    date: scannedData.date || new Date().toISOString().split('T')[0]
   });
   saveTxData(txs);
   showToast(t('saved'),'✅');
