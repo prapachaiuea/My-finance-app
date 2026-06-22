@@ -436,8 +436,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
               <div class="ex-title">✦ <span id="lbl-extracted">Extracted from slip</span></div>
               <div class="ex-row"><span class="ex-label" id="lbl-ex-amount">Amount</span><span class="ex-val highlight" id="ex-amount">—</span></div>
               <div class="ex-row"><span class="ex-label" id="lbl-ex-date">Date</span><span class="ex-val" id="ex-date">—</span></div>
-              <div class="ex-row"><span class="ex-label" id="lbl-ex-to">Recipient</span><span class="ex-val" id="ex-to">—</span></div>
-              <div class="ex-row"><span class="ex-label" id="lbl-ex-note">Note</span><span class="ex-val" id="ex-note">—</span></div>
+              <div class="ex-row" style="align-items:flex-start;padding:10px 0"><span class="ex-label" id="lbl-ex-to" style="padding-top:8px">Recipient</span><span class="ex-val" id="ex-to"><input type="text" id="ex-to-input" placeholder="e.g. CP Axtra, ร้านอาหาร..." style="background:var(--bg4);border:0.5px solid var(--border2);border-radius:8px;color:var(--text);font-size:13px;padding:7px 10px;width:170px;font-family:inherit"/></span></div>
+              <div class="ex-row" style="align-items:flex-start;padding:10px 0"><span class="ex-label" id="lbl-ex-note" style="padding-top:8px">Note</span><span class="ex-val" id="ex-note"><input type="text" id="ex-note-input" placeholder="e.g. ชาบูหม่าล่า, ยา..." style="background:var(--bg4);border:0.5px solid var(--border2);border-radius:8px;color:var(--text);font-size:13px;padding:7px 10px;width:170px;font-family:inherit"/></span></div>
               <div class="ex-row">
                 <span class="ex-label" id="lbl-ex-cat">Category</span>
                 <div class="select-arrow" style="width:140px">
@@ -965,81 +965,171 @@ function handleSlipUpload(event){
   const file = event.target.files[0];
   if(!file) return;
   const url = URL.createObjectURL(file);
-  document.getElementById('preview-img').src = url;
+  const imgEl = document.getElementById('preview-img');
+  imgEl.src = url;
   document.getElementById('scan-preview').style.display='block';
   document.getElementById('scan-tips').style.display='none';
   document.getElementById('upload-zone').style.display='none';
   document.getElementById('ocr-status').style.display='flex';
   document.getElementById('extracted-result').style.display='none';
-  runOCR(file);
+  imgEl.onload = () => runOCR(file);
+  if(imgEl.complete && imgEl.naturalWidth > 0) runOCR(file);
 }
+// =================== PRECISION CANVAS EXTRACTION ===================
+// Based on pixel analysis of real KBank Make slips:
+// - Amount: always at 52-80% height, left 58% (right of QR), large bold digits
+// - Date: always at 8-18% height, top-left area
+// - Recipient: editable field (Thai names unreliable without AI)
+// - Note: editable field (user typed it themselves in KBank)
+
+const TH_MONTH_MAP = {
+  'ม.ค':['01',1],'มค':['01',1],'jan':['01',1],
+  'ก.พ':['02',2],'กพ':['02',2],'feb':['02',2],
+  'มี.ค':['03',3],'มีค':['03',3],'mar':['03',3],
+  'เม.ย':['04',4],'เมย':['04',4],'apr':['04',4],
+  'พ.ค':['05',5],'พค':['05',5],'may':['05',5],
+  'มิ.ย':['06',6],'มิย':['06',6],'มิย':['06',6],'jun':['06',6],
+  'ก.ค':['07',7],'กค':['07',7],'jul':['07',7],
+  'ส.ค':['08',8],'สค':['08',8],'aug':['08',8],
+  'ก.ย':['09',9],'กย':['09',9],'sep':['09',9],
+  'ต.ค':['10',10],'ตค':['10',10],'oct':['10',10],
+  'พ.ย':['11',11],'พย':['11',11],'nov':['11',11],
+  'ธ.ค':['12',12],'ธค':['12',12],'dec':['12',12],
+};
+
+function imageToCanvas(imgElement, scale=3){
+  const c = document.createElement('canvas');
+  c.width = imgElement.naturalWidth * scale;
+  c.height = imgElement.naturalHeight * scale;
+  const ctx = c.getContext('2d');
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(imgElement, 0, 0, c.width, c.height);
+  return {canvas: c, ctx, w: imgElement.naturalWidth, h: imgElement.naturalHeight, scale};
+}
+
+function cropZone(srcCanvas, srcW, srcH, scale, x0pct, y0pct, x1pct, y1pct){
+  const x0 = Math.floor(srcW * x0pct * scale);
+  const y0 = Math.floor(srcH * y0pct * scale);
+  const x1 = Math.floor(srcW * x1pct * scale);
+  const y1 = Math.floor(srcH * y1pct * scale);
+  const cw = x1 - x0, ch = y1 - y0;
+  const c = document.createElement('canvas');
+  c.width = cw; c.height = ch;
+  const ctx = c.getContext('2d');
+  ctx.drawImage(srcCanvas, x0, y0, cw, ch, 0, 0, cw, ch);
+  return c;
+}
+
+function toHighContrastBW(canvas, darkThresh=140){
+  const ctx = canvas.getContext('2d');
+  const id = ctx.getImageData(0,0,canvas.width,canvas.height);
+  const d = id.data;
+  for(let i=0;i<d.length;i+=4){
+    const lum = 0.299*d[i]+0.587*d[i+1]+0.114*d[i+2];
+    const v = lum < darkThresh ? 0 : 255;
+    d[i]=d[i+1]=d[i+2]=v; d[i+3]=255;
+  }
+  ctx.putImageData(id,0,0);
+  return canvas;
+}
+
+function canvasToDataURL(canvas){ return canvas.toDataURL('image/png'); }
+
+async function runOCROnCanvas(canvas, lang='eng', psm=6, whitelist=''){
+  const config = { lang, tessedit_pageseg_mode: psm };
+  if(whitelist) config.tessedit_char_whitelist = whitelist;
+  const result = await Tesseract.recognize(canvasToDataURL(canvas), lang, { logger: ()=>{} });
+  return result.data.text.trim();
+}
+
 async function runOCR(file){
-  try{
-    const result = await Tesseract.recognize(file,['tha','eng'],{logger:()=>{}});
-    const text = result.data.text;
-    parseSlip(text);
-  }catch(e){
+  const imgEl = document.getElementById('preview-img');
+  // Wait for image to fully load
+  await new Promise(res => { if(imgEl.complete) res(); else imgEl.onload = res; });
+
+  document.getElementById('ocr-status').style.display='flex';
+  document.getElementById('extracted-result').style.display='none';
+
+  try {
+    const {canvas, w, h, scale} = imageToCanvas(imgEl, 3);
+
+    // ---- STEP 1: AMOUNT (highest priority, most reliable) ----
+    // Crop left 58% of image, rows 52-80% — big bold amount digits live here
+    const amtCanvas = cropZone(canvas, w, h, scale, 0.03, 0.52, 0.58, 0.80);
+    const amtBW = toHighContrastBW(amtCanvas, 140);
+    const amtRaw = await runOCROnCanvas(amtBW, 'eng', 6, '0123456789.');
+    
+    // Smart extraction: find all X.XX decimal numbers, pick the LARGEST (not the 0.00 fee)
+    const decNums = [...amtRaw.matchAll(/\d+\.\d{2}/g)].map(m=>parseFloat(m[0])).filter(n=>n>1);
+    let amount = decNums.length ? Math.max(...decNums) : null;
+    if(!amount){
+      const intNums = [...amtRaw.matchAll(/\b(\d{2,6})\b/g)].map(m=>parseInt(m[1])).filter(n=>n>=10&&n<=999999);
+      amount = intNums.length ? Math.max(...intNums) : null;
+    }
+
+    // ---- STEP 2: DATE ----
+    // Crop top section — date line is at ~8-18% height
+    const dateCanvas = cropZone(canvas, w, h, scale, 0.02, 0.08, 0.78, 0.19);
+    const dateBW = toHighContrastBW(dateCanvas, 150);
+    const dateRaw = await runOCROnCanvas(dateBW, 'tha+eng', 7);
+
+    let dateStr = new Date().toISOString().split('T')[0];
+    // Find Buddhist year (25XX)
+    const yearMatch = dateRaw.match(/25[6-9]\d/);
+    if(yearMatch){
+      const yearBE = parseInt(yearMatch[0]);
+      const yearCE = yearBE - 543;
+      // Find day number (1-2 digit, before the year)
+      const beforeYear = dateRaw.substring(0, dateRaw.indexOf(yearMatch[0]));
+      const dayMatch = beforeYear.match(/\b(\d{1,2})\b/g);
+      const day = dayMatch ? dayMatch.find(d=>parseInt(d)>=1&&parseInt(d)<=31) : null;
+      // Find month from Thai text
+      let month = '01';
+      const rawLower = dateRaw.toLowerCase();
+      for(const [key, [mon]] of Object.entries(TH_MONTH_MAP)){
+        if(rawLower.includes(key.toLowerCase())){ month=mon; break; }
+      }
+      // Fallback: look for U.y pattern (Tesseract misreads มิ.ย as U.y or similar)
+      if(month==='01' && (rawLower.includes('u.y')||rawLower.includes('u.ย')||rawLower.includes('มิ')||rawLower.includes('ย.'))){
+        month='06';
+      }
+      if(day && yearCE > 2000){
+        dateStr = `${yearCE}-${month}-${String(parseInt(day)).padStart(2,'0')}`;
+      }
+    }
+
+    // ---- STEP 3: TRANSACTION TYPE from title ----
+    // Top-left title: ชำระเงินสำเร็จ = payment/expense, โอนเงินสำเร็จ = transfer
+    const titleCanvas = cropZone(canvas, w, h, scale, 0.02, 0.04, 0.75, 0.10);
+    const titleRaw = await runOCROnCanvas(titleCanvas, 'tha+eng', 7);
+    const isTransfer = titleRaw.includes('โอน') || titleRaw.toLowerCase().includes('transfer');
+    // Both types are typically expenses from your perspective
+    const detectedType = 'expense';
+
+    // ---- SHOW RESULTS ----
+    document.getElementById('ocr-status').style.display='none';
+    document.getElementById('extracted-result').style.display='block';
+
+    document.getElementById('ex-amount').textContent = amount
+      ? `฿${amount.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}`
+      : '—';
+    document.getElementById('ex-date').textContent = dateStr;
+
+    // Recipient & Note: always editable inputs — Thai OCR unreliable without AI
+    scannedData = { amount: amount||0, date: dateStr, recipient:'', note:'' };
+    populateExCatSelect();
+    setExType(detectedType);
+
+  } catch(e){
+    console.error(e);
     document.getElementById('ocr-status').style.display='none';
     document.getElementById('extracted-result').style.display='block';
     populateExCatSelect();
-    showToast('OCR error — fill manually','⚠️');
+    showToast('Fill fields manually','⚠️');
   }
 }
-function parseSlip(text){
-  document.getElementById('ocr-status').style.display='none';
-  document.getElementById('extracted-result').style.display='block';
-  const lines = text.split('\n').map(l=>l.trim()).filter(Boolean);
-  // Amount: look for pattern like 900.00 or จำนวน then number
-  let amount = '';
-  const amtMatch = text.match(/(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)\s*(?:บาท|THB|Baht)/i);
-  if(amtMatch) amount = amtMatch[1].replace(/,/g,'');
-  if(!amount){
-    const numMatch = text.match(/^(\d+\.\d{2})$/m);
-    if(numMatch) amount = numMatch[1];
-  }
-  // Date: Thai format  DD มิ.ย. 2569 or similar
-  let dateStr = '';
-  const thMonths = {'ม.ค.':'01','ก.พ.':'02','มี.ค.':'03','เม.ย.':'04','พ.ค.':'05','มิ.ย.':'06','ก.ค.':'07','ส.ค.':'08','ก.ย.':'09','ต.ค.':'10','พ.ย.':'11','ธ.ค.':'12'};
-  const dateMatch = text.match(/(\d{1,2})\s*(ม\.ค\.|ก\.พ\.|มี\.ค\.|เม\.ย\.|พ\.ค\.|มิ\.ย\.|ก\.ค\.|ส\.ค\.|ก\.ย\.|ต\.ค\.|พ\.ย\.|ธ\.ค\.)\s*(\d{4})/);
-  if(dateMatch){
-    const day = dateMatch[1].padStart(2,'0');
-    const mon = thMonths[dateMatch[2]]||'01';
-    const yearBE = parseInt(dateMatch[3]);
-    const yearCE = yearBE > 2500 ? yearBE - 543 : yearBE;
-    dateStr = `${yearCE}-${mon}-${day}`;
-  } else {
-    dateStr = new Date().toISOString().split('T')[0];
-  }
-  // Recipient: line after arrow or after "→" or company name
-  let recipient = '';
-  for(let i=0;i<lines.length;i++){
-    if(lines[i].includes('→')||lines[i].includes('↓')){
-      if(lines[i+1]) recipient = lines[i+1];
-      if(lines[i+2]&&!lines[i+2].match(/^xxx/i)) recipient = lines[i+1]+' '+lines[i+2];
-      break;
-    }
-  }
-  if(!recipient){
-    const cpMatch = text.match(/CP\s+\w+[^\n]*/i)||text.match(/[A-Z]{2,}\s+[A-Z]+\s+(?:PUBLIC|CO|LTD|COMPANY)[^\n]*/i);
-    if(cpMatch) recipient = cpMatch[0].trim();
-  }
-  // Note: look for text in bottom note area (last non-empty short line)
-  let note = '';
-  const noteMatch = text.match(/(?:หมายเหตุ|Note|memo)[:\s]+([^\n]+)/i);
-  if(noteMatch) note = noteMatch[1].trim();
-  if(!note){
-    // last short meaningful line
-    const shortLines = lines.filter(l=>l.length>1&&l.length<30&&!/^(xxx|0\d{8,}|[A-Z0-9]{15,})/i.test(l)&&!/\d{4}-\d{2}-\d{2}/.test(l));
-    if(shortLines.length) note = shortLines[shortLines.length-1];
-  }
-  document.getElementById('ex-amount').textContent = amount ? `฿${parseFloat(amount).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}` : '—';
-  document.getElementById('ex-date').textContent = dateStr || '—';
-  document.getElementById('ex-to').textContent = recipient.substring(0,50)||'—';
-  document.getElementById('ex-note').textContent = note.substring(0,40)||'—';
-  scannedData = {amount:parseFloat(amount)||0, date:dateStr, recipient, note};
-  populateExCatSelect();
-  setExType('expense');
-}
+
+function parseSlip(text){ /* legacy - not used */ }
 function populateExCatSelect(){
   const sel = document.getElementById('ex-cat');
   const cats = loadCats('expense');
@@ -1049,12 +1139,17 @@ function confirmScan(){
   if(!scannedData.amount){ showToast(t('fill_all'),'⚠️'); return; }
   const catRaw = document.getElementById('ex-cat').value;
   const [emoji,cat] = catRaw.split('|');
+  // Read from editable inputs
+  const recipientInput = document.getElementById('ex-to-input');
+  const noteInput = document.getElementById('ex-note-input');
+  const recipient = recipientInput ? recipientInput.value.trim() : scannedData.recipient;
+  const note = noteInput ? noteInput.value.trim() : scannedData.note;
+  const name = recipient || note || 'Scanned slip';
   const txs = loadTx();
   txs.push({
-    id:Date.now(),type:exTypeCurrent,
+    id:Date.now(), type:exTypeCurrent,
     amount:scannedData.amount,
-    name:scannedData.recipient||scannedData.note||'Scanned slip',
-    cat,emoji,
+    name, cat, emoji,
     date:scannedData.date||new Date().toISOString().split('T')[0]
   });
   saveTxData(txs);
