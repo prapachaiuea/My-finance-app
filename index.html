@@ -524,7 +524,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
               <div class="ex-title">✦ <span id="lbl-extracted">Extracted from slip</span></div>
               <div class="ex-row"><span class="ex-label" id="lbl-ex-amount">Amount</span><span class="ex-val highlight" id="ex-amount">—</span></div>
               <div class="ex-row"><span class="ex-label" id="lbl-ex-date">Date</span><span class="ex-val" id="ex-date">—</span></div>
-              <div class="ex-row" id="ex-time-row" style="display:none"><span class="ex-label" id="lbl-ex-time">Time</span><span class="ex-val" id="ex-time">—</span></div>
+              <div class="ex-row" id="ex-time-row"><span class="ex-label" id="lbl-ex-time">Time</span><span class="ex-val"><input type="text" id="ex-time-input" placeholder="HH:MM" maxlength="5" style="background:var(--bg4);border:0.5px solid var(--border2);border-radius:8px;color:var(--text);font-size:14px;padding:7px 10px;width:100px;font-family:inherit;text-align:center;letter-spacing:1px"/></span></div>
               <div class="ex-row" style="align-items:flex-start;padding:10px 0"><span class="ex-label" id="lbl-ex-to" style="padding-top:8px">Recipient</span><span class="ex-val" id="ex-to"><input type="text" id="ex-to-input" placeholder="e.g. CP Axtra, ร้านอาหาร..." style="background:var(--bg4);border:0.5px solid var(--border2);border-radius:8px;color:var(--text);font-size:14px;padding:7px 10px;width:170px;font-family:-apple-system,'Helvetica Neue',Arial,'Noto Sans Thai',sans-serif"/></span></div>
               <div class="ex-row" style="align-items:flex-start;padding:10px 0"><span class="ex-label" id="lbl-ex-note" style="padding-top:8px">Note</span><span class="ex-val" id="ex-note"><input type="text" id="ex-note-input" placeholder="e.g. ชาบูหม่าล่า, ยา..." style="background:var(--bg4);border:0.5px solid var(--border2);border-radius:8px;color:var(--text);font-size:14px;padding:7px 10px;width:170px;font-family:-apple-system,'Helvetica Neue',Arial,'Noto Sans Thai',sans-serif"/></span></div>
               <div class="ex-row">
@@ -680,7 +680,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
               <div class="settings-icon purple">💎</div>
               <div class="settings-text">
                 <div class="settings-title">FinFlow</div>
-                <div class="settings-sub" id="lbl-version">Version 1.9 · Personal use</div>
+                <div class="settings-sub" id="lbl-version">Version 2.0 · Personal use</div>
               </div>
             </div>
           </div>
@@ -800,6 +800,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
           <span class="tx-detail-row-label" id="tx-d-date-lbl">Date</span>
           <span class="tx-detail-row-val" id="tx-d-date"></span>
         </div>
+        <div class="tx-detail-row" id="tx-d-note-row" style="display:none">
+          <span class="tx-detail-row-label" id="tx-d-note-lbl">Note</span>
+          <span class="tx-detail-row-val" id="tx-d-note" style="text-align:right;max-width:60%"></span>
+        </div>
         <div class="tx-detail-row">
           <span class="tx-detail-row-label" id="tx-d-type-lbl">Type</span>
           <span class="tx-type-badge" id="tx-d-type"></span>
@@ -830,6 +834,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
       <div class="field">
         <div class="field-label" id="tx-ed-date-lbl">Date</div>
         <input type="date" id="ed-date"/>
+      </div>
+      <div class="field">
+        <div class="field-label" id="tx-ed-note-lbl">Note</div>
+        <input type="text" id="ed-note" placeholder="Note / Memo"/>
       </div>
       <div class="field">
         <div class="field-label" id="tx-ed-type-lbl">Type</div>
@@ -906,7 +914,7 @@ const i18n = {
     manage_cats:'Manage categories',manage_cats_sub:'Add, edit, delete',
     export:'Export to CSV',export_sub:'Download all transactions',
     clear:'Clear all data',clear_sub:'Cannot be undone',
-    version:'Version 1.9 · Personal use',privacy:'100% Private',privacy_sub:'Data stays on your device only',
+    version:'Version 2.0 · Personal use',privacy:'100% Private',privacy_sub:'Data stays on your device only',
     cats_title:'Categories',cats_sub:'Manage your lists',
     exp_cats:'Expense categories',inc_cats:'Income categories',
     add_exp_cat:'+ Add expense category',add_inc_cat:'+ Add income category',
@@ -949,7 +957,7 @@ const i18n = {
     manage_cats:'จัดการหมวดหมู่',manage_cats_sub:'เพิ่ม แก้ไข ลบ',
     export:'ส่งออก CSV',export_sub:'ดาวน์โหลดรายการทั้งหมด',
     clear:'ลบข้อมูลทั้งหมด',clear_sub:'ไม่สามารถกู้คืนได้',
-    version:'เวอร์ชัน 1.9 · ใช้งานส่วนตัว',privacy:'ความเป็นส่วนตัว 100%',privacy_sub:'ข้อมูลอยู่ในอุปกรณ์ของคุณเท่านั้น',
+    version:'เวอร์ชัน 2.0 · ใช้งานส่วนตัว',privacy:'ความเป็นส่วนตัว 100%',privacy_sub:'ข้อมูลอยู่ในอุปกรณ์ของคุณเท่านั้น',
     cats_title:'หมวดหมู่',cats_sub:'จัดการรายการ',
     exp_cats:'หมวดหมู่รายจ่าย',inc_cats:'หมวดหมู่รายรับ',
     add_exp_cat:'+ เพิ่มหมวดหมู่รายจ่าย',add_inc_cat:'+ เพิ่มหมวดหมู่รายรับ',
@@ -1155,6 +1163,12 @@ function openTxDetail(id){
   document.getElementById('tx-d-cat').textContent = `${tx.emoji||''} ${tx.cat}`;
   const d = new Date(tx.date);
   document.getElementById('tx-d-date').textContent = d.toLocaleDateString(lang==='th'?'th-TH':'en-GB',{day:'numeric',month:'long',year:'numeric'})+(tx.time?' · '+tx.time:'');
+  const noteRow=document.getElementById('tx-d-note-row');
+  const noteEl=document.getElementById('tx-d-note');
+  const noteLbl=document.getElementById('tx-d-note-lbl');
+  if(noteLbl) noteLbl.textContent=t('ex_note');
+  if(noteEl) noteEl.textContent=tx.note||'';
+  if(noteRow) noteRow.style.display=tx.note?'':'none';
   const badge = document.getElementById('tx-d-type');
   badge.textContent = tx.type==='income'?t('income'):t('expense');
   badge.className = `tx-type-badge ${tx.type}`;
@@ -1185,6 +1199,7 @@ function openEditPanel(){
   document.getElementById('ed-amount').value = tx.amount;
   document.getElementById('ed-name').value = tx.name;
   document.getElementById('ed-date').value = tx.date;
+  document.getElementById('ed-note').value = tx.note||'';
   editTypeCurrent = tx.type;
   populateEditCatSelect(tx.type, `${tx.emoji}|${tx.cat}`);
   setEditType(tx.type);
@@ -1193,6 +1208,7 @@ function openEditPanel(){
   document.getElementById('tx-ed-desc-lbl').textContent = t('description');
   document.getElementById('tx-ed-cat-lbl').textContent = t('category');
   document.getElementById('tx-ed-date-lbl').textContent = t('date');
+  document.getElementById('tx-ed-note-lbl').textContent = t('ex_note');
   document.getElementById('tx-ed-type-lbl').textContent = t('lbl_type');
   document.getElementById('ed-btn-income').textContent = t('btn_income');
   document.getElementById('ed-btn-expense').textContent = t('btn_expense');
@@ -1233,7 +1249,8 @@ function saveEditTx(){
   const txs = loadTx();
   const idx = txs.findIndex(t=>t.id===detailTxId);
   if(idx===-1){ showToast('Error','⚠️'); return; }
-  txs[idx] = {...txs[idx], amount, name, cat, emoji, date, type:editTypeCurrent};
+  const noteVal = (document.getElementById('ed-note')?.value||'').trim();
+  txs[idx] = {...txs[idx], amount, name, cat, emoji, date, type:editTypeCurrent, note:noteVal};
   saveTxData(txs);
   closeTxDetail();
   renderHome();
@@ -1549,16 +1566,18 @@ async function runOCR(file){
 
     } else {
       // ── KBANK MAKE ───────────────────────────────────────────────
-      // Date+Time: top area
-      const dateC=applyBW(cropCanvas(src,W,H,scale,0,0.03,0.90,0.25),128);
+      // Date+Time: top area — no BW, color OCR handles gradient better
+      const dateC=cropCanvas(src,W,H,scale,0,0.03,0.90,0.25);
       const dateTxtK=await ocrCanvas(dateC,'tha+eng');
       dateStr=parseThaiDate(dateTxtK);
       // Time: anchor to year 25XX in tha+eng text, fallback to eng-only OCR
       time=parseKBankTime(dateTxtK);
+      let _dbgTimeTxt='';
       if(!time){
-        const timeTxtK=await ocrCanvas(dateC,'eng');
-        time=parseTime(timeTxtK)||parseTime(dateTxtK);
+        _dbgTimeTxt=await ocrCanvas(dateC,'eng');
+        time=parseTime(_dbgTimeTxt)||parseTime(dateTxtK);
       }
+      console.log('[FinFlow-KBank]',JSON.stringify({dateTxtK,engTxt:_dbgTimeTxt,time}));
       // Amount: left 62%, rows 50-72%
       const amtC=applyBW(cropCanvas(src,W,H,scale,0,0.50,0.62,0.72),140);
       amount=parseAmount(await ocrCanvas(amtC,'eng'));
@@ -1583,15 +1602,13 @@ async function runOCR(file){
     document.getElementById('ex-amount').textContent=amount
       ?'฿'+amount.toLocaleString('th-TH',{minimumFractionDigits:2,maximumFractionDigits:2}):'—';
     document.getElementById('ex-date').textContent=dateStr;
-    const timeRow=document.getElementById('ex-time-row');
-    const timeEl=document.getElementById('ex-time');
-    if(timeEl) timeEl.textContent=time||'—';
-    if(timeRow) timeRow.style.display=time?'':'none';
+    const timeInput=document.getElementById('ex-time-input');
+    if(timeInput) timeInput.value=time||'';
     const toInput=document.getElementById('ex-to-input');
     const noteInput=document.getElementById('ex-note-input');
     if(toInput) toInput.value=recipient;
     if(noteInput) noteInput.value=note;
-    scannedData={amount:amount||0,date:dateStr,time:time||null};
+    scannedData={amount:amount||0,date:dateStr};
     populateExCatSelect('expense');
     setExType('expense');
     if(statusTxt) statusTxt.textContent=t('reading');
@@ -1621,13 +1638,14 @@ function confirmScan(){
   const recipient = recipientInput ? recipientInput.value.trim() : '';
   const note = noteInput ? noteInput.value.trim() : '';
   const name = recipient || note || 'Scanned slip';
+  const timeVal = (document.getElementById('ex-time-input')?.value||'').trim()||null;
   const txs = loadTx();
   txs.push({
     id: Date.now(), type: exTypeCurrent,
     amount: scannedData.amount,
-    name, cat, emoji,
+    name, cat, emoji, note,
     date: scannedData.date || new Date().toISOString().split('T')[0],
-    time: scannedData.time || null
+    time: timeVal
   });
   saveTxData(txs);
   showToast(t('saved'),'✅');
