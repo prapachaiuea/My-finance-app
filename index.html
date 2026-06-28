@@ -589,7 +589,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
           <div class="stat-box"><div class="stat-box-label" id="lbl-vs-last">vs last month</div><div class="stat-box-val" id="an-vs">—</div></div>
         </div>
         <div class="stat-row">
-          <div class="stat-box"><div class="stat-box-label" id="lbl-savings-rate">Savings rate</div><div class="stat-box-val green" id="an-savings-rate">—</div></div>
+          <div class="stat-box"><div class="stat-box-label" id="lbl-savings-rate">Savings rate</div><div class="stat-box-val" id="an-savings-rate">—</div></div>
           <div class="stat-box"><div class="stat-box-label" id="lbl-avg-daily">Avg / day</div><div class="stat-box-val" id="an-avg-daily">—</div></div>
         </div>
         <div class="stat-row">
@@ -720,7 +720,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
               <div class="settings-icon purple">💎</div>
               <div class="settings-text">
                 <div class="settings-title">FinFlow</div>
-                <div class="settings-sub" id="lbl-version">Version 2.6 · Personal use</div>
+                <div class="settings-sub" id="lbl-version">Version 2.7 · Personal use</div>
               </div>
             </div>
           </div>
@@ -959,7 +959,7 @@ const i18n = {
     manage_cats:'Manage categories',manage_cats_sub:'Add, edit, delete',
     export:'Export to CSV',export_sub:'Download all transactions',
     clear:'Clear all data',clear_sub:'Cannot be undone',
-    version:'Version 2.6 · Personal use',privacy:'100% Private',privacy_sub:'Data stays on your device only',
+    version:'Version 2.7 · Personal use',privacy:'100% Private',privacy_sub:'Data stays on your device only',
     cats_title:'Categories',cats_sub:'Manage your lists',
     exp_cats:'Expense categories',inc_cats:'Income categories',
     add_exp_cat:'+ Add expense category',add_inc_cat:'+ Add income category',
@@ -1000,13 +1000,13 @@ const i18n = {
     chart_bar:'แนวโน้มรายจ่ายรายเดือน',chart_bar_sub:'6 เดือนล่าสุด',
     chart_line:'รายรับเทียบรายจ่าย',chart_line_sub:'แนวโน้มเปรียบเทียบ',
     chart_heat:'ปฏิทินการใช้จ่ายรายวัน',chart_heat_sub:'สีเข้ม = ใช้จ่ายมาก',
-    chart_top:'หมวดหมู่รายจ่ายสูงสุด',chart_top_sub:'ตามจำนวนเงินเดือนนี้',
+    chart_top:'หมวดหมู่รายจ่ายสูงสุด',chart_top_sub:'ยอดรายจ่ายเดือนนี้',
     settings_title:'ตั้งค่า',settings_sub:'การตั้งค่าและข้อมูล',
     lang_section:'ภาษา',cats_section:'หมวดหมู่',data_section:'ข้อมูล',about_section:'เกี่ยวกับ',
     manage_cats:'จัดการหมวดหมู่',manage_cats_sub:'เพิ่ม แก้ไข ลบ',
     export:'ส่งออก CSV',export_sub:'ดาวน์โหลดรายการทั้งหมด',
     clear:'ลบข้อมูลทั้งหมด',clear_sub:'ไม่สามารถกู้คืนได้',
-    version:'เวอร์ชัน 2.6 · ใช้งานส่วนตัว',privacy:'ความเป็นส่วนตัว 100%',privacy_sub:'ข้อมูลอยู่ในอุปกรณ์ของคุณเท่านั้น',
+    version:'เวอร์ชัน 2.7 · ใช้งานส่วนตัว',privacy:'ความเป็นส่วนตัว 100%',privacy_sub:'ข้อมูลอยู่ในอุปกรณ์ของคุณเท่านั้น',
     cats_title:'หมวดหมู่',cats_sub:'จัดการรายการ',
     exp_cats:'หมวดหมู่รายจ่าย',inc_cats:'หมวดหมู่รายรับ',
     add_exp_cat:'+ เพิ่มหมวดหมู่รายจ่าย',add_inc_cat:'+ เพิ่มหมวดหมู่รายรับ',
@@ -1021,9 +1021,9 @@ const i18n = {
     detail_title:'รายละเอียด',edit_title:'แก้ไขรายการ',
     lbl_edit:'แก้ไข',lbl_delete:'ลบ',lbl_save_edit:'บันทึกการแก้ไข',lbl_type:'ประเภท',
     no_results:'ไม่พบรายการ',see_all:'รายการทั้งหมด',
-    budget_section:'งบประมาณรายเดือน',budget_setting_title:'วงเงินใช้จ่ายต่อเดือน',budget_setting_sub:'แสดงความคืบหน้าในวิเคราะห์',save_budget:'บันทึก',
-    budget_card:'งบประมาณรายเดือน',budget_card_sub:'ยอดใช้จ่าย vs เป้าหมาย',
-    savings_rate:'อัตราออม',avg_daily:'เฉลี่ย/วัน',biggest_exp:'รายจ่ายสูงสุด',tx_count:'จำนวนรายการ',
+    budget_section:'งบประมาณรายเดือน',budget_setting_title:'วงเงินใช้จ่ายต่อเดือน',budget_setting_sub:'ดูความคืบหน้าได้ในหน้าวิเคราะห์',save_budget:'บันทึก',
+    budget_card:'งบประมาณรายเดือน',budget_card_sub:'ยอดใช้จ่าย เทียบ งบประมาณ',
+    savings_rate:'อัตราการออม',avg_daily:'เฉลี่ยต่อวัน',biggest_exp:'รายจ่ายสูงสุด',tx_count:'รายการทั้งหมด',
     day_filter:'📅 กรองตามวันที่'
   }
 };
@@ -1054,7 +1054,7 @@ function loadCats(type){
 }
 function saveCats(type,data){ localStorage.setItem(type==='expense'?'ff_exp_cats':'ff_inc_cats',JSON.stringify(data)); }
 function fmt(n){ const v=Math.abs(n); return '฿'+v.toLocaleString('en-US',{minimumFractionDigits:v%1?2:0,maximumFractionDigits:2}); }
-function fmtShort(n){ if(n>=1000)return '฿'+(Math.round(n/100)/10)+'k'; return fmt(n); }
+function fmtShort(n){ if(n>=1000)return '฿'+(Math.round(n/100)/10)+'k'; return '฿'+Math.round(n); }
 
 // =================== NAVIGATION ===================
 const NAV_PAGES = ['home','scan','add','analytics','settings'];
@@ -1401,7 +1401,7 @@ function renderAllTx(){
   const dateFilter=(document.getElementById('all-tx-date-filter')?.value||'');
   let txs = getMonthTx(allTxYear, allTxMonth);
   if(txFilterType!=='all') txs = txs.filter(tx=>tx.type===txFilterType);
-  if(query) txs = txs.filter(tx=>tx.name.toLowerCase().includes(query)||tx.cat.toLowerCase().includes(query));
+  if(query) txs = txs.filter(tx=>tx.name.toLowerCase().includes(query)||tx.cat.toLowerCase().includes(query)||(tx.note||'').toLowerCase().includes(query));
   if(dateFilter) txs = txs.filter(tx=>tx.date===dateFilter);
   txs.sort((a,b)=>(new Date(b.date)-new Date(a.date))||b.id-a.id);
   const monthIncome = txs.filter(tx=>tx.type==='income').reduce((s,tx)=>s+tx.amount,0);
@@ -1842,7 +1842,7 @@ function renderAnalytics(){
   if(bigEl) bigEl.textContent=biggest>0?fmt(biggest):'—';
   // transaction count
   const tcEl=document.getElementById('an-tx-count');
-  if(tcEl) tcEl.textContent=txs.length+(lang==='th'?' รายการ':' items');
+  if(tcEl) tcEl.textContent=txs.length;
   // budget progress
   renderBudget(expense);
   renderDonut(txs);
@@ -2020,9 +2020,10 @@ function saveCategory(){
 function exportCSV(){
   const txs=loadTx();
   if(!txs.length){ showToast(t('no_data'),'ℹ️'); return; }
-  const header='Date,Type,Amount,Category,Description\n';
-  const rows=txs.map(t=>`${t.date},${t.type},${t.amount},"${t.cat}","${t.name}"`).join('\n');
-  const blob=new Blob([header+rows],{type:'text/csv'});
+  const esc=s=>`"${(s||'').replace(/"/g,'""')}"`;
+  const header='Date,Time,Type,Amount,Category,Description,Note\n';
+  const rows=txs.map(t=>`${t.date},${t.time||''},${t.type},${t.amount},${esc(t.cat)},${esc(t.name)},${esc(t.note)}`).join('\n');
+  const blob=new Blob(['﻿'+header+rows],{type:'text/csv;charset=utf-8'});
   const a=document.createElement('a');
   a.href=URL.createObjectURL(blob);
   a.download='finflow_transactions.csv';
