@@ -694,11 +694,18 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
     <!-- ALL TRANSACTIONS -->
     <div class="page" id="page-all">
       <div class="status-spacer"></div>
-      <div class="page-header" style="display:flex;align-items:center;gap:12px;padding-bottom:8px">
-        <button onclick="goPage('home')" style="background:var(--bg3);border:0.5px solid var(--border);border-radius:10px;width:36px;height:36px;cursor:pointer;color:var(--text);font-size:18px;flex-shrink:0">‹</button>
-        <div>
-          <h1 id="lbl-all-tx-title">All Transactions</h1>
-          <p id="lbl-all-tx-count" style="font-size:13px;color:var(--text2);margin-top:2px"></p>
+      <div class="page-header" style="display:flex;align-items:center;justify-content:space-between;padding-bottom:8px">
+        <div style="display:flex;align-items:center;gap:12px">
+          <button onclick="goPage('home')" style="background:var(--bg3);border:0.5px solid var(--border);border-radius:10px;width:36px;height:36px;cursor:pointer;color:var(--text);font-size:18px;flex-shrink:0">‹</button>
+          <div>
+            <h1 id="lbl-all-tx-title">All Transactions</h1>
+            <p id="lbl-all-tx-count" style="font-size:13px;color:var(--text2);margin-top:2px"></p>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <button onclick="changeAllTxMonth(-1)" style="width:28px;height:28px;border-radius:8px;border:0.5px solid var(--border2);background:var(--bg3);color:var(--text2);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center">‹</button>
+          <span id="all-tx-month-label" style="font-size:11px;color:var(--text2);min-width:62px;text-align:center;font-weight:600"></span>
+          <button onclick="changeAllTxMonth(1)" style="width:28px;height:28px;border-radius:8px;border:0.5px solid var(--border2);background:var(--bg3);color:var(--text2);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center">›</button>
         </div>
       </div>
       <div class="search-bar-wrap">
@@ -940,6 +947,8 @@ let addCatType = 'expense';
 let currentPage = 'home';
 let currentMonth = new Date().getMonth();
 let currentYear = new Date().getFullYear();
+let allTxMonth = new Date().getMonth();
+let allTxYear = new Date().getFullYear();
 let scannedData = {};
 
 function t(key){ return (i18n[lang]||i18n.en)[key] || key; }
@@ -974,7 +983,7 @@ function goPage(p){
   if(p==='add'){ populateCatSelect(); document.getElementById('f-amount').focus(); }
   if(p==='categories') renderCategoryManager();
   if(p==='scan') resetScan();
-  if(p==='all'){ txFilterType='all'; renderAllTx(); }
+  if(p==='all'){ txFilterType='all'; allTxMonth=currentMonth; allTxYear=currentYear; renderAllTx(); }
 }
 
 // =================== LANGUAGE ===================
@@ -1215,6 +1224,13 @@ function deleteTxFromDetail(){
 // =================== ALL TRANSACTIONS ===================
 let txFilterType = 'all';
 
+function changeAllTxMonth(d){
+  allTxMonth += d;
+  if(allTxMonth > 11){ allTxMonth = 0; allTxYear++; }
+  if(allTxMonth < 0){ allTxMonth = 11; allTxYear--; }
+  renderAllTx();
+}
+
 function setTxFilter(type){
   txFilterType = type;
   document.querySelectorAll('.filter-tab').forEach(el=>el.classList.remove('active'));
@@ -1229,45 +1245,39 @@ function renderAllTx(){
   document.getElementById('ftab-income').textContent = t('filter_income');
   document.getElementById('ftab-expense').textContent = t('filter_expense');
   document.getElementById('lbl-all-tx-title').textContent = t('all_tx');
+  const monthLbl = document.getElementById('all-tx-month-label');
+  if(monthLbl) monthLbl.textContent = monthLabel(allTxYear, allTxMonth);
   const query = (searchEl?.value||'').toLowerCase().trim();
-  let txs = loadTx();
+  let txs = getMonthTx(allTxYear, allTxMonth);
   if(txFilterType!=='all') txs = txs.filter(tx=>tx.type===txFilterType);
   if(query) txs = txs.filter(tx=>tx.name.toLowerCase().includes(query)||tx.cat.toLowerCase().includes(query));
   txs.sort((a,b)=>new Date(b.date)-new Date(a.date));
-  const total = loadTx().length;
+  const monthIncome = txs.filter(tx=>tx.type==='income').reduce((s,tx)=>s+tx.amount,0);
+  const monthExpense = txs.filter(tx=>tx.type==='expense').reduce((s,tx)=>s+tx.amount,0);
   document.getElementById('lbl-all-tx-count').textContent = lang==='th'
-    ? `${txs.length} จาก ${total} รายการ`
-    : `${txs.length} of ${total} transactions`;
+    ? `${txs.length} รายการ · รับ ${fmt(monthIncome)} จ่าย ${fmt(monthExpense)}`
+    : `${txs.length} items · In ${fmt(monthIncome)} Out ${fmt(monthExpense)}`;
   const container = document.getElementById('all-tx-list');
   if(!txs.length){
-    container.innerHTML=`<div class="empty"><div class="empty-icon">🔍</div><div class="empty-title">${t('no_results')}</div><div class="empty-sub"></div></div>`;
+    container.innerHTML=`<div class="empty"><div class="empty-icon">🗓️</div><div class="empty-title">${t('no_results')}</div><div class="empty-sub" style="margin-top:4px;font-size:12px;color:var(--text3)">${monthLabel(allTxYear,allTxMonth)}</div></div>`;
     return;
   }
-  const groups={};
-  txs.forEach(tx=>{
+  container.innerHTML=txs.map(tx=>{
     const d=new Date(tx.date);
-    const key=`${d.getFullYear()}-${String(d.getMonth()).padStart(2,'0')}`;
-    if(!groups[key]) groups[key]={label:monthLabel(d.getFullYear(),d.getMonth()),txs:[]};
-    groups[key].txs.push(tx);
-  });
-  container.innerHTML=Object.values(groups).map(g=>`
-    <div class="all-tx-month-header">${g.label}</div>
-    ${g.txs.map(tx=>{
-      const d=new Date(tx.date);
-      const dateStr=d.toLocaleDateString(lang==='th'?'th-TH':'en-GB',{day:'numeric',month:'short'});
-      return `<div class="tx-item" onclick="openTxDetail(${tx.id})">
-        <div class="tx-emoji ${tx.type}">${tx.emoji||'💳'}</div>
-        <div class="tx-info">
-          <div class="tx-name">${tx.name}</div>
-          <div class="tx-meta">${tx.cat}</div>
-        </div>
-        <div class="tx-right">
-          <div class="tx-amount ${tx.type}">${tx.type==='income'?'+':'-'}${fmt(tx.amount)}</div>
-          <div class="tx-date">${dateStr}</div>
-        </div>
-        <button class="tx-del" onclick="event.stopPropagation();deleteTx(${tx.id})">✕</button>
-      </div>`;
-    }).join('')}`).join('');
+    const dateStr=d.toLocaleDateString(lang==='th'?'th-TH':'en-GB',{day:'numeric',month:'short'});
+    return `<div class="tx-item" onclick="openTxDetail(${tx.id})">
+      <div class="tx-emoji ${tx.type}">${tx.emoji||'💳'}</div>
+      <div class="tx-info">
+        <div class="tx-name">${tx.name}</div>
+        <div class="tx-meta">${tx.cat}</div>
+      </div>
+      <div class="tx-right">
+        <div class="tx-amount ${tx.type}">${tx.type==='income'?'+':'-'}${fmt(tx.amount)}</div>
+        <div class="tx-date">${dateStr}</div>
+      </div>
+      <button class="tx-del" onclick="event.stopPropagation();deleteTx(${tx.id})">✕</button>
+    </div>`;
+  }).join('');
 }
 
 // =================== ADD TRANSACTION ===================
