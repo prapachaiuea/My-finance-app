@@ -680,7 +680,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
               <div class="settings-icon purple">💎</div>
               <div class="settings-text">
                 <div class="settings-title">FinFlow</div>
-                <div class="settings-sub" id="lbl-version">Version 1.5 · Personal use</div>
+                <div class="settings-sub" id="lbl-version">Version 1.6 · Personal use</div>
               </div>
             </div>
           </div>
@@ -906,7 +906,7 @@ const i18n = {
     manage_cats:'Manage categories',manage_cats_sub:'Add, edit, delete',
     export:'Export to CSV',export_sub:'Download all transactions',
     clear:'Clear all data',clear_sub:'Cannot be undone',
-    version:'Version 1.5 · Personal use',privacy:'100% Private',privacy_sub:'Data stays on your device only',
+    version:'Version 1.6 · Personal use',privacy:'100% Private',privacy_sub:'Data stays on your device only',
     cats_title:'Categories',cats_sub:'Manage your lists',
     exp_cats:'Expense categories',inc_cats:'Income categories',
     add_exp_cat:'+ Add expense category',add_inc_cat:'+ Add income category',
@@ -949,7 +949,7 @@ const i18n = {
     manage_cats:'จัดการหมวดหมู่',manage_cats_sub:'เพิ่ม แก้ไข ลบ',
     export:'ส่งออก CSV',export_sub:'ดาวน์โหลดรายการทั้งหมด',
     clear:'ลบข้อมูลทั้งหมด',clear_sub:'ไม่สามารถกู้คืนได้',
-    version:'เวอร์ชัน 1.5 · ใช้งานส่วนตัว',privacy:'ความเป็นส่วนตัว 100%',privacy_sub:'ข้อมูลอยู่ในอุปกรณ์ของคุณเท่านั้น',
+    version:'เวอร์ชัน 1.6 · ใช้งานส่วนตัว',privacy:'ความเป็นส่วนตัว 100%',privacy_sub:'ข้อมูลอยู่ในอุปกรณ์ของคุณเท่านั้น',
     cats_title:'หมวดหมู่',cats_sub:'จัดการรายการ',
     exp_cats:'หมวดหมู่รายจ่าย',inc_cats:'หมวดหมู่รายรับ',
     add_exp_cat:'+ เพิ่มหมวดหมู่รายจ่าย',add_inc_cat:'+ เพิ่มหมวดหมู่รายรับ',
@@ -1456,10 +1456,17 @@ function parseAmount(text){
   return ints.length?Math.max(...ints):null;
 }
 
-// Parse HH:MM from OCR text
+// Parse HH:MM from OCR text — handles colon misread as space/dot
 function parseTime(text){
-  const m=text.match(/\b([01]?\d|2[0-3]):([0-5]\d)(?::\d{2})?\b/);
+  // Primary: HH:MM or HH.MM
+  let m=text.match(/\b([01]?\d|2[0-3])[:.，]([0-5]\d)\b/);
   if(m) return `${String(parseInt(m[1])).padStart(2,'0')}:${m[2]}`;
+  // Fallback: HH MM at end of line (OCR dropped the colon)
+  m=text.match(/\b([01]?\d|2[0-3])\s([0-5]\d)\s*$/m);
+  if(m){
+    const h=parseInt(m[1]),mn=parseInt(m[2]);
+    if(h<=23&&mn<=59) return `${String(h).padStart(2,'0')}:${m[2]}`;
+  }
   return null;
 }
 
@@ -1535,8 +1542,8 @@ async function runOCR(file){
 
     } else {
       // ── KBANK MAKE ───────────────────────────────────────────────
-      // Date+Time: top-left 4-15%
-      const dateC=applyBW(cropCanvas(src,W,H,scale,0,0.04,0.70,0.15),128);
+      // Date+Time: top area 3-18%, wider to capture full "DD MMM YYYY HH:MM"
+      const dateC=applyBW(cropCanvas(src,W,H,scale,0,0.03,0.90,0.18),128);
       const dateTxtK=await ocrCanvas(dateC,'tha+eng');
       dateStr=parseThaiDate(dateTxtK);
       time=parseTime(dateTxtK);
@@ -1553,7 +1560,7 @@ async function runOCR(file){
       // Note: bottom rounded box 88-97%
       const noteC=cropCanvas(src,W,H,scale,0.02,0.88,0.72,0.97);
       const noteRaw=(await ocrCanvas(noteC,'tha+eng')).trim();
-      const noteLine=cleanThaiOCR(noteRaw.split('\n')[0].trim());
+      const noteLine=cleanThaiOCR(noteRaw.split('\n')[0].trim()).replace(/^[^ก-๙a-zA-Z0-9]+/,'').trim();
       if(noteLine.length>=2&&noteLine.length<=50) note=noteLine;
     }
 
