@@ -588,6 +588,19 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
           <div class="stat-box"><div class="stat-box-label" id="lbl-total-spent">Total spent</div><div class="stat-box-val red" id="an-expense">฿0</div></div>
           <div class="stat-box"><div class="stat-box-label" id="lbl-vs-last">vs last month</div><div class="stat-box-val" id="an-vs">—</div></div>
         </div>
+        <div class="stat-row">
+          <div class="stat-box"><div class="stat-box-label" id="lbl-savings-rate">Savings rate</div><div class="stat-box-val green" id="an-savings-rate">—</div></div>
+          <div class="stat-box"><div class="stat-box-label" id="lbl-avg-daily">Avg / day</div><div class="stat-box-val" id="an-avg-daily">—</div></div>
+        </div>
+        <div class="stat-row">
+          <div class="stat-box"><div class="stat-box-label" id="lbl-biggest-exp">Biggest expense</div><div class="stat-box-val red" id="an-biggest">—</div></div>
+          <div class="stat-box"><div class="stat-box-label" id="lbl-tx-count">Transactions</div><div class="stat-box-val" id="an-tx-count">—</div></div>
+        </div>
+        <div class="chart-card" id="budget-card" style="display:none">
+          <div class="chart-title" id="lbl-budget-card-title">Monthly Budget</div>
+          <div class="chart-subtitle" id="lbl-budget-card-sub">Spending vs target</div>
+          <div id="budget-progress-content"></div>
+        </div>
         <div class="chart-card">
           <div class="chart-title" id="lbl-chart-donut">Spending by category</div>
           <div class="chart-subtitle" id="lbl-chart-donut-sub">This month's breakdown</div>
@@ -643,6 +656,25 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
           </div>
         </div>
 
+        <div class="s-label" id="lbl-budget-section">Monthly Budget</div>
+        <div style="background:var(--card);border-radius:var(--r-lg);border:0.5px solid var(--border);overflow:hidden;margin-bottom:12px">
+          <div style="padding:14px 16px">
+            <div class="settings-left" style="margin-bottom:10px">
+              <div class="settings-icon green">🎯</div>
+              <div class="settings-text">
+                <div class="settings-title" id="lbl-budget-setting-title">Monthly spend limit</div>
+                <div class="settings-sub" id="lbl-budget-setting-sub">Progress shown in Analytics</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center">
+              <div class="amount-prefix" style="flex:1">
+                <input type="number" id="budget-input" placeholder="0" inputmode="decimal" min="0" style="width:100%;font-size:16px;padding:10px 12px 10px 36px;background:var(--bg3);border:0.5px solid var(--border2);border-radius:8px;color:var(--text);font-family:inherit"/>
+              </div>
+              <button onclick="saveBudget()" style="padding:10px 16px;background:var(--green-dim);border:0.5px solid var(--green);border-radius:8px;color:var(--green);font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0" id="lbl-save-budget">Save</button>
+            </div>
+          </div>
+        </div>
+
         <div class="s-label" id="lbl-categories-section">Categories</div>
         <div style="background:var(--card);border-radius:var(--r-lg);border:0.5px solid var(--border);overflow:hidden;margin-bottom:12px">
           <div style="padding:14px 16px;border-bottom:0.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;cursor:pointer" onclick="goPage('categories')">
@@ -688,7 +720,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
               <div class="settings-icon purple">💎</div>
               <div class="settings-text">
                 <div class="settings-title">FinFlow</div>
-                <div class="settings-sub" id="lbl-version">Version 2.5 · Personal use</div>
+                <div class="settings-sub" id="lbl-version">Version 2.6 · Personal use</div>
               </div>
             </div>
           </div>
@@ -747,6 +779,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
           <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           <input class="search-input" id="all-tx-search" placeholder="Search..." oninput="renderAllTx()"/>
         </div>
+          <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;margin-top:10px;margin-bottom:4px" id="lbl-day-filter">📅 Filter by day</div>
         <div style="display:flex;align-items:center;gap:6px;margin-top:8px">
           <input type="date" id="all-tx-date-filter" onchange="onDateFilterChange(this.value)" style="flex:1;background:var(--bg3);border:0.5px solid var(--border2);border-radius:var(--r-md);color:var(--text);font-size:13px;padding:8px 10px;font-family:inherit;cursor:pointer"/>
           <button id="btn-clear-date" onclick="clearDateFilter()" style="display:none;width:32px;height:32px;border-radius:8px;border:0.5px solid var(--border2);background:var(--bg3);color:var(--text3);font-size:15px;cursor:pointer;flex-shrink:0;align-items:center;justify-content:center">✕</button>
@@ -926,7 +959,7 @@ const i18n = {
     manage_cats:'Manage categories',manage_cats_sub:'Add, edit, delete',
     export:'Export to CSV',export_sub:'Download all transactions',
     clear:'Clear all data',clear_sub:'Cannot be undone',
-    version:'Version 2.5 · Personal use',privacy:'100% Private',privacy_sub:'Data stays on your device only',
+    version:'Version 2.6 · Personal use',privacy:'100% Private',privacy_sub:'Data stays on your device only',
     cats_title:'Categories',cats_sub:'Manage your lists',
     exp_cats:'Expense categories',inc_cats:'Income categories',
     add_exp_cat:'+ Add expense category',add_inc_cat:'+ Add income category',
@@ -940,7 +973,11 @@ const i18n = {
     filter_all:'All',filter_income:'Income',filter_expense:'Expense',
     detail_title:'Transaction Detail',edit_title:'Edit Transaction',
     lbl_edit:'Edit',lbl_delete:'Delete',lbl_save_edit:'Save changes',lbl_type:'Type',
-    no_results:'No results found',see_all:'All transactions'
+    no_results:'No results found',see_all:'All transactions',
+    budget_section:'Monthly Budget',budget_setting_title:'Monthly spend limit',budget_setting_sub:'Progress shown in Analytics',save_budget:'Save',
+    budget_card:'Monthly Budget',budget_card_sub:'Spending vs target',
+    savings_rate:'Savings rate',avg_daily:'Avg / day',biggest_exp:'Biggest expense',tx_count:'Transactions',
+    day_filter:'📅 Filter by day'
   },
   th: {
     greeting_morning:'อรุณสวัสดิ์',greeting_afternoon:'สวัสดีตอนบ่าย',greeting_evening:'สวัสดีตอนเย็น',
@@ -969,7 +1006,7 @@ const i18n = {
     manage_cats:'จัดการหมวดหมู่',manage_cats_sub:'เพิ่ม แก้ไข ลบ',
     export:'ส่งออก CSV',export_sub:'ดาวน์โหลดรายการทั้งหมด',
     clear:'ลบข้อมูลทั้งหมด',clear_sub:'ไม่สามารถกู้คืนได้',
-    version:'เวอร์ชัน 2.5 · ใช้งานส่วนตัว',privacy:'ความเป็นส่วนตัว 100%',privacy_sub:'ข้อมูลอยู่ในอุปกรณ์ของคุณเท่านั้น',
+    version:'เวอร์ชัน 2.6 · ใช้งานส่วนตัว',privacy:'ความเป็นส่วนตัว 100%',privacy_sub:'ข้อมูลอยู่ในอุปกรณ์ของคุณเท่านั้น',
     cats_title:'หมวดหมู่',cats_sub:'จัดการรายการ',
     exp_cats:'หมวดหมู่รายจ่าย',inc_cats:'หมวดหมู่รายรับ',
     add_exp_cat:'+ เพิ่มหมวดหมู่รายจ่าย',add_inc_cat:'+ เพิ่มหมวดหมู่รายรับ',
@@ -983,7 +1020,11 @@ const i18n = {
     filter_all:'ทั้งหมด',filter_income:'รายรับ',filter_expense:'รายจ่าย',
     detail_title:'รายละเอียด',edit_title:'แก้ไขรายการ',
     lbl_edit:'แก้ไข',lbl_delete:'ลบ',lbl_save_edit:'บันทึกการแก้ไข',lbl_type:'ประเภท',
-    no_results:'ไม่พบรายการ',see_all:'รายการทั้งหมด'
+    no_results:'ไม่พบรายการ',see_all:'รายการทั้งหมด',
+    budget_section:'งบประมาณรายเดือน',budget_setting_title:'วงเงินใช้จ่ายต่อเดือน',budget_setting_sub:'แสดงความคืบหน้าในวิเคราะห์',save_budget:'บันทึก',
+    budget_card:'งบประมาณรายเดือน',budget_card_sub:'ยอดใช้จ่าย vs เป้าหมาย',
+    savings_rate:'อัตราออม',avg_daily:'เฉลี่ย/วัน',biggest_exp:'รายจ่ายสูงสุด',tx_count:'จำนวนรายการ',
+    day_filter:'📅 กรองตามวันที่'
   }
 };
 
@@ -1061,6 +1102,10 @@ function applyLang(){
     'lbl-ex-cat':'ex_cat','lbl-ex-type-label':'ex_type','lbl-confirm-btn':'confirm',
     'lbl-tips':'tips','tip1':'tip1','tip2':'tip2','tip3':'tip3',
     'lbl-analytics-title':'analytics_title','lbl-analytics-sub':'analytics_sub',
+    'lbl-budget-section':'budget_section','lbl-budget-setting-title':'budget_setting_title','lbl-budget-setting-sub':'budget_setting_sub','lbl-save-budget':'save_budget',
+    'lbl-budget-card-title':'budget_card','lbl-budget-card-sub':'budget_card_sub',
+    'lbl-savings-rate':'savings_rate','lbl-avg-daily':'avg_daily','lbl-biggest-exp':'biggest_exp','lbl-tx-count':'tx_count',
+    'lbl-day-filter':'day_filter',
     'lbl-total-spent':'total_spent','lbl-vs-last':'vs_last',
     'lbl-chart-donut':'chart_donut','lbl-chart-donut-sub':'chart_donut_sub',
     'lbl-chart-bar':'chart_bar','lbl-chart-bar-sub':'chart_bar_sub',
@@ -1731,6 +1776,35 @@ function confirmScan(){
   goPage('home');
 }
 
+// =================== BUDGET ===================
+function saveBudget(){
+  const val=parseFloat(document.getElementById('budget-input')?.value||'0')||0;
+  localStorage.setItem('ff_budget',String(val));
+  showToast(lang==='th'?'บันทึกงบประมาณแล้ว':'Budget saved','✅');
+  if(currentPage==='analytics') renderAnalytics();
+}
+function renderBudget(expense){
+  const budget=parseFloat(localStorage.getItem('ff_budget')||'0');
+  const card=document.getElementById('budget-card');
+  const content=document.getElementById('budget-progress-content');
+  if(!card||!content) return;
+  if(!budget){card.style.display='none';return;}
+  card.style.display='';
+  const pct=Math.min(100,Math.round(expense/budget*100));
+  const over=expense>budget;
+  const barColor=over?'var(--red)':pct>=80?'#F5A623':'var(--green)';
+  content.innerHTML=`
+    <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+      <span style="font-size:13px;color:var(--text2)">${fmt(expense)} <span style="color:var(--text3)">/ ${fmt(budget)}</span></span>
+      <span style="font-size:14px;font-weight:800;color:${barColor}">${pct}%</span>
+    </div>
+    <div style="background:var(--bg4);border-radius:100px;height:10px;overflow:hidden">
+      <div style="background:${barColor};height:100%;width:${pct}%;border-radius:100px;transition:width 0.5s ease"></div>
+    </div>
+    ${over?`<div style="font-size:12px;color:var(--red);margin-top:8px;font-weight:600">⚠️ Over budget by ${fmt(expense-budget)}</div>`:''}
+    ${!over&&pct>=80?`<div style="font-size:12px;color:#F5A623;margin-top:8px;font-weight:600">⚡ ${100-pct}% of budget remaining</div>`:''}`;
+}
+
 // =================== ANALYTICS ===================
 function renderAnalytics(){
   applyLang();
@@ -1750,6 +1824,27 @@ function renderAnalytics(){
     vsEl.textContent = (diff>0?'+':'')+diff+'%';
     vsEl.style.color = diff>0?'var(--red)':'var(--green)';
   }
+  // savings rate
+  const srEl=document.getElementById('an-savings-rate');
+  if(srEl){
+    if(income>0){const sr=Math.round((income-expense)/income*100);srEl.textContent=sr+'%';srEl.style.color=sr<0?'var(--red)':'var(--green)';}
+    else{srEl.textContent='—';srEl.style.color='var(--text)';}
+  }
+  // avg daily spend
+  const now2=new Date();
+  const daysElapsed=(currentYear===now2.getFullYear()&&currentMonth===now2.getMonth())?now2.getDate():new Date(currentYear,currentMonth+1,0).getDate();
+  const adEl=document.getElementById('an-avg-daily');
+  if(adEl) adEl.textContent=expense>0?fmt(expense/daysElapsed):'—';
+  // biggest single expense
+  const expTxs2=txs.filter(t=>t.type==='expense');
+  const biggest=expTxs2.length?Math.max(...expTxs2.map(t=>t.amount)):0;
+  const bigEl=document.getElementById('an-biggest');
+  if(bigEl) bigEl.textContent=biggest>0?fmt(biggest):'—';
+  // transaction count
+  const tcEl=document.getElementById('an-tx-count');
+  if(tcEl) tcEl.textContent=txs.length+(lang==='th'?' รายการ':' items');
+  // budget progress
+  renderBudget(expense);
   renderDonut(txs);
   renderBarChart();
   renderLineChart();
@@ -1955,6 +2050,8 @@ function showToast(msg,icon='✓'){
 document.addEventListener('DOMContentLoaded',()=>{
   const _now=new Date();
   document.getElementById('f-date').value=_now.toISOString().split('T')[0];
+  const _bi=document.getElementById('budget-input');
+  if(_bi){const _bv=localStorage.getItem('ff_budget');if(_bv&&parseFloat(_bv)>0)_bi.value=_bv;}
   const _ft=document.getElementById('f-time');
   if(_ft) _ft.value=`${String(_now.getHours()).padStart(2,'0')}:${String(_now.getMinutes()).padStart(2,'0')}`;
   document.getElementById('lang-th').classList.toggle('active',lang==='th');
