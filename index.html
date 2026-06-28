@@ -524,6 +524,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
               <div class="ex-title">✦ <span id="lbl-extracted">Extracted from slip</span></div>
               <div class="ex-row"><span class="ex-label" id="lbl-ex-amount">Amount</span><span class="ex-val highlight" id="ex-amount">—</span></div>
               <div class="ex-row"><span class="ex-label" id="lbl-ex-date">Date</span><span class="ex-val" id="ex-date">—</span></div>
+              <div class="ex-row" id="ex-time-row" style="display:none"><span class="ex-label" id="lbl-ex-time">Time</span><span class="ex-val" id="ex-time">—</span></div>
               <div class="ex-row" style="align-items:flex-start;padding:10px 0"><span class="ex-label" id="lbl-ex-to" style="padding-top:8px">Recipient</span><span class="ex-val" id="ex-to"><input type="text" id="ex-to-input" placeholder="e.g. CP Axtra, ร้านอาหาร..." style="background:var(--bg4);border:0.5px solid var(--border2);border-radius:8px;color:var(--text);font-size:14px;padding:7px 10px;width:170px;font-family:-apple-system,'Helvetica Neue',Arial,'Noto Sans Thai',sans-serif"/></span></div>
               <div class="ex-row" style="align-items:flex-start;padding:10px 0"><span class="ex-label" id="lbl-ex-note" style="padding-top:8px">Note</span><span class="ex-val" id="ex-note"><input type="text" id="ex-note-input" placeholder="e.g. ชาบูหม่าล่า, ยา..." style="background:var(--bg4);border:0.5px solid var(--border2);border-radius:8px;color:var(--text);font-size:14px;padding:7px 10px;width:170px;font-family:-apple-system,'Helvetica Neue',Arial,'Noto Sans Thai',sans-serif"/></span></div>
               <div class="ex-row">
@@ -679,7 +680,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
               <div class="settings-icon purple">💎</div>
               <div class="settings-text">
                 <div class="settings-title">FinFlow</div>
-                <div class="settings-sub" id="lbl-version">Version 1.4 · Personal use</div>
+                <div class="settings-sub" id="lbl-version">Version 1.5 · Personal use</div>
               </div>
             </div>
           </div>
@@ -890,7 +891,7 @@ const i18n = {
     pick_bank:'Select your bank',
     upload_title:'Tap to upload slip',upload_sub:'KBank Make · Bangkok Bank · Any bank slip',
     reading:'Reading slip...',extracted:'Extracted from slip',
-    ex_amount:'Amount',ex_date:'Date',ex_to:'Recipient',ex_note:'Note',ex_cat:'Category',ex_type:'Transaction type',
+    ex_amount:'Amount',ex_date:'Date',ex_time:'Time',ex_to:'Recipient',ex_note:'Note',ex_cat:'Category',ex_type:'Transaction type',
     confirm:'Confirm & save',
     tips:'Tips for best results',tip1:'Use clear, well-lit screenshots',tip2:'KBank Make & Bangkok Bank supported',tip3:'Always review before saving',
     analytics_title:'Analytics',analytics_sub:'Your spending insights',
@@ -905,7 +906,7 @@ const i18n = {
     manage_cats:'Manage categories',manage_cats_sub:'Add, edit, delete',
     export:'Export to CSV',export_sub:'Download all transactions',
     clear:'Clear all data',clear_sub:'Cannot be undone',
-    version:'Version 1.4 · Personal use',privacy:'100% Private',privacy_sub:'Data stays on your device only',
+    version:'Version 1.5 · Personal use',privacy:'100% Private',privacy_sub:'Data stays on your device only',
     cats_title:'Categories',cats_sub:'Manage your lists',
     exp_cats:'Expense categories',inc_cats:'Income categories',
     add_exp_cat:'+ Add expense category',add_inc_cat:'+ Add income category',
@@ -933,7 +934,7 @@ const i18n = {
     pick_bank:'เลือกธนาคาร',
     upload_title:'แตะเพื่ออัพโหลดสลิป',upload_sub:'KBank Make · Bangkok Bank · สลิปทุกธนาคาร',
     reading:'กำลังอ่านสลิป...',extracted:'ข้อมูลจากสลิป',
-    ex_amount:'จำนวนเงิน',ex_date:'วันที่',ex_to:'ผู้รับเงิน',ex_note:'หมายเหตุ',ex_cat:'หมวดหมู่',ex_type:'ประเภทรายการ',
+    ex_amount:'จำนวนเงิน',ex_date:'วันที่',ex_time:'เวลา',ex_to:'ผู้รับเงิน',ex_note:'หมายเหตุ',ex_cat:'หมวดหมู่',ex_type:'ประเภทรายการ',
     confirm:'ยืนยันและบันทึก',
     tips:'เคล็ดลับสำหรับผลลัพธ์ที่ดี',tip1:'ใช้ภาพที่ชัดและมีแสงเพียงพอ',tip2:'สลิป KBank Make ให้ผลดีที่สุด',tip3:'ตรวจสอบข้อมูลก่อนบันทึกเสมอ',
     analytics_title:'วิเคราะห์',analytics_sub:'สรุปการใช้จ่ายของคุณ',
@@ -948,7 +949,7 @@ const i18n = {
     manage_cats:'จัดการหมวดหมู่',manage_cats_sub:'เพิ่ม แก้ไข ลบ',
     export:'ส่งออก CSV',export_sub:'ดาวน์โหลดรายการทั้งหมด',
     clear:'ลบข้อมูลทั้งหมด',clear_sub:'ไม่สามารถกู้คืนได้',
-    version:'เวอร์ชัน 1.4 · ใช้งานส่วนตัว',privacy:'ความเป็นส่วนตัว 100%',privacy_sub:'ข้อมูลอยู่ในอุปกรณ์ของคุณเท่านั้น',
+    version:'เวอร์ชัน 1.5 · ใช้งานส่วนตัว',privacy:'ความเป็นส่วนตัว 100%',privacy_sub:'ข้อมูลอยู่ในอุปกรณ์ของคุณเท่านั้น',
     cats_title:'หมวดหมู่',cats_sub:'จัดการรายการ',
     exp_cats:'หมวดหมู่รายจ่าย',inc_cats:'หมวดหมู่รายรับ',
     add_exp_cat:'+ เพิ่มหมวดหมู่รายจ่าย',add_inc_cat:'+ เพิ่มหมวดหมู่รายรับ',
@@ -1036,7 +1037,7 @@ function applyLang(){
     'lbl-pick-bank':'pick_bank',
     'lbl-upload-title':'upload_title','lbl-upload-sub':'upload_sub',
     'lbl-reading':'reading','lbl-extracted':'extracted',
-    'lbl-ex-amount':'ex_amount','lbl-ex-date':'ex_date','lbl-ex-to':'ex_to','lbl-ex-note':'ex_note',
+    'lbl-ex-amount':'ex_amount','lbl-ex-date':'ex_date','lbl-ex-time':'ex_time','lbl-ex-to':'ex_to','lbl-ex-note':'ex_note',
     'lbl-ex-cat':'ex_cat','lbl-ex-type-label':'ex_type','lbl-confirm-btn':'confirm',
     'lbl-tips':'tips','tip1':'tip1','tip2':'tip2','tip3':'tip3',
     'lbl-analytics-title':'analytics_title','lbl-analytics-sub':'analytics_sub',
@@ -1108,7 +1109,7 @@ function renderHome(){
       <div class="tx-emoji ${tx.type}">${tx.emoji||'💳'}</div>
       <div class="tx-info">
         <div class="tx-name">${tx.name}</div>
-        <div class="tx-meta">${tx.cat}</div>
+        <div class="tx-meta">${tx.cat}${tx.time?' · '+tx.time:''}</div>
       </div>
       <div class="tx-right">
         <div class="tx-amount ${tx.type}">${tx.type==='income'?'+':'-'}${fmt(tx.amount)}</div>
@@ -1153,7 +1154,7 @@ function openTxDetail(id){
   amtEl.className = `tx-detail-amount ${tx.type}`;
   document.getElementById('tx-d-cat').textContent = `${tx.emoji||''} ${tx.cat}`;
   const d = new Date(tx.date);
-  document.getElementById('tx-d-date').textContent = d.toLocaleDateString(lang==='th'?'th-TH':'en-GB',{day:'numeric',month:'long',year:'numeric'});
+  document.getElementById('tx-d-date').textContent = d.toLocaleDateString(lang==='th'?'th-TH':'en-GB',{day:'numeric',month:'long',year:'numeric'})+(tx.time?' · '+tx.time:'');
   const badge = document.getElementById('tx-d-type');
   badge.textContent = tx.type==='income'?t('income'):t('expense');
   badge.className = `tx-type-badge ${tx.type}`;
@@ -1298,7 +1299,7 @@ function renderAllTx(){
       <div class="tx-emoji ${tx.type}">${tx.emoji||'💳'}</div>
       <div class="tx-info">
         <div class="tx-name">${tx.name}</div>
-        <div class="tx-meta">${tx.cat}</div>
+        <div class="tx-meta">${tx.cat}${tx.time?' · '+tx.time:''}</div>
       </div>
       <div class="tx-right">
         <div class="tx-amount ${tx.type}">${tx.type==='income'?'+':'-'}${fmt(tx.amount)}</div>
@@ -1455,6 +1456,13 @@ function parseAmount(text){
   return ints.length?Math.max(...ints):null;
 }
 
+// Parse HH:MM from OCR text
+function parseTime(text){
+  const m=text.match(/\b([01]?\d|2[0-3]):([0-5]\d)(?::\d{2})?\b/);
+  if(m) return `${String(parseInt(m[1])).padStart(2,'0')}:${m[2]}`;
+  return null;
+}
+
 // Parse Thai date — handles 4-digit BE (2569) and 2-digit BE (69)
 function parseThaiDate(text){
   const t=text.toLowerCase().replace(/\s+/g,' ');
@@ -1506,28 +1514,32 @@ async function runOCR(file){
       bank = await detectBank(src,W,H,scale);
     }
     if(statusTxt) statusTxt.textContent = bank==='bbl'?'Reading Bangkok Bank slip...':'Reading KBank Make slip...';
-    let amount=null,dateStr=null,recipient='',note='';
+    let amount=null,dateStr=null,time=null,recipient='',note='';
 
     if(bank==='bbl'){
       // ── BANGKOK BANK ─────────────────────────────────────────────
-      // Date: center strip 15-34%
+      // Date+Time: center strip 15-34%
       const dateC=applyBW(cropCanvas(src,W,H,scale,0.10,0.15,0.90,0.34),128);
-      dateStr=parseThaiDate(await ocrCanvas(dateC,'tha+eng'));
-      // Amount: center 34-52% (จำนวนเงิน + number + THB)
+      const dateTxtB=await ocrCanvas(dateC,'tha+eng');
+      dateStr=parseThaiDate(dateTxtB);
+      time=parseTime(dateTxtB);
+      // Amount: center 34-52%
       const amtC=applyBW(cropCanvas(src,W,H,scale,0.05,0.34,0.95,0.52),140);
       amount=parseAmount(await ocrCanvas(amtC,'eng'));
-      // Recipient (ไปที่): 60-76%
-      const recC=cropCanvas(src,W,H,scale,0.15,0.60,0.90,0.76);
+      // Recipient (ไปที่): 55-72% — shifted up from 60-76%
+      const recC=cropCanvas(src,W,H,scale,0.10,0.55,0.92,0.72);
       const recRaw=await ocrCanvas(recC,'tha+eng');
       const recLines=recRaw.split('\n').map(l=>l.trim())
-        .filter(l=>l.length>1&&!/^\d{3}[-x]/.test(l)&&!/ธนาคาร/.test(l)&&!/ไปที่/.test(l)&&!/จาก/.test(l));
+        .filter(l=>l.length>1&&/[ก-๙a-zA-Z]/.test(l)&&!/^\d{3}[-x]/.test(l)&&!/ธนาคาร/.test(l)&&!/ไปที่/.test(l)&&!/จาก/.test(l)&&!/-\d{3,}/.test(l));
       recipient=cleanThaiOCR((recLines[0]||'').replace(/^(นาย|นาง|น\.ส\.|นางสาว)\s*/,'').trim());
 
     } else {
       // ── KBANK MAKE ───────────────────────────────────────────────
-      // Date: top-left 4-15%
+      // Date+Time: top-left 4-15%
       const dateC=applyBW(cropCanvas(src,W,H,scale,0,0.04,0.70,0.15),128);
-      dateStr=parseThaiDate(await ocrCanvas(dateC,'tha+eng'));
+      const dateTxtK=await ocrCanvas(dateC,'tha+eng');
+      dateStr=parseThaiDate(dateTxtK);
+      time=parseTime(dateTxtK);
       // Amount: left 62%, rows 50-72%
       const amtC=applyBW(cropCanvas(src,W,H,scale,0,0.50,0.62,0.72),140);
       amount=parseAmount(await ocrCanvas(amtC,'eng'));
@@ -1535,8 +1547,8 @@ async function runOCR(file){
       const recC=cropCanvas(src,W,H,scale,0.12,0.33,0.88,0.50);
       const recRaw=await ocrCanvas(recC,'tha+eng');
       const recLines=recRaw.split('\n').map(l=>l.trim())
-        .filter(l=>l.length>1&&!/^xxx/i.test(l)&&!/^\d{5,}$/.test(l));
-      // Line 0 = sender account, line 1+ = recipient name
+        .filter(l=>l.length>1&&/[ก-๙a-zA-Z]/.test(l)&&!/^xxx/i.test(l)&&!/^\d{5,}$/.test(l)&&!/-\d{3,}/.test(l));
+      // Line 0 = sender, line 1+ = recipient name
       recipient=cleanThaiOCR(recLines.length>=2?recLines[1]:(recLines[0]||''));
       // Note: bottom rounded box 88-97%
       const noteC=cropCanvas(src,W,H,scale,0.02,0.88,0.72,0.97);
@@ -1552,11 +1564,15 @@ async function runOCR(file){
     document.getElementById('ex-amount').textContent=amount
       ?'฿'+amount.toLocaleString('th-TH',{minimumFractionDigits:2,maximumFractionDigits:2}):'—';
     document.getElementById('ex-date').textContent=dateStr;
+    const timeRow=document.getElementById('ex-time-row');
+    const timeEl=document.getElementById('ex-time');
+    if(timeEl) timeEl.textContent=time||'—';
+    if(timeRow) timeRow.style.display=time?'':'none';
     const toInput=document.getElementById('ex-to-input');
     const noteInput=document.getElementById('ex-note-input');
     if(toInput) toInput.value=recipient;
     if(noteInput) noteInput.value=note;
-    scannedData={amount:amount||0,date:dateStr};
+    scannedData={amount:amount||0,date:dateStr,time:time||null};
     populateExCatSelect('expense');
     setExType('expense');
     if(statusTxt) statusTxt.textContent=t('reading');
@@ -1591,7 +1607,8 @@ function confirmScan(){
     id: Date.now(), type: exTypeCurrent,
     amount: scannedData.amount,
     name, cat, emoji,
-    date: scannedData.date || new Date().toISOString().split('T')[0]
+    date: scannedData.date || new Date().toISOString().split('T')[0],
+    time: scannedData.time || null
   });
   saveTxData(txs);
   showToast(t('saved'),'✅');
