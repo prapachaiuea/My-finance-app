@@ -680,7 +680,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
               <div class="settings-icon purple">💎</div>
               <div class="settings-text">
                 <div class="settings-title">FinFlow</div>
-                <div class="settings-sub" id="lbl-version">Version 2.0 · Personal use</div>
+                <div class="settings-sub" id="lbl-version">Version 2.1 · Personal use</div>
               </div>
             </div>
           </div>
@@ -914,7 +914,7 @@ const i18n = {
     manage_cats:'Manage categories',manage_cats_sub:'Add, edit, delete',
     export:'Export to CSV',export_sub:'Download all transactions',
     clear:'Clear all data',clear_sub:'Cannot be undone',
-    version:'Version 2.0 · Personal use',privacy:'100% Private',privacy_sub:'Data stays on your device only',
+    version:'Version 2.1 · Personal use',privacy:'100% Private',privacy_sub:'Data stays on your device only',
     cats_title:'Categories',cats_sub:'Manage your lists',
     exp_cats:'Expense categories',inc_cats:'Income categories',
     add_exp_cat:'+ Add expense category',add_inc_cat:'+ Add income category',
@@ -957,7 +957,7 @@ const i18n = {
     manage_cats:'จัดการหมวดหมู่',manage_cats_sub:'เพิ่ม แก้ไข ลบ',
     export:'ส่งออก CSV',export_sub:'ดาวน์โหลดรายการทั้งหมด',
     clear:'ลบข้อมูลทั้งหมด',clear_sub:'ไม่สามารถกู้คืนได้',
-    version:'เวอร์ชัน 2.0 · ใช้งานส่วนตัว',privacy:'ความเป็นส่วนตัว 100%',privacy_sub:'ข้อมูลอยู่ในอุปกรณ์ของคุณเท่านั้น',
+    version:'เวอร์ชัน 2.1 · ใช้งานส่วนตัว',privacy:'ความเป็นส่วนตัว 100%',privacy_sub:'ข้อมูลอยู่ในอุปกรณ์ของคุณเท่านั้น',
     cats_title:'หมวดหมู่',cats_sub:'จัดการรายการ',
     exp_cats:'หมวดหมู่รายจ่าย',inc_cats:'หมวดหมู่รายรับ',
     add_exp_cat:'+ เพิ่มหมวดหมู่รายจ่าย',add_inc_cat:'+ เพิ่มหมวดหมู่รายรับ',
@@ -1105,7 +1105,7 @@ function renderHome(){
   document.getElementById('hero-income').textContent = fmt(income);
   document.getElementById('hero-expense').textContent = fmt(expense);
   const list = document.getElementById('home-tx-list');
-  const sorted = [...txs].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,10);
+  const sorted = [...txs].sort((a,b)=>(new Date(b.date)-new Date(a.date))||b.id-a.id).slice(0,10);
   if(!sorted.length){
     list.innerHTML=`<div class="empty"><div class="empty-icon">💸</div><div class="empty-title">${t('no_tx')}</div><div class="empty-sub">${t('no_tx_sub')}</div></div>`;
     return;
@@ -1298,7 +1298,7 @@ function renderAllTx(){
   let txs = getMonthTx(allTxYear, allTxMonth);
   if(txFilterType!=='all') txs = txs.filter(tx=>tx.type===txFilterType);
   if(query) txs = txs.filter(tx=>tx.name.toLowerCase().includes(query)||tx.cat.toLowerCase().includes(query));
-  txs.sort((a,b)=>new Date(b.date)-new Date(a.date));
+  txs.sort((a,b)=>(new Date(b.date)-new Date(a.date))||b.id-a.id);
   const monthIncome = txs.filter(tx=>tx.type==='income').reduce((s,tx)=>s+tx.amount,0);
   const monthExpense = txs.filter(tx=>tx.type==='expense').reduce((s,tx)=>s+tx.amount,0);
   document.getElementById('lbl-all-tx-count').textContent = lang==='th'
