@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
@@ -303,6 +303,60 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 /* PULSE ANIMATION */
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
 .pulse{animation:pulse 1.5s ease infinite}
+
+/* TRANSACTION DETAIL / EDIT SHEET */
+.tx-detail-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.72);display:flex;align-items:flex-end;justify-content:center;z-index:500;opacity:0;pointer-events:none;transition:opacity 0.25s;backdrop-filter:blur(6px)}
+.tx-detail-overlay.open{opacity:1;pointer-events:all}
+.tx-detail-sheet{background:var(--bg2);border-radius:var(--r-xl) var(--r-xl) 0 0;padding:0 20px calc(28px + var(--safe-bottom));width:100%;max-width:430px;transform:translateY(100%);transition:transform 0.32s cubic-bezier(0.32,0.72,0,1);border-top:0.5px solid var(--border2);max-height:90vh;overflow-y:auto}
+.tx-detail-overlay.open .tx-detail-sheet{transform:translateY(0)}
+.tx-detail-handle{width:36px;height:4px;background:var(--bg4);border-radius:2px;margin:14px auto 0}
+.tx-detail-header{display:flex;align-items:center;justify-content:space-between;padding:16px 0 10px}
+.tx-detail-edit-btn{padding:7px 16px;background:var(--bg3);border:0.5px solid var(--border2);border-radius:100px;color:var(--text2);font-size:12px;font-weight:600;cursor:pointer;transition:all 0.15s}
+.tx-detail-edit-btn:active{background:var(--bg4)}
+.tx-detail-hero{display:flex;flex-direction:column;align-items:center;padding:8px 0 20px;border-bottom:0.5px solid var(--border)}
+.tx-detail-icon{width:68px;height:68px;border-radius:24px;display:flex;align-items:center;justify-content:center;font-size:30px;margin-bottom:12px}
+.tx-detail-icon.expense{background:var(--red-dim)}
+.tx-detail-icon.income{background:var(--green-dim)}
+.tx-detail-name{font-size:17px;font-weight:700;color:var(--text);text-align:center;margin-bottom:8px;max-width:260px}
+.tx-detail-amount{font-size:34px;font-weight:800;letter-spacing:-1px}
+.tx-detail-amount.expense{color:var(--red)}
+.tx-detail-amount.income{color:var(--green)}
+.tx-detail-rows{padding:4px 0}
+.tx-detail-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:0.5px solid var(--border)}
+.tx-detail-row:last-child{border-bottom:none}
+.tx-detail-row-label{font-size:13px;color:var(--text2)}
+.tx-detail-row-val{font-size:13px;font-weight:600;color:var(--text)}
+.tx-type-badge{padding:4px 12px;border-radius:100px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em}
+.tx-type-badge.income{background:var(--green-dim);color:var(--green)}
+.tx-type-badge.expense{background:var(--red-dim);color:var(--red)}
+.tx-detail-del-btn{width:100%;padding:15px;background:var(--red-dim);border:0.5px solid rgba(255,107,107,0.25);border-radius:var(--r-lg);color:var(--red);font-size:15px;font-weight:700;cursor:pointer;transition:all 0.2s;margin-top:16px}
+.tx-detail-del-btn:active{background:rgba(255,107,107,0.3)}
+.tx-view-panel{display:block}
+.tx-view-panel.hidden{display:none}
+.tx-edit-panel{display:none}
+.tx-edit-panel.active{display:block}
+.edit-panel-title{font-size:18px;font-weight:700;color:var(--text);padding:16px 0 14px;border-bottom:0.5px solid var(--border);margin-bottom:14px}
+
+/* SEE ALL BUTTON */
+.see-all-row{padding:10px 16px 8px;display:none}
+.see-all-btn{display:flex;align-items:center;justify-content:space-between;width:100%;padding:13px 16px;background:var(--card);border:0.5px solid var(--border);border-radius:var(--r-md);color:var(--text2);font-size:13px;font-weight:600;cursor:pointer;transition:all 0.15s}
+.see-all-btn:active{background:var(--bg3)}
+.see-all-btn-left{display:flex;align-items:center;gap:8px}
+.tx-count-badge{background:var(--bg4);border-radius:100px;padding:2px 9px;font-size:11px;color:var(--text3);font-weight:600}
+
+/* ALL TRANSACTIONS PAGE */
+.search-bar-wrap{padding:0 16px 10px;position:sticky;top:0;z-index:9;background:var(--bg);padding-top:8px}
+.search-input-wrap{position:relative}
+.search-input-wrap svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;stroke:var(--text3);stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.search-input{width:100%;background:var(--bg3);border:0.5px solid var(--border2);border-radius:var(--r-md);color:var(--text);font-size:14px;padding:11px 14px 11px 38px;font-family:inherit;transition:border-color 0.2s}
+.search-input:focus{outline:none;border-color:var(--green)}
+.search-input::placeholder{color:var(--text3)}
+.filter-tabs{display:flex;gap:8px;margin-top:10px}
+.filter-tab{padding:7px 16px;border-radius:100px;background:var(--bg3);border:0.5px solid var(--border);color:var(--text2);font-size:12px;font-weight:600;cursor:pointer;transition:all 0.15s}
+.filter-tab.active{background:var(--green-dim);border-color:var(--green);color:var(--green)}
+.filter-tab:active{transform:scale(0.95)}
+.all-tx-list{padding:0 16px 8px;display:flex;flex-direction:column;gap:6px}
+.all-tx-month-header{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;padding:16px 0 6px}
 </style>
 </head>
 <body>
@@ -373,6 +427,15 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 
       <div class="s-label" id="lbl-recent">Recent transactions</div>
       <div class="tx-list" id="home-tx-list"></div>
+      <div class="see-all-row" id="see-all-row">
+        <button class="see-all-btn" onclick="goPage('all')">
+          <div class="see-all-btn-left">
+            <span id="lbl-see-all">All transactions</span>
+            <span class="tx-count-badge" id="tx-total-count"></span>
+          </div>
+          <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:var(--text3);stroke-width:2.5;fill:none;stroke-linecap:round;stroke-linejoin:round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
     </div>
 
     <!-- ADD -->
@@ -628,6 +691,30 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
       </div>
     </div>
 
+    <!-- ALL TRANSACTIONS -->
+    <div class="page" id="page-all">
+      <div class="status-spacer"></div>
+      <div class="page-header" style="display:flex;align-items:center;gap:12px;padding-bottom:8px">
+        <button onclick="goPage('home')" style="background:var(--bg3);border:0.5px solid var(--border);border-radius:10px;width:36px;height:36px;cursor:pointer;color:var(--text);font-size:18px;flex-shrink:0">‹</button>
+        <div>
+          <h1 id="lbl-all-tx-title">All Transactions</h1>
+          <p id="lbl-all-tx-count" style="font-size:13px;color:var(--text2);margin-top:2px"></p>
+        </div>
+      </div>
+      <div class="search-bar-wrap">
+        <div class="search-input-wrap">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input class="search-input" id="all-tx-search" placeholder="Search..." oninput="renderAllTx()"/>
+        </div>
+        <div class="filter-tabs">
+          <button class="filter-tab active" id="ftab-all" onclick="setTxFilter('all')">All</button>
+          <button class="filter-tab" id="ftab-income" onclick="setTxFilter('income')">Income</button>
+          <button class="filter-tab" id="ftab-expense" onclick="setTxFilter('expense')">Expense</button>
+        </div>
+      </div>
+      <div class="all-tx-list" id="all-tx-list"></div>
+    </div>
+
   </div><!-- /pages -->
 
   <!-- BOTTOM NAV -->
@@ -653,6 +740,78 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
       <span id="nav-lbl-settings">Settings</span>
     </button>
   </nav>
+</div>
+
+<!-- TRANSACTION DETAIL / EDIT SHEET -->
+<div class="tx-detail-overlay" id="tx-detail-overlay" onclick="closeTxDetailOutside(event)">
+  <div class="tx-detail-sheet">
+    <div class="tx-detail-handle"></div>
+
+    <!-- VIEW PANEL -->
+    <div class="tx-view-panel" id="tx-view-panel">
+      <div class="tx-detail-header">
+        <span style="font-size:15px;font-weight:700;color:var(--text)" id="tx-detail-title-lbl">Detail</span>
+        <button class="tx-detail-edit-btn" onclick="openEditPanel()" id="tx-edit-btn-lbl">Edit</button>
+      </div>
+      <div class="tx-detail-hero">
+        <div class="tx-detail-icon" id="tx-d-icon"></div>
+        <div class="tx-detail-name" id="tx-d-name"></div>
+        <div class="tx-detail-amount" id="tx-d-amount"></div>
+      </div>
+      <div class="tx-detail-rows">
+        <div class="tx-detail-row">
+          <span class="tx-detail-row-label" id="tx-d-cat-lbl">Category</span>
+          <span class="tx-detail-row-val" id="tx-d-cat"></span>
+        </div>
+        <div class="tx-detail-row">
+          <span class="tx-detail-row-label" id="tx-d-date-lbl">Date</span>
+          <span class="tx-detail-row-val" id="tx-d-date"></span>
+        </div>
+        <div class="tx-detail-row">
+          <span class="tx-detail-row-label" id="tx-d-type-lbl">Type</span>
+          <span class="tx-type-badge" id="tx-d-type"></span>
+        </div>
+      </div>
+      <button class="tx-detail-del-btn" id="tx-d-del-btn" onclick="deleteTxFromDetail()">Delete</button>
+    </div>
+
+    <!-- EDIT PANEL -->
+    <div class="tx-edit-panel" id="tx-edit-panel">
+      <div class="edit-panel-title" id="tx-edit-title-lbl">Edit Transaction</div>
+      <div class="field">
+        <div class="field-label" id="tx-ed-amount-lbl">Amount</div>
+        <div class="amount-prefix">
+          <input class="amount-field" type="number" id="ed-amount" placeholder="0.00" inputmode="decimal" min="0"/>
+        </div>
+      </div>
+      <div class="field">
+        <div class="field-label" id="tx-ed-desc-lbl">Description</div>
+        <input type="text" id="ed-name" placeholder="Description"/>
+      </div>
+      <div class="field">
+        <div class="field-label" id="tx-ed-cat-lbl">Category</div>
+        <div class="select-arrow">
+          <select id="ed-cat"></select>
+        </div>
+      </div>
+      <div class="field">
+        <div class="field-label" id="tx-ed-date-lbl">Date</div>
+        <input type="date" id="ed-date"/>
+      </div>
+      <div class="field">
+        <div class="field-label" id="tx-ed-type-lbl">Type</div>
+        <div class="type-toggle">
+          <button class="type-btn income-t" id="ed-btn-income" onclick="setEditType('income')">+ Income</button>
+          <button class="type-btn expense-t" id="ed-btn-expense" onclick="setEditType('expense')">− Expense</button>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px;margin-bottom:8px">
+        <button class="btn-cancel" onclick="closeEditPanel()">Cancel</button>
+        <button class="btn-save" id="ed-save-btn" onclick="saveEditTx()">Save changes</button>
+      </div>
+    </div>
+
+  </div>
 </div>
 
 <!-- MODAL -->
@@ -713,7 +872,7 @@ const i18n = {
     manage_cats:'Manage categories',manage_cats_sub:'Add, edit, delete',
     export:'Export to CSV',export_sub:'Download all transactions',
     clear:'Clear all data',clear_sub:'Cannot be undone',
-    version:'Version 1.0 · Personal use',privacy:'100% Private',privacy_sub:'Data stays on your device only',
+    version:'Version 1.1 · Personal use',privacy:'100% Private',privacy_sub:'Data stays on your device only',
     cats_title:'Categories',cats_sub:'Manage your lists',
     exp_cats:'Expense categories',inc_cats:'Income categories',
     add_exp_cat:'+ Add expense category',add_inc_cat:'+ Add income category',
@@ -722,7 +881,12 @@ const i18n = {
     saved:'Saved!',deleted:'Deleted',exported:'CSV downloaded!',cleared:'All data cleared',
     fill_all:'Please fill all fields',confirm_clear:'Delete ALL data? This cannot be undone.',
     no_data:'No data',no_expense:'No expenses this month',
-    prev_month:'Previous month',next_month:'Next month',higher:'higher',lower:'lower',same:'same as last month'
+    prev_month:'Previous month',next_month:'Next month',higher:'higher',lower:'lower',same:'same as last month',
+    all_tx:'All Transactions',search_placeholder:'Search by name or category...',
+    filter_all:'All',filter_income:'Income',filter_expense:'Expense',
+    detail_title:'Transaction Detail',edit_title:'Edit Transaction',
+    lbl_edit:'Edit',lbl_delete:'Delete',lbl_save_edit:'Save changes',lbl_type:'Type',
+    no_results:'No results found',see_all:'All transactions'
   },
   th: {
     greeting_morning:'อรุณสวัสดิ์',greeting_afternoon:'สวัสดีตอนบ่าย',greeting_evening:'สวัสดีตอนเย็น',
@@ -750,7 +914,7 @@ const i18n = {
     manage_cats:'จัดการหมวดหมู่',manage_cats_sub:'เพิ่ม แก้ไข ลบ',
     export:'ส่งออก CSV',export_sub:'ดาวน์โหลดรายการทั้งหมด',
     clear:'ลบข้อมูลทั้งหมด',clear_sub:'ไม่สามารถกู้คืนได้',
-    version:'เวอร์ชัน 1.0 · ใช้งานส่วนตัว',privacy:'ความเป็นส่วนตัว 100%',privacy_sub:'ข้อมูลอยู่ในอุปกรณ์ของคุณเท่านั้น',
+    version:'เวอร์ชัน 1.1 · ใช้งานส่วนตัว',privacy:'ความเป็นส่วนตัว 100%',privacy_sub:'ข้อมูลอยู่ในอุปกรณ์ของคุณเท่านั้น',
     cats_title:'หมวดหมู่',cats_sub:'จัดการรายการ',
     exp_cats:'หมวดหมู่รายจ่าย',inc_cats:'หมวดหมู่รายรับ',
     add_exp_cat:'+ เพิ่มหมวดหมู่รายจ่าย',add_inc_cat:'+ เพิ่มหมวดหมู่รายรับ',
@@ -759,7 +923,12 @@ const i18n = {
     saved:'บันทึกแล้ว!',deleted:'ลบแล้ว',exported:'ดาวน์โหลด CSV แล้ว!',cleared:'ลบข้อมูลทั้งหมดแล้ว',
     fill_all:'กรุณากรอกข้อมูลให้ครบ',confirm_clear:'ลบข้อมูลทั้งหมด? ไม่สามารถกู้คืนได้',
     no_data:'ไม่มีข้อมูล',no_expense:'ไม่มีรายจ่ายเดือนนี้',
-    prev_month:'เดือนก่อน',next_month:'เดือนถัดไป',higher:'สูงกว่า',lower:'ต่ำกว่า',same:'เท่ากับเดือนที่แล้ว'
+    prev_month:'เดือนก่อน',next_month:'เดือนถัดไป',higher:'สูงกว่า',lower:'ต่ำกว่า',same:'เท่ากับเดือนที่แล้ว',
+    all_tx:'รายการทั้งหมด',search_placeholder:'ค้นหาชื่อหรือหมวดหมู่...',
+    filter_all:'ทั้งหมด',filter_income:'รายรับ',filter_expense:'รายจ่าย',
+    detail_title:'รายละเอียด',edit_title:'แก้ไขรายการ',
+    lbl_edit:'แก้ไข',lbl_delete:'ลบ',lbl_save_edit:'บันทึกการแก้ไข',lbl_type:'ประเภท',
+    no_results:'ไม่พบรายการ',see_all:'รายการทั้งหมด'
   }
 };
 
@@ -805,6 +974,7 @@ function goPage(p){
   if(p==='add'){ populateCatSelect(); document.getElementById('f-amount').focus(); }
   if(p==='categories') renderCategoryManager();
   if(p==='scan') resetScan();
+  if(p==='all'){ txFilterType='all'; renderAllTx(); }
 }
 
 // =================== LANGUAGE ===================
@@ -896,7 +1066,7 @@ function renderHome(){
   list.innerHTML = sorted.map(tx=>{
     const d = new Date(tx.date);
     const dateStr = d.toLocaleDateString(lang==='th'?'th-TH':'en-GB',{day:'numeric',month:'short'});
-    return `<div class="tx-item">
+    return `<div class="tx-item" onclick="openTxDetail(${tx.id})">
       <div class="tx-emoji ${tx.type}">${tx.emoji||'💳'}</div>
       <div class="tx-info">
         <div class="tx-name">${tx.name}</div>
@@ -909,13 +1079,195 @@ function renderHome(){
       <button class="tx-del" onclick="event.stopPropagation();deleteTx(${tx.id})">✕</button>
     </div>`;
   }).join('');
+  const allTxs = loadTx();
+  const seeAllRow = document.getElementById('see-all-row');
+  if(seeAllRow){
+    seeAllRow.style.display = allTxs.length ? 'block' : 'none';
+    const badge = document.getElementById('tx-total-count');
+    if(badge) badge.textContent = allTxs.length;
+    const lbl = document.getElementById('lbl-see-all');
+    if(lbl) lbl.textContent = t('see_all');
+  }
 }
 
 function deleteTx(id){
   const txs = loadTx().filter(t=>t.id!==id);
   saveTxData(txs);
   renderHome();
+  if(currentPage==='all') renderAllTx();
   showToast(t('deleted'),'✓');
+}
+
+// =================== TRANSACTION DETAIL ===================
+let detailTxId = null;
+let editTypeCurrent = 'expense';
+
+function openTxDetail(id){
+  const tx = loadTx().find(t=>t.id===id);
+  if(!tx) return;
+  detailTxId = id;
+  const icon = document.getElementById('tx-d-icon');
+  icon.textContent = tx.emoji||'💳';
+  icon.className = `tx-detail-icon ${tx.type}`;
+  document.getElementById('tx-d-name').textContent = tx.name;
+  const amtEl = document.getElementById('tx-d-amount');
+  amtEl.textContent = (tx.type==='income'?'+':'-')+fmt(tx.amount);
+  amtEl.className = `tx-detail-amount ${tx.type}`;
+  document.getElementById('tx-d-cat').textContent = `${tx.emoji||''} ${tx.cat}`;
+  const d = new Date(tx.date);
+  document.getElementById('tx-d-date').textContent = d.toLocaleDateString(lang==='th'?'th-TH':'en-GB',{day:'numeric',month:'long',year:'numeric'});
+  const badge = document.getElementById('tx-d-type');
+  badge.textContent = tx.type==='income'?t('income'):t('expense');
+  badge.className = `tx-type-badge ${tx.type}`;
+  document.getElementById('tx-detail-title-lbl').textContent = t('detail_title');
+  document.getElementById('tx-edit-btn-lbl').textContent = t('lbl_edit');
+  document.getElementById('tx-d-del-btn').textContent = t('lbl_delete');
+  document.getElementById('tx-d-cat-lbl').textContent = t('category');
+  document.getElementById('tx-d-date-lbl').textContent = t('date');
+  document.getElementById('tx-d-type-lbl').textContent = t('lbl_type');
+  document.getElementById('tx-view-panel').classList.remove('hidden');
+  document.getElementById('tx-edit-panel').classList.remove('active');
+  document.getElementById('tx-detail-overlay').classList.add('open');
+}
+
+function closeTxDetail(){
+  document.getElementById('tx-detail-overlay').classList.remove('open');
+  detailTxId = null;
+}
+
+function closeTxDetailOutside(e){
+  if(e.target===document.getElementById('tx-detail-overlay')) closeTxDetail();
+}
+
+function openEditPanel(){
+  if(detailTxId===null) return;
+  const tx = loadTx().find(t=>t.id===detailTxId);
+  if(!tx) return;
+  document.getElementById('ed-amount').value = tx.amount;
+  document.getElementById('ed-name').value = tx.name;
+  document.getElementById('ed-date').value = tx.date;
+  editTypeCurrent = tx.type;
+  populateEditCatSelect(tx.type, `${tx.emoji}|${tx.cat}`);
+  setEditType(tx.type);
+  document.getElementById('tx-edit-title-lbl').textContent = t('edit_title');
+  document.getElementById('tx-ed-amount-lbl').textContent = t('amount');
+  document.getElementById('tx-ed-desc-lbl').textContent = t('description');
+  document.getElementById('tx-ed-cat-lbl').textContent = t('category');
+  document.getElementById('tx-ed-date-lbl').textContent = t('date');
+  document.getElementById('tx-ed-type-lbl').textContent = t('lbl_type');
+  document.getElementById('ed-btn-income').textContent = t('btn_income');
+  document.getElementById('ed-btn-expense').textContent = t('btn_expense');
+  document.getElementById('ed-save-btn').textContent = t('lbl_save_edit');
+  document.getElementById('tx-view-panel').classList.add('hidden');
+  document.getElementById('tx-edit-panel').classList.add('active');
+}
+
+function closeEditPanel(){
+  document.getElementById('tx-view-panel').classList.remove('hidden');
+  document.getElementById('tx-edit-panel').classList.remove('active');
+}
+
+function setEditType(type){
+  editTypeCurrent = type;
+  document.getElementById('ed-btn-income').classList.toggle('active',type==='income');
+  document.getElementById('ed-btn-expense').classList.toggle('active',type==='expense');
+  populateEditCatSelect(type, null);
+}
+
+function populateEditCatSelect(type, currentVal){
+  const sel = document.getElementById('ed-cat');
+  const cats = loadCats(type);
+  sel.innerHTML = cats.map(c=>`<option value="${c.emoji}|${c.name}">${c.emoji} ${c.name}</option>`).join('');
+  if(currentVal){
+    const opt = [...sel.options].find(o=>o.value===currentVal);
+    if(opt) sel.value = currentVal;
+  }
+}
+
+function saveEditTx(){
+  const amount = parseFloat(document.getElementById('ed-amount').value);
+  const name = document.getElementById('ed-name').value.trim();
+  const catRaw = document.getElementById('ed-cat').value;
+  const date = document.getElementById('ed-date').value;
+  if(!amount||amount<=0||!name||!catRaw||!date){ showToast(t('fill_all'),'⚠️'); return; }
+  const [emoji,cat] = catRaw.split('|');
+  const txs = loadTx();
+  const idx = txs.findIndex(t=>t.id===detailTxId);
+  if(idx===-1){ showToast('Error','⚠️'); return; }
+  txs[idx] = {...txs[idx], amount, name, cat, emoji, date, type:editTypeCurrent};
+  saveTxData(txs);
+  closeTxDetail();
+  renderHome();
+  if(currentPage==='all') renderAllTx();
+  showToast(t('saved'),'✅');
+}
+
+function deleteTxFromDetail(){
+  if(detailTxId===null) return;
+  const txs = loadTx().filter(t=>t.id!==detailTxId);
+  saveTxData(txs);
+  closeTxDetail();
+  renderHome();
+  if(currentPage==='all') renderAllTx();
+  showToast(t('deleted'),'✓');
+}
+
+// =================== ALL TRANSACTIONS ===================
+let txFilterType = 'all';
+
+function setTxFilter(type){
+  txFilterType = type;
+  document.querySelectorAll('.filter-tab').forEach(el=>el.classList.remove('active'));
+  document.getElementById('ftab-'+type).classList.add('active');
+  renderAllTx();
+}
+
+function renderAllTx(){
+  const searchEl = document.getElementById('all-tx-search');
+  if(searchEl) searchEl.placeholder = t('search_placeholder');
+  document.getElementById('ftab-all').textContent = t('filter_all');
+  document.getElementById('ftab-income').textContent = t('filter_income');
+  document.getElementById('ftab-expense').textContent = t('filter_expense');
+  document.getElementById('lbl-all-tx-title').textContent = t('all_tx');
+  const query = (searchEl?.value||'').toLowerCase().trim();
+  let txs = loadTx();
+  if(txFilterType!=='all') txs = txs.filter(tx=>tx.type===txFilterType);
+  if(query) txs = txs.filter(tx=>tx.name.toLowerCase().includes(query)||tx.cat.toLowerCase().includes(query));
+  txs.sort((a,b)=>new Date(b.date)-new Date(a.date));
+  const total = loadTx().length;
+  document.getElementById('lbl-all-tx-count').textContent = lang==='th'
+    ? `${txs.length} จาก ${total} รายการ`
+    : `${txs.length} of ${total} transactions`;
+  const container = document.getElementById('all-tx-list');
+  if(!txs.length){
+    container.innerHTML=`<div class="empty"><div class="empty-icon">🔍</div><div class="empty-title">${t('no_results')}</div><div class="empty-sub"></div></div>`;
+    return;
+  }
+  const groups={};
+  txs.forEach(tx=>{
+    const d=new Date(tx.date);
+    const key=`${d.getFullYear()}-${String(d.getMonth()).padStart(2,'0')}`;
+    if(!groups[key]) groups[key]={label:monthLabel(d.getFullYear(),d.getMonth()),txs:[]};
+    groups[key].txs.push(tx);
+  });
+  container.innerHTML=Object.values(groups).map(g=>`
+    <div class="all-tx-month-header">${g.label}</div>
+    ${g.txs.map(tx=>{
+      const d=new Date(tx.date);
+      const dateStr=d.toLocaleDateString(lang==='th'?'th-TH':'en-GB',{day:'numeric',month:'short'});
+      return `<div class="tx-item" onclick="openTxDetail(${tx.id})">
+        <div class="tx-emoji ${tx.type}">${tx.emoji||'💳'}</div>
+        <div class="tx-info">
+          <div class="tx-name">${tx.name}</div>
+          <div class="tx-meta">${tx.cat}</div>
+        </div>
+        <div class="tx-right">
+          <div class="tx-amount ${tx.type}">${tx.type==='income'?'+':'-'}${fmt(tx.amount)}</div>
+          <div class="tx-date">${dateStr}</div>
+        </div>
+        <button class="tx-del" onclick="event.stopPropagation();deleteTx(${tx.id})">✕</button>
+      </div>`;
+    }).join('')}`).join('');
 }
 
 // =================== ADD TRANSACTION ===================
@@ -1421,3 +1773,4 @@ document.addEventListener('DOMContentLoaded',()=>{
 </script>
 </body>
 </html>
+
