@@ -184,6 +184,18 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 .confirm-btn{width:100%;padding:17px;background:var(--green);color:#000;font-size:16px;font-weight:800;border:none;border-radius:var(--r-lg);cursor:pointer;transition:all 0.2s}
 .confirm-btn:active{transform:scale(0.97)}
 
+/* BANK PICKER */
+.bank-picker{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.bank-btn{padding:16px 12px;border-radius:var(--r-lg);border:1.5px solid var(--border);background:var(--bg3);cursor:pointer;transition:all 0.2s;display:flex;flex-direction:column;align-items:center;gap:8px;width:100%}
+.bank-btn:active{transform:scale(0.96)}
+.bank-btn.active{border-color:var(--green);background:var(--green-dim)}
+.bank-btn-logo{width:48px;height:48px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;flex-shrink:0;transition:opacity 0.2s}
+.kbank-logo{background:rgba(0,168,120,0.18);color:#00A878}
+.bbl-logo{background:rgba(30,80,200,0.18);color:#3060D0}
+.bank-btn-name{font-size:13px;font-weight:700;color:var(--text)}
+.bank-btn-sub{font-size:11px;color:var(--text2)}
+.bank-btn.active .bank-btn-name{color:var(--green)}
+
 /* ANALYTICS */
 .analytics-wrap{padding:0 16px}
 .chart-card{background:var(--card);border-radius:var(--r-lg);border:0.5px solid var(--border);padding:18px;margin-bottom:12px}
@@ -482,11 +494,24 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
         <p id="lbl-scan-sub">Upload KBank Make payment slip</p>
       </div>
       <div class="scan-wrap">
-        <div class="upload-zone" id="upload-zone">
+        <div class="s-label" id="lbl-pick-bank">Select your bank</div>
+        <div class="bank-picker" id="bank-picker">
+          <button class="bank-btn" id="bank-btn-kbank" onclick="selectBank('kbank')">
+            <div class="bank-btn-logo kbank-logo">K</div>
+            <div class="bank-btn-name">KBank Make</div>
+            <div class="bank-btn-sub">กสิกรไทย</div>
+          </button>
+          <button class="bank-btn" id="bank-btn-bbl" onclick="selectBank('bbl')">
+            <div class="bank-btn-logo bbl-logo">B</div>
+            <div class="bank-btn-name">Bangkok Bank</div>
+            <div class="bank-btn-sub">กรุงเทพ</div>
+          </button>
+        </div>
+        <div class="upload-zone" id="upload-zone" style="display:none">
           <input type="file" accept="image/*" id="slip-input" onchange="handleSlipUpload(event)"/>
           <div class="upload-icon">📷</div>
           <div class="upload-title" id="lbl-upload-title">Tap to upload slip</div>
-          <div class="upload-sub" id="lbl-upload-sub">KBank Make · SCB Easy · Any bank slip</div>
+          <div class="upload-sub" id="lbl-upload-sub">KBank Make · Bangkok Bank · Any bank slip</div>
         </div>
         <div id="scan-preview" style="display:none">
           <img id="preview-img" class="preview-img"/>
@@ -654,7 +679,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
               <div class="settings-icon purple">💎</div>
               <div class="settings-text">
                 <div class="settings-title">FinFlow</div>
-                <div class="settings-sub" id="lbl-version">Version 1.0 · Personal use</div>
+                <div class="settings-sub" id="lbl-version">Version 1.4 · Personal use</div>
               </div>
             </div>
           </div>
@@ -861,7 +886,8 @@ const i18n = {
     add_title:'Add transaction',add_sub:'Record income or expense',
     btn_income:'+ Income',btn_expense:'− Expense',
     amount:'Amount',description:'Description',category:'Category',date:'Date',save:'Save transaction',
-    scan_title:'Scan slip',scan_sub:'Upload bank slip — KBank Make or Bangkok Bank',
+    scan_title:'Scan slip',scan_sub:'Select your bank then upload slip',
+    pick_bank:'Select your bank',
     upload_title:'Tap to upload slip',upload_sub:'KBank Make · Bangkok Bank · Any bank slip',
     reading:'Reading slip...',extracted:'Extracted from slip',
     ex_amount:'Amount',ex_date:'Date',ex_to:'Recipient',ex_note:'Note',ex_cat:'Category',ex_type:'Transaction type',
@@ -879,7 +905,7 @@ const i18n = {
     manage_cats:'Manage categories',manage_cats_sub:'Add, edit, delete',
     export:'Export to CSV',export_sub:'Download all transactions',
     clear:'Clear all data',clear_sub:'Cannot be undone',
-    version:'Version 1.3 · Personal use',privacy:'100% Private',privacy_sub:'Data stays on your device only',
+    version:'Version 1.4 · Personal use',privacy:'100% Private',privacy_sub:'Data stays on your device only',
     cats_title:'Categories',cats_sub:'Manage your lists',
     exp_cats:'Expense categories',inc_cats:'Income categories',
     add_exp_cat:'+ Add expense category',add_inc_cat:'+ Add income category',
@@ -903,7 +929,8 @@ const i18n = {
     add_title:'เพิ่มรายการ',add_sub:'บันทึกรายรับหรือรายจ่าย',
     btn_income:'+ รายรับ',btn_expense:'− รายจ่าย',
     amount:'จำนวนเงิน',description:'รายละเอียด',category:'หมวดหมู่',date:'วันที่',save:'บันทึกรายการ',
-    scan_title:'สแกนสลิป',scan_sub:'อัพโหลดสลิป KBank Make หรือ Bangkok Bank',
+    scan_title:'สแกนสลิป',scan_sub:'เลือกธนาคารแล้วอัพโหลดสลิป',
+    pick_bank:'เลือกธนาคาร',
     upload_title:'แตะเพื่ออัพโหลดสลิป',upload_sub:'KBank Make · Bangkok Bank · สลิปทุกธนาคาร',
     reading:'กำลังอ่านสลิป...',extracted:'ข้อมูลจากสลิป',
     ex_amount:'จำนวนเงิน',ex_date:'วันที่',ex_to:'ผู้รับเงิน',ex_note:'หมายเหตุ',ex_cat:'หมวดหมู่',ex_type:'ประเภทรายการ',
@@ -921,7 +948,7 @@ const i18n = {
     manage_cats:'จัดการหมวดหมู่',manage_cats_sub:'เพิ่ม แก้ไข ลบ',
     export:'ส่งออก CSV',export_sub:'ดาวน์โหลดรายการทั้งหมด',
     clear:'ลบข้อมูลทั้งหมด',clear_sub:'ไม่สามารถกู้คืนได้',
-    version:'เวอร์ชัน 1.3 · ใช้งานส่วนตัว',privacy:'ความเป็นส่วนตัว 100%',privacy_sub:'ข้อมูลอยู่ในอุปกรณ์ของคุณเท่านั้น',
+    version:'เวอร์ชัน 1.4 · ใช้งานส่วนตัว',privacy:'ความเป็นส่วนตัว 100%',privacy_sub:'ข้อมูลอยู่ในอุปกรณ์ของคุณเท่านั้น',
     cats_title:'หมวดหมู่',cats_sub:'จัดการรายการ',
     exp_cats:'หมวดหมู่รายจ่าย',inc_cats:'หมวดหมู่รายรับ',
     add_exp_cat:'+ เพิ่มหมวดหมู่รายจ่าย',add_inc_cat:'+ เพิ่มหมวดหมู่รายรับ',
@@ -950,6 +977,7 @@ let currentYear = new Date().getFullYear();
 let allTxMonth = new Date().getMonth();
 let allTxYear = new Date().getFullYear();
 let scannedData = {};
+let selectedBank = null;
 
 function t(key){ return (i18n[lang]||i18n.en)[key] || key; }
 function loadTx(){ return JSON.parse(localStorage.getItem('ff_tx')||'[]'); }
@@ -1005,6 +1033,7 @@ function applyLang(){
     'btn-income':'btn_income','btn-expense':'btn_expense',
     'lbl-amount':'amount','lbl-desc':'description','lbl-cat':'category','lbl-date':'date','lbl-save-btn':'save',
     'lbl-scan-title':'scan_title','lbl-scan-sub':'scan_sub',
+    'lbl-pick-bank':'pick_bank',
     'lbl-upload-title':'upload_title','lbl-upload-sub':'upload_sub',
     'lbl-reading':'reading','lbl-extracted':'extracted',
     'lbl-ex-amount':'ex_amount','lbl-ex-date':'ex_date','lbl-ex-to':'ex_to','lbl-ex-note':'ex_note',
@@ -1317,11 +1346,24 @@ function setExType(type){
   populateExCatSelect(type);
 }
 function resetScan(){
+  selectedBank = null;
+  document.getElementById('bank-btn-kbank').classList.remove('active');
+  document.getElementById('bank-btn-bbl').classList.remove('active');
   document.getElementById('scan-preview').style.display='none';
   document.getElementById('ocr-status').style.display='none';
   document.getElementById('extracted-result').style.display='none';
   document.getElementById('scan-tips').style.display='block';
+  document.getElementById('upload-zone').style.display='none';
+  document.getElementById('slip-input').value='';
+}
+function selectBank(bank){
+  selectedBank = bank;
+  document.getElementById('bank-btn-kbank').classList.toggle('active', bank==='kbank');
+  document.getElementById('bank-btn-bbl').classList.toggle('active', bank==='bbl');
   document.getElementById('upload-zone').style.display='block';
+  document.getElementById('scan-preview').style.display='none';
+  document.getElementById('extracted-result').style.display='none';
+  document.getElementById('scan-tips').style.display='block';
   document.getElementById('slip-input').value='';
 }
 function handleSlipUpload(event){
@@ -1457,14 +1499,17 @@ async function runOCR(file){
     const scale=window.innerWidth<=430?2:3;
     const src=drawImageOnCanvas(imgEl,scale);
 
-    // Stage 1: detect bank
-    if(statusTxt) statusTxt.textContent='Detecting bank...';
-    const bank=await detectBank(src,W,H,scale);
+    // Stage 1: use user-selected bank or auto-detect fallback
+    let bank = selectedBank;
+    if(!bank){
+      if(statusTxt) statusTxt.textContent='Detecting bank...';
+      bank = await detectBank(src,W,H,scale);
+    }
+    if(statusTxt) statusTxt.textContent = bank==='bbl'?'Reading Bangkok Bank slip...':'Reading KBank Make slip...';
     let amount=null,dateStr=null,recipient='',note='';
 
     if(bank==='bbl'){
       // ── BANGKOK BANK ─────────────────────────────────────────────
-      if(statusTxt) statusTxt.textContent='Reading Bangkok Bank slip...';
       // Date: center strip 15-34%
       const dateC=applyBW(cropCanvas(src,W,H,scale,0.10,0.15,0.90,0.34),128);
       dateStr=parseThaiDate(await ocrCanvas(dateC,'tha+eng'));
@@ -1476,11 +1521,10 @@ async function runOCR(file){
       const recRaw=await ocrCanvas(recC,'tha+eng');
       const recLines=recRaw.split('\n').map(l=>l.trim())
         .filter(l=>l.length>1&&!/^\d{3}[-x]/.test(l)&&!/ธนาคาร/.test(l)&&!/ไปที่/.test(l)&&!/จาก/.test(l));
-      recipient=(recLines[0]||'').replace(/^(นาย|นาง|น\.ส\.|นางสาว)\s*/,'').trim();
+      recipient=cleanThaiOCR((recLines[0]||'').replace(/^(นาย|นาง|น\.ส\.|นางสาว)\s*/,'').trim());
 
     } else {
       // ── KBANK MAKE ───────────────────────────────────────────────
-      if(statusTxt) statusTxt.textContent='Reading KBank Make slip...';
       // Date: top-left 4-15%
       const dateC=applyBW(cropCanvas(src,W,H,scale,0,0.04,0.70,0.15),128);
       dateStr=parseThaiDate(await ocrCanvas(dateC,'tha+eng'));
@@ -1493,7 +1537,7 @@ async function runOCR(file){
       const recLines=recRaw.split('\n').map(l=>l.trim())
         .filter(l=>l.length>1&&!/^xxx/i.test(l)&&!/^\d{5,}$/.test(l));
       // Line 0 = sender account, line 1+ = recipient name
-      recipient=recLines.length>=2?recLines[1]:(recLines[0]||'');
+      recipient=cleanThaiOCR(recLines.length>=2?recLines[1]:(recLines[0]||''));
       // Note: bottom rounded box 88-97%
       const noteC=cropCanvas(src,W,H,scale,0.02,0.88,0.72,0.97);
       const noteRaw=(await ocrCanvas(noteC,'tha+eng')).trim();
