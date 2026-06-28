@@ -691,6 +691,27 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 
         <div class="s-label" id="lbl-data-section">Data</div>
         <div class="settings-group">
+          <div class="settings-row" style="cursor:pointer" onclick="backupData()">
+            <div class="settings-left">
+              <div class="settings-icon green">💾</div>
+              <div class="settings-text">
+                <div class="settings-title" id="lbl-backup">Backup data</div>
+                <div class="settings-sub" id="lbl-backup-sub">Download all data as JSON</div>
+              </div>
+            </div>
+            <span class="chev">›</span>
+          </div>
+          <div class="settings-row" style="cursor:pointer" onclick="document.getElementById('restore-input').click()">
+            <div class="settings-left">
+              <div class="settings-icon purple">📥</div>
+              <div class="settings-text">
+                <div class="settings-title" id="lbl-restore">Restore from backup</div>
+                <div class="settings-sub" id="lbl-restore-sub">Load a FinFlow JSON backup</div>
+              </div>
+            </div>
+            <span class="chev">›</span>
+          </div>
+          <input type="file" id="restore-input" accept=".json" style="display:none" onchange="restoreData(event)">
           <div class="settings-row" style="cursor:pointer" onclick="exportCSV()">
             <div class="settings-left">
               <div class="settings-icon blue">📤</div>
@@ -720,7 +741,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
               <div class="settings-icon purple">💎</div>
               <div class="settings-text">
                 <div class="settings-title">FinFlow</div>
-                <div class="settings-sub" id="lbl-version">Version 2.7 · Personal use</div>
+                <div class="settings-sub" id="lbl-version">Version 2.8 · Personal use</div>
               </div>
             </div>
           </div>
@@ -957,9 +978,13 @@ const i18n = {
     settings_title:'Settings',settings_sub:'Preferences & data',
     lang_section:'Language',cats_section:'Categories',data_section:'Data',about_section:'About',
     manage_cats:'Manage categories',manage_cats_sub:'Add, edit, delete',
+    backup:'Backup data',backup_sub:'Download all data as JSON',
+    restore:'Restore from backup',restore_sub:'Load a FinFlow JSON backup',
+    backup_done:'Backup downloaded!',restore_done:'Data restored!',restore_err:'Invalid backup file',
+    confirm_restore:'Replace all current data with this backup?',
     export:'Export to CSV',export_sub:'Download all transactions',
     clear:'Clear all data',clear_sub:'Cannot be undone',
-    version:'Version 2.7 · Personal use',privacy:'100% Private',privacy_sub:'Data stays on your device only',
+    version:'Version 2.8 · Personal use',privacy:'100% Private',privacy_sub:'Data stays on your device only',
     cats_title:'Categories',cats_sub:'Manage your lists',
     exp_cats:'Expense categories',inc_cats:'Income categories',
     add_exp_cat:'+ Add expense category',add_inc_cat:'+ Add income category',
@@ -1004,9 +1029,13 @@ const i18n = {
     settings_title:'ตั้งค่า',settings_sub:'การตั้งค่าและข้อมูล',
     lang_section:'ภาษา',cats_section:'หมวดหมู่',data_section:'ข้อมูล',about_section:'เกี่ยวกับ',
     manage_cats:'จัดการหมวดหมู่',manage_cats_sub:'เพิ่ม แก้ไข ลบ',
+    backup:'สำรองข้อมูล',backup_sub:'ดาวน์โหลดข้อมูลทั้งหมดเป็น JSON',
+    restore:'กู้คืนจากข้อมูลสำรอง',restore_sub:'โหลดไฟล์ backup ของ FinFlow',
+    backup_done:'ดาวน์โหลด backup แล้ว!',restore_done:'กู้คืนข้อมูลแล้ว!',restore_err:'ไฟล์ backup ไม่ถูกต้อง',
+    confirm_restore:'แทนที่ข้อมูลปัจจุบันทั้งหมดด้วย backup นี้?',
     export:'ส่งออก CSV',export_sub:'ดาวน์โหลดรายการทั้งหมด',
     clear:'ลบข้อมูลทั้งหมด',clear_sub:'ไม่สามารถกู้คืนได้',
-    version:'เวอร์ชัน 2.7 · ใช้งานส่วนตัว',privacy:'ความเป็นส่วนตัว 100%',privacy_sub:'ข้อมูลอยู่ในอุปกรณ์ของคุณเท่านั้น',
+    version:'เวอร์ชัน 2.8 · ใช้งานส่วนตัว',privacy:'ความเป็นส่วนตัว 100%',privacy_sub:'ข้อมูลอยู่ในอุปกรณ์ของคุณเท่านั้น',
     cats_title:'หมวดหมู่',cats_sub:'จัดการรายการ',
     exp_cats:'หมวดหมู่รายจ่าย',inc_cats:'หมวดหมู่รายรับ',
     add_exp_cat:'+ เพิ่มหมวดหมู่รายจ่าย',add_inc_cat:'+ เพิ่มหมวดหมู่รายรับ',
@@ -1116,6 +1145,8 @@ function applyLang(){
     'lbl-language-section':'lang_section','lbl-categories-section':'cats_section',
     'lbl-data-section':'data_section','lbl-about-section':'about_section',
     'lbl-manage-cats':'manage_cats','lbl-manage-cats-sub':'manage_cats_sub',
+    'lbl-backup':'backup','lbl-backup-sub':'backup_sub',
+    'lbl-restore':'restore','lbl-restore-sub':'restore_sub',
     'lbl-export':'export','lbl-export-sub':'export_sub',
     'lbl-clear':'clear','lbl-clear-sub':'clear_sub',
     'lbl-version':'version','lbl-privacy':'privacy','lbl-privacy-sub':'privacy_sub',
@@ -2029,6 +2060,43 @@ function exportCSV(){
   a.download='finflow_transactions.csv';
   a.click();
   showToast(t('exported'),'📤');
+}
+function backupData(){
+  const payload={
+    version:1,
+    exported:new Date().toISOString(),
+    transactions:JSON.parse(localStorage.getItem('ff_tx')||'[]'),
+    expense_cats:JSON.parse(localStorage.getItem('ff_exp_cats')||'[]'),
+    income_cats:JSON.parse(localStorage.getItem('ff_inc_cats')||'[]'),
+    budget:localStorage.getItem('ff_budget')||'0'
+  };
+  const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  const d=new Date().toISOString().split('T')[0];
+  a.download=`finflow_backup_${d}.json`;
+  a.click();
+  showToast(t('backup_done'),'💾');
+}
+function restoreData(e){
+  const file=e.target.files[0];
+  if(!file) return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    try{
+      const data=JSON.parse(ev.target.result);
+      if(!data.transactions) throw new Error('invalid');
+      if(!confirm(t('confirm_restore'))) return;
+      localStorage.setItem('ff_tx',JSON.stringify(data.transactions));
+      if(data.expense_cats) localStorage.setItem('ff_exp_cats',JSON.stringify(data.expense_cats));
+      if(data.income_cats) localStorage.setItem('ff_inc_cats',JSON.stringify(data.income_cats));
+      if(data.budget) localStorage.setItem('ff_budget',data.budget);
+      showToast(t('restore_done'),'📥');
+      renderHome();
+    }catch(_){ showToast(t('restore_err'),'⚠️'); }
+  };
+  reader.readAsText(file);
+  e.target.value='';
 }
 function clearData(){
   if(!confirm(t('confirm_clear'))) return;
