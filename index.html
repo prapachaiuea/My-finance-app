@@ -444,17 +444,14 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
         </div>
       </div>
 
-      <div class="s-label" id="lbl-recent">Recent transactions</div>
-      <div class="tx-list" id="home-tx-list"></div>
-      <div class="see-all-row" id="see-all-row">
-        <button class="see-all-btn" onclick="goPage('all')">
-          <div class="see-all-btn-left">
-            <span id="lbl-see-all">All transactions</span>
-            <span class="tx-count-badge" id="tx-total-count"></span>
-          </div>
-          <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:var(--text3);stroke-width:2.5;fill:none;stroke-linecap:round;stroke-linejoin:round"><polyline points="9 18 15 12 9 6"/></svg>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:0 20px;margin-bottom:10px;margin-top:24px">
+        <span style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em" id="lbl-recent">Recent transactions</span>
+        <button onclick="goPage('all')" style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--green);background:none;border:none;cursor:pointer;font-weight:700">
+          <span id="lbl-see-all-top">See all</span>
+          <span class="tx-count-badge" id="tx-total-count" style="background:var(--green-dim);color:var(--green)"></span>
         </button>
       </div>
+      <div class="tx-list" id="home-tx-list"></div>
     </div>
 
     <!-- ADD -->
@@ -687,7 +684,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
               <div class="settings-icon purple">💎</div>
               <div class="settings-text">
                 <div class="settings-title">FinFlow</div>
-                <div class="settings-sub" id="lbl-version">Version 2.3 · Personal use</div>
+                <div class="settings-sub" id="lbl-version">Version 2.4 · Personal use</div>
               </div>
             </div>
           </div>
@@ -735,10 +732,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
             <p id="lbl-all-tx-count" style="font-size:13px;color:var(--text2);margin-top:2px"></p>
           </div>
         </div>
-        <div style="display:flex;align-items:center;gap:6px">
-          <button onclick="changeAllTxMonth(-1)" style="width:28px;height:28px;border-radius:8px;border:0.5px solid var(--border2);background:var(--bg3);color:var(--text2);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center">‹</button>
-          <span id="all-tx-month-label" style="font-size:11px;color:var(--text2);min-width:62px;text-align:center;font-weight:600"></span>
-          <button onclick="changeAllTxMonth(1)" style="width:28px;height:28px;border-radius:8px;border:0.5px solid var(--border2);background:var(--bg3);color:var(--text2);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center">›</button>
+        <div style="display:flex;align-items:center;gap:4px">
+          <button onclick="changeAllTxMonth(-1)" style="width:28px;height:28px;border-radius:8px;border:0.5px solid var(--border2);background:var(--bg3);color:var(--text2);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">‹</button>
+          <input type="month" id="all-tx-month-picker" onchange="setAllTxMonthFromPicker(this.value)" style="background:var(--bg3);border:0.5px solid var(--border2);border-radius:8px;color:var(--text);font-size:11px;font-weight:600;padding:5px 6px;font-family:inherit;cursor:pointer;min-width:0;width:120px"/>
+          <button onclick="changeAllTxMonth(1)" style="width:28px;height:28px;border-radius:8px;border:0.5px solid var(--border2);background:var(--bg3);color:var(--text2);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">›</button>
         </div>
       </div>
       <div class="search-bar-wrap">
@@ -921,7 +918,7 @@ const i18n = {
     manage_cats:'Manage categories',manage_cats_sub:'Add, edit, delete',
     export:'Export to CSV',export_sub:'Download all transactions',
     clear:'Clear all data',clear_sub:'Cannot be undone',
-    version:'Version 2.3 · Personal use',privacy:'100% Private',privacy_sub:'Data stays on your device only',
+    version:'Version 2.4 · Personal use',privacy:'100% Private',privacy_sub:'Data stays on your device only',
     cats_title:'Categories',cats_sub:'Manage your lists',
     exp_cats:'Expense categories',inc_cats:'Income categories',
     add_exp_cat:'+ Add expense category',add_inc_cat:'+ Add income category',
@@ -964,7 +961,7 @@ const i18n = {
     manage_cats:'จัดการหมวดหมู่',manage_cats_sub:'เพิ่ม แก้ไข ลบ',
     export:'ส่งออก CSV',export_sub:'ดาวน์โหลดรายการทั้งหมด',
     clear:'ลบข้อมูลทั้งหมด',clear_sub:'ไม่สามารถกู้คืนได้',
-    version:'เวอร์ชัน 2.3 · ใช้งานส่วนตัว',privacy:'ความเป็นส่วนตัว 100%',privacy_sub:'ข้อมูลอยู่ในอุปกรณ์ของคุณเท่านั้น',
+    version:'เวอร์ชัน 2.4 · ใช้งานส่วนตัว',privacy:'ความเป็นส่วนตัว 100%',privacy_sub:'ข้อมูลอยู่ในอุปกรณ์ของคุณเท่านั้น',
     cats_title:'หมวดหมู่',cats_sub:'จัดการรายการ',
     exp_cats:'หมวดหมู่รายจ่าย',inc_cats:'หมวดหมู่รายรับ',
     add_exp_cat:'+ เพิ่มหมวดหมู่รายจ่าย',add_inc_cat:'+ เพิ่มหมวดหมู่รายรับ',
@@ -1112,15 +1109,23 @@ function renderHome(){
   document.getElementById('hero-income').textContent = fmt(income);
   document.getElementById('hero-expense').textContent = fmt(expense);
   const list = document.getElementById('home-tx-list');
-  const sorted = [...txs].sort((a,b)=>(new Date(b.date)-new Date(a.date))||b.id-a.id).slice(0,20);
+  const sorted = [...txs].sort((a,b)=>(new Date(b.date)-new Date(a.date))||b.id-a.id);
   if(!sorted.length){
     list.innerHTML=`<div class="empty"><div class="empty-icon">💸</div><div class="empty-title">${t('no_tx')}</div><div class="empty-sub">${t('no_tx_sub')}</div></div>`;
+    const badge=document.getElementById('tx-total-count');
+    if(badge) badge.textContent='';
+    const lbl=document.getElementById('lbl-see-all-top');
+    if(lbl) lbl.textContent=t('see_all');
     return;
   }
+  // limit home to last 5 day groups
+  const allDates=[...new Set(sorted.map(tx=>tx.date))];
+  const showDates=new Set(allDates.slice(0,5));
+  const limited=sorted.filter(tx=>showDates.has(tx.date));
   const todayStr=new Date().toISOString().split('T')[0];
   const yestStr=new Date(Date.now()-86400000).toISOString().split('T')[0];
   const seenH=[];const grpsH={};
-  sorted.forEach(tx=>{if(!grpsH[tx.date]){grpsH[tx.date]=[];seenH.push(tx.date);}grpsH[tx.date].push(tx);});
+  limited.forEach(tx=>{if(!grpsH[tx.date]){grpsH[tx.date]=[];seenH.push(tx.date);}grpsH[tx.date].push(tx);});
   list.innerHTML=seenH.map(date=>{
     const dayTxs=grpsH[date];
     const d=new Date(date);
@@ -1147,14 +1152,10 @@ function renderHome(){
     </div>`;
   }).join('');
   const allTxs = loadTx();
-  const seeAllRow = document.getElementById('see-all-row');
-  if(seeAllRow){
-    seeAllRow.style.display = allTxs.length ? 'block' : 'none';
-    const badge = document.getElementById('tx-total-count');
-    if(badge) badge.textContent = allTxs.length;
-    const lbl = document.getElementById('lbl-see-all');
-    if(lbl) lbl.textContent = t('see_all');
-  }
+  const badge = document.getElementById('tx-total-count');
+  if(badge) badge.textContent = allTxs.length || '';
+  const lbl = document.getElementById('lbl-see-all-top');
+  if(lbl) lbl.textContent = t('see_all');
 }
 
 function deleteTx(id){
@@ -1297,6 +1298,12 @@ function changeAllTxMonth(d){
   if(allTxMonth < 0){ allTxMonth = 11; allTxYear--; }
   renderAllTx();
 }
+function setAllTxMonthFromPicker(val){
+  if(!val) return;
+  const [y,m] = val.split('-');
+  allTxYear=parseInt(y); allTxMonth=parseInt(m)-1;
+  renderAllTx();
+}
 
 function setTxFilter(type){
   txFilterType = type;
@@ -1312,8 +1319,8 @@ function renderAllTx(){
   document.getElementById('ftab-income').textContent = t('filter_income');
   document.getElementById('ftab-expense').textContent = t('filter_expense');
   document.getElementById('lbl-all-tx-title').textContent = t('all_tx');
-  const monthLbl = document.getElementById('all-tx-month-label');
-  if(monthLbl) monthLbl.textContent = monthLabel(allTxYear, allTxMonth);
+  const picker = document.getElementById('all-tx-month-picker');
+  if(picker) picker.value = `${allTxYear}-${String(allTxMonth+1).padStart(2,'0')}`;
   const query = (searchEl?.value||'').toLowerCase().trim();
   let txs = getMonthTx(allTxYear, allTxMonth);
   if(txFilterType!=='all') txs = txs.filter(tx=>tx.type===txFilterType);
