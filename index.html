@@ -861,12 +861,12 @@ const i18n = {
     add_title:'Add transaction',add_sub:'Record income or expense',
     btn_income:'+ Income',btn_expense:'− Expense',
     amount:'Amount',description:'Description',category:'Category',date:'Date',save:'Save transaction',
-    scan_title:'Scan slip',scan_sub:'Upload KBank Make payment slip',
-    upload_title:'Tap to upload slip',upload_sub:'KBank Make · SCB Easy · Any bank slip',
+    scan_title:'Scan slip',scan_sub:'Upload bank slip — KBank Make or Bangkok Bank',
+    upload_title:'Tap to upload slip',upload_sub:'KBank Make · Bangkok Bank · Any bank slip',
     reading:'Reading slip...',extracted:'Extracted from slip',
     ex_amount:'Amount',ex_date:'Date',ex_to:'Recipient',ex_note:'Note',ex_cat:'Category',ex_type:'Transaction type',
     confirm:'Confirm & save',
-    tips:'Tips for best results',tip1:'Use clear, well-lit screenshots',tip2:'KBank Make slips work best',tip3:'Always review before saving',
+    tips:'Tips for best results',tip1:'Use clear, well-lit screenshots',tip2:'KBank Make & Bangkok Bank supported',tip3:'Always review before saving',
     analytics_title:'Analytics',analytics_sub:'Your spending insights',
     total_spent:'Total spent',vs_last:'vs last month',
     chart_donut:'Spending by category',chart_donut_sub:"This month's breakdown",
@@ -879,7 +879,7 @@ const i18n = {
     manage_cats:'Manage categories',manage_cats_sub:'Add, edit, delete',
     export:'Export to CSV',export_sub:'Download all transactions',
     clear:'Clear all data',clear_sub:'Cannot be undone',
-    version:'Version 1.2 · Personal use',privacy:'100% Private',privacy_sub:'Data stays on your device only',
+    version:'Version 1.3 · Personal use',privacy:'100% Private',privacy_sub:'Data stays on your device only',
     cats_title:'Categories',cats_sub:'Manage your lists',
     exp_cats:'Expense categories',inc_cats:'Income categories',
     add_exp_cat:'+ Add expense category',add_inc_cat:'+ Add income category',
@@ -903,8 +903,8 @@ const i18n = {
     add_title:'เพิ่มรายการ',add_sub:'บันทึกรายรับหรือรายจ่าย',
     btn_income:'+ รายรับ',btn_expense:'− รายจ่าย',
     amount:'จำนวนเงิน',description:'รายละเอียด',category:'หมวดหมู่',date:'วันที่',save:'บันทึกรายการ',
-    scan_title:'สแกนสลิป',scan_sub:'อัพโหลดสลิป KBank Make',
-    upload_title:'แตะเพื่ออัพโหลดสลิป',upload_sub:'KBank Make · SCB Easy · สลิปทุกธนาคาร',
+    scan_title:'สแกนสลิป',scan_sub:'อัพโหลดสลิป KBank Make หรือ Bangkok Bank',
+    upload_title:'แตะเพื่ออัพโหลดสลิป',upload_sub:'KBank Make · Bangkok Bank · สลิปทุกธนาคาร',
     reading:'กำลังอ่านสลิป...',extracted:'ข้อมูลจากสลิป',
     ex_amount:'จำนวนเงิน',ex_date:'วันที่',ex_to:'ผู้รับเงิน',ex_note:'หมายเหตุ',ex_cat:'หมวดหมู่',ex_type:'ประเภทรายการ',
     confirm:'ยืนยันและบันทึก',
@@ -921,7 +921,7 @@ const i18n = {
     manage_cats:'จัดการหมวดหมู่',manage_cats_sub:'เพิ่ม แก้ไข ลบ',
     export:'ส่งออก CSV',export_sub:'ดาวน์โหลดรายการทั้งหมด',
     clear:'ลบข้อมูลทั้งหมด',clear_sub:'ไม่สามารถกู้คืนได้',
-    version:'เวอร์ชัน 1.2 · ใช้งานส่วนตัว',privacy:'ความเป็นส่วนตัว 100%',privacy_sub:'ข้อมูลอยู่ในอุปกรณ์ของคุณเท่านั้น',
+    version:'เวอร์ชัน 1.3 · ใช้งานส่วนตัว',privacy:'ความเป็นส่วนตัว 100%',privacy_sub:'ข้อมูลอยู่ในอุปกรณ์ของคุณเท่านั้น',
     cats_title:'หมวดหมู่',cats_sub:'จัดการรายการ',
     exp_cats:'หมวดหมู่รายจ่าย',inc_cats:'หมวดหมู่รายรับ',
     add_exp_cat:'+ เพิ่มหมวดหมู่รายจ่าย',add_inc_cat:'+ เพิ่มหมวดหมู่รายรับ',
@@ -1346,8 +1346,8 @@ function populateExCatSelect(type){
   sel.innerHTML = cats.map(c=>`<option value="${c.emoji}|${c.name}">${c.emoji} ${c.name}</option>`).join('');
 }
 
-// =================== PRECISION SCAN ENGINE v3 ===================
-// Fixes: Thai OCR space cleaning, mobile canvas scale, wider amount zone
+// =================== SCAN ENGINE v4 - Multi-Bank ===================
+// Auto-detects KBank Make and Bangkok Bank, uses bank-specific OCR zones
 
 function drawImageOnCanvas(imgEl, scale){
   const c = document.createElement('canvas');
@@ -1381,16 +1381,15 @@ function applyBW(canvas, thresh){
   return canvas;
 }
 
-async function ocrCanvas(canvas, lang, psm, whitelist){
+async function ocrCanvas(canvas, lang){
   try {
     const r = await Tesseract.recognize(canvas.toDataURL('image/png'), lang||'eng', { logger:()=>{} });
     return r.data.text.trim();
   } catch(e) { return ''; }
 }
 
-// Clean Thai OCR output: Tesseract adds spaces between Thai syllables
 function cleanThaiOCR(text){
-  var thaiRange = /[\u0E00-\u0E7F]/;
+  var thaiRange = /[฀-๿]/;
   var result = '';
   var chars = text.split('');
   for(var i=0;i<chars.length;i++){
@@ -1403,127 +1402,131 @@ function cleanThaiOCR(text){
   return result.trim();
 }
 
-async function runOCR(file){
-  const imgEl = document.getElementById('preview-img');
-  await new Promise(res => { 
-    if(imgEl.complete && imgEl.naturalWidth>0) res(); 
-    else imgEl.onload = res; 
-  });
+// Extract largest decimal amount, skip 0.00 fees
+function parseAmount(text){
+  const clean=text.replace(/\s/g,'');
+  const decimals=[...clean.matchAll(/(\d{1,3}(?:,\d{3})*\.\d{2})/g)]
+    .map(m=>parseFloat(m[1].replace(/,/g,''))).filter(n=>n>0.01);
+  if(decimals.length) return Math.max(...decimals);
+  const ints=[...clean.matchAll(/(\d{2,7})/g)]
+    .map(m=>parseInt(m[1])).filter(n=>n>=1&&n<=9999999);
+  return ints.length?Math.max(...ints):null;
+}
 
+// Parse Thai date — handles 4-digit BE (2569) and 2-digit BE (69)
+function parseThaiDate(text){
+  const t=text.toLowerCase().replace(/\s+/g,' ');
+  const MONTHS=[
+    ['ม.ค','มค','jan'],['ก.พ','กพ','feb'],['มี.ค','มีค','mar'],
+    ['เม.ย','เมย','apr'],['พ.ค','พค','may'],['มิ.ย','มิย','jun'],
+    ['ก.ค','กค','jul'],['ส.ค','สค','aug'],['ก.ย','กย','sep'],
+    ['ต.ค','ตค','oct'],['พ.ย','พย','nov'],['ธ.ค','ธค','dec']
+  ];
+  let month=new Date().getMonth()+1;
+  for(let i=0;i<MONTHS.length;i++){ if(MONTHS[i].some(p=>t.includes(p))){ month=i+1; break; } }
+  const dayM=t.match(/(\d{1,2})\s*(?:ม\.ค|ก\.พ|มี\.ค|เม\.ย|พ\.ค|มิ\.ย|ก\.ค|ส\.ค|ก\.ย|ต\.ค|พ\.ย|ธ\.ค|jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)/);
+  const day=dayM?Math.min(31,Math.max(1,parseInt(dayM[1]))):new Date().getDate();
+  const y4=t.match(/\b(25[6-9]\d)\b/);
+  const y2=t.match(/\b([6-9]\d)\b/);
+  let ce=new Date().getFullYear();
+  if(y4) ce=parseInt(y4[1])-543;
+  else if(y2) ce=parseInt(y2[1])+2500-543;
+  return `${ce}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+}
+
+// Detect bank by OCR-ing top 20% of image
+async function detectBank(src,W,H,scale){
+  const strip=cropCanvas(src,W,H,scale,0,0,1.0,0.20);
+  const eng=(await ocrCanvas(strip,'eng')).toLowerCase();
+  if(eng.includes('bangkok')) return 'bbl';
+  if(eng.includes('kbank')||eng.includes('make')) return 'kbank';
+  const thai=(await ocrCanvas(strip,'tha+eng')).toLowerCase();
+  if(thai.includes('รายการสำเร็จ')&&!thai.includes('ชำระ')&&!thai.includes('โอน')) return 'bbl';
+  return 'kbank';
+}
+
+async function runOCR(file){
+  const imgEl=document.getElementById('preview-img');
+  await new Promise(res=>{ if(imgEl.complete&&imgEl.naturalWidth>0) res(); else imgEl.onload=res; });
   document.getElementById('ocr-status').style.display='flex';
   document.getElementById('extracted-result').style.display='none';
+  const statusTxt=document.getElementById('lbl-reading');
 
   try {
     const W=imgEl.naturalWidth, H=imgEl.naturalHeight;
-    // Use scale=2 for mobile (less memory, still accurate for large digits)
-    const scale = window.innerWidth <= 430 ? 2 : 3;
-    const src = drawImageOnCanvas(imgEl, scale);
+    const scale=window.innerWidth<=430?2:3;
+    const src=drawImageOnCanvas(imgEl,scale);
 
-    // ── AMOUNT ──────────────────────────────────────────────────
-    // Wider zone: 45-82% height to catch all slip sizes
-    // Use multiple passes with different thresholds
-    const amtC = applyBW(cropCanvas(src,W,H,scale, 0.02,0.45, 0.60,0.82), 140);
-    const amtRaw = await ocrCanvas(amtC, 'eng', 6, '0123456789.,');
-    const amtClean = amtRaw.replace(/,/g,'');
-    const amtDecimals = [...amtClean.matchAll(/\d+\.\d{2}/g)]
-      .map(m=>parseFloat(m[0])).filter(n=>n>1);
-    let amount = amtDecimals.length ? Math.max(...amtDecimals) : null;
-    if(!amount){
-      const amtInts = [...amtClean.matchAll(/(\d{2,6})/g)]
-        .map(m=>parseInt(m[1])).filter(n=>n>=10&&n<=999999);
-      amount = amtInts.length ? Math.max(...amtInts) : null;
+    // Stage 1: detect bank
+    if(statusTxt) statusTxt.textContent='Detecting bank...';
+    const bank=await detectBank(src,W,H,scale);
+    let amount=null,dateStr=null,recipient='',note='';
+
+    if(bank==='bbl'){
+      // ── BANGKOK BANK ─────────────────────────────────────────────
+      if(statusTxt) statusTxt.textContent='Reading Bangkok Bank slip...';
+      // Date: center strip 15-34%
+      const dateC=applyBW(cropCanvas(src,W,H,scale,0.10,0.15,0.90,0.34),128);
+      dateStr=parseThaiDate(await ocrCanvas(dateC,'tha+eng'));
+      // Amount: center 34-52% (จำนวนเงิน + number + THB)
+      const amtC=applyBW(cropCanvas(src,W,H,scale,0.05,0.34,0.95,0.52),140);
+      amount=parseAmount(await ocrCanvas(amtC,'eng'));
+      // Recipient (ไปที่): 60-76%
+      const recC=cropCanvas(src,W,H,scale,0.15,0.60,0.90,0.76);
+      const recRaw=await ocrCanvas(recC,'tha+eng');
+      const recLines=recRaw.split('\n').map(l=>l.trim())
+        .filter(l=>l.length>1&&!/^\d{3}[-x]/.test(l)&&!/ธนาคาร/.test(l)&&!/ไปที่/.test(l)&&!/จาก/.test(l));
+      recipient=(recLines[0]||'').replace(/^(นาย|นาง|น\.ส\.|นางสาว)\s*/,'').trim();
+
+    } else {
+      // ── KBANK MAKE ───────────────────────────────────────────────
+      if(statusTxt) statusTxt.textContent='Reading KBank Make slip...';
+      // Date: top-left 4-15%
+      const dateC=applyBW(cropCanvas(src,W,H,scale,0,0.04,0.70,0.15),128);
+      dateStr=parseThaiDate(await ocrCanvas(dateC,'tha+eng'));
+      // Amount: left 62%, rows 50-72%
+      const amtC=applyBW(cropCanvas(src,W,H,scale,0,0.50,0.62,0.72),140);
+      amount=parseAmount(await ocrCanvas(amtC,'eng'));
+      // Recipient: rows 33-50% (name after ↓ arrow)
+      const recC=cropCanvas(src,W,H,scale,0.12,0.33,0.88,0.50);
+      const recRaw=await ocrCanvas(recC,'tha+eng');
+      const recLines=recRaw.split('\n').map(l=>l.trim())
+        .filter(l=>l.length>1&&!/^xxx/i.test(l)&&!/^\d{5,}$/.test(l));
+      // Line 0 = sender account, line 1+ = recipient name
+      recipient=recLines.length>=2?recLines[1]:(recLines[0]||'');
+      // Note: bottom rounded box 88-97%
+      const noteC=cropCanvas(src,W,H,scale,0.02,0.88,0.72,0.97);
+      const noteRaw=(await ocrCanvas(noteC,'tha+eng')).trim();
+      const noteLine=cleanThaiOCR(noteRaw.split('\n')[0].trim());
+      if(noteLine.length>=2&&noteLine.length<=50) note=noteLine;
     }
 
-    // ── DATE DAY ─────────────────────────────────────────────────
-    const dayC = applyBW(cropCanvas(src,W,H,scale, 0.02,0.10, 0.14,0.185), 130);
-    const dayRaw = (await ocrCanvas(dayC,'eng',7,'0123456789')).replace(/\s/g,'');
-    let day = null;
-    if(dayRaw.length>=2 && parseInt(dayRaw.slice(0,2))>=1 && parseInt(dayRaw.slice(0,2))<=31)
-      day = String(parseInt(dayRaw.slice(0,2)));
-    else if(dayRaw.length>=1 && parseInt(dayRaw[0])>=1)
-      day = dayRaw[0];
+    if(!dateStr) dateStr=new Date().toISOString().split('T')[0];
 
-    // ── DATE YEAR ────────────────────────────────────────────────
-    const yearC = applyBW(cropCanvas(src,W,H,scale, 0.10,0.10, 0.78,0.185), 130);
-    const yearRaw = (await ocrCanvas(yearC,'eng',7,'0123456789')).replace(/\s/g,'');
-    const yearMatch = yearRaw.match(/25[6-9][0-9]/);
-    const yearCE = yearMatch ? parseInt(yearMatch[0])-543 : new Date().getFullYear();
-
-    // ── DATE MONTH ───────────────────────────────────────────────
-    const monthC = cropCanvas(src,W,H,scale, 0.14,0.10, 0.60,0.185);
-    const monthRaw = (await ocrCanvas(monthC,'tha+eng',7,'')).toLowerCase();
-    const MONTH_MAP = [
-      [['ม.ค','มค','jan'],'01'],[['ก.พ','กพ','feb'],'02'],[['มี.ค','มีค','mar'],'03'],
-      [['เม.ย','เมย','apr'],'04'],[['พ.ค','พค','may'],'05'],
-      [['มิ.ย','มิย','jun','u.y','u.8','0.9','i.e','t.e'],'06'],
-      [['ก.ค','กค','jul'],'07'],[['ส.ค','สค','aug'],'08'],[['ก.ย','กย','sep'],'09'],
-      [['ต.ค','ตค','oct'],'10'],[['พ.ย','พย','nov'],'11'],[['ธ.ค','ธค','dec'],'12'],
-    ];
-    let month = String(new Date().getMonth()+1).padStart(2,'0');
-    for(const [patterns,mon] of MONTH_MAP){
-      if(patterns.some(p=>monthRaw.includes(p))){ month=mon; break; }
-    }
-    const dateStr = day && yearCE
-      ? `${yearCE}-${month}-${String(parseInt(day)).padStart(2,'0')}`
-      : new Date().toISOString().split('T')[0];
-
-    // ── RECIPIENT ────────────────────────────────────────────────
-    const recC = cropCanvas(src,W,H,scale, 0.14,0.33, 0.90,0.50);
-    const recRaw = await ocrCanvas(recC,'tha+eng',6,'');
-    const recLines = recRaw.split('\n').map(l=>l.trim())
-      .filter(l=>l.length>1 && !/^xxx/i.test(l) && !/^\d{9,}$/.test(l));
-    const recResult = recLines[0]||'';
-    const isEnglishRecipient = /^[A-Z0-9\s()\-\.]+$/.test(recResult) && recResult.length > 2;
-    const autoRecipient = isEnglishRecipient ? recResult.trim() : '';
-
-    // ── NOTE ─────────────────────────────────────────────────────
-    let autoNote = '';
-    const hasNoteBox = H >= 1050 && !(H >= 1025 && H <= 1040);
-    if(hasNoteBox){
-      const noteY1 = H > 1100 ? 0.90 : 0.88;
-      const noteC = cropCanvas(src,W,H,scale, 0.04,noteY1, 0.62,0.97);
-      const noteRaw = (await ocrCanvas(noteC,'tha+eng',7,'')).trim();
-      const firstLine = noteRaw.split('\n')[0].trim();
-      // Clean Thai OCR spacing artifacts
-      const noteCleaned = cleanThaiOCR(firstLine);
-      // Only use if looks valid (not OCR garbage)
-      if(noteCleaned.length >= 2 && noteCleaned.length <= 50){
-        // Check if mostly ASCII (English note) or Thai - both are valid
-        const hasGarbage = /[^฀-๿a-zA-Z0-9\s\-\.]/g.test(noteCleaned) 
-          && !/[฀-๿]/.test(noteCleaned);
-        if(!hasGarbage) autoNote = noteCleaned;
-      }
-    }
-
-    // ── DISPLAY RESULTS ──────────────────────────────────────────
     document.getElementById('ocr-status').style.display='none';
     document.getElementById('extracted-result').style.display='block';
-
-    document.getElementById('ex-amount').textContent = amount
-      ? '฿'+amount.toLocaleString('th-TH',{minimumFractionDigits:2,maximumFractionDigits:2})
-      : '—';
-    document.getElementById('ex-date').textContent = dateStr;
-
-    const toInput = document.getElementById('ex-to-input');
-    const noteInput = document.getElementById('ex-note-input');
-    if(toInput) toInput.value = autoRecipient;
-    if(noteInput) noteInput.value = autoNote;
-
-    scannedData = { amount: amount||0, date: dateStr };
+    document.getElementById('ex-amount').textContent=amount
+      ?'฿'+amount.toLocaleString('th-TH',{minimumFractionDigits:2,maximumFractionDigits:2}):'—';
+    document.getElementById('ex-date').textContent=dateStr;
+    const toInput=document.getElementById('ex-to-input');
+    const noteInput=document.getElementById('ex-note-input');
+    if(toInput) toInput.value=recipient;
+    if(noteInput) noteInput.value=note;
+    scannedData={amount:amount||0,date:dateStr};
     populateExCatSelect('expense');
     setExType('expense');
+    if(statusTxt) statusTxt.textContent=t('reading');
 
   } catch(e){
-    console.error('Scan error:', e);
+    console.error('Scan error:',e);
     document.getElementById('ocr-status').style.display='none';
     document.getElementById('extracted-result').style.display='block';
-    scannedData = { amount:0, date: new Date().toISOString().split('T')[0] };
+    scannedData={amount:0,date:new Date().toISOString().split('T')[0]};
     populateExCatSelect('expense');
     showToast('Scan failed — fill manually','⚠️');
+    if(statusTxt) statusTxt.textContent=t('reading');
   }
 }
-
-function parseSlip(){ /* legacy */ }
 
 
 function confirmScan(){
