@@ -486,6 +486,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
           <div class="field-label" id="lbl-date">Date</div>
           <input type="date" id="f-date"/>
         </div>
+        <div class="field">
+          <div class="field-label" id="lbl-add-time">Time</div>
+          <input type="time" id="f-time"/>
+        </div>
         <button class="submit-btn" id="lbl-save-btn" onclick="saveTransaction()">Save transaction</button>
       </div>
     </div>
@@ -684,7 +688,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
               <div class="settings-icon purple">💎</div>
               <div class="settings-text">
                 <div class="settings-title">FinFlow</div>
-                <div class="settings-sub" id="lbl-version">Version 2.4 · Personal use</div>
+                <div class="settings-sub" id="lbl-version">Version 2.5 · Personal use</div>
               </div>
             </div>
           </div>
@@ -742,6 +746,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
         <div class="search-input-wrap">
           <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           <input class="search-input" id="all-tx-search" placeholder="Search..." oninput="renderAllTx()"/>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;margin-top:8px">
+          <input type="date" id="all-tx-date-filter" onchange="onDateFilterChange(this.value)" style="flex:1;background:var(--bg3);border:0.5px solid var(--border2);border-radius:var(--r-md);color:var(--text);font-size:13px;padding:8px 10px;font-family:inherit;cursor:pointer"/>
+          <button id="btn-clear-date" onclick="clearDateFilter()" style="display:none;width:32px;height:32px;border-radius:8px;border:0.5px solid var(--border2);background:var(--bg3);color:var(--text3);font-size:15px;cursor:pointer;flex-shrink:0;align-items:center;justify-content:center">✕</button>
         </div>
         <div class="filter-tabs">
           <button class="filter-tab active" id="ftab-all" onclick="setTxFilter('all')">All</button>
@@ -918,7 +926,7 @@ const i18n = {
     manage_cats:'Manage categories',manage_cats_sub:'Add, edit, delete',
     export:'Export to CSV',export_sub:'Download all transactions',
     clear:'Clear all data',clear_sub:'Cannot be undone',
-    version:'Version 2.4 · Personal use',privacy:'100% Private',privacy_sub:'Data stays on your device only',
+    version:'Version 2.5 · Personal use',privacy:'100% Private',privacy_sub:'Data stays on your device only',
     cats_title:'Categories',cats_sub:'Manage your lists',
     exp_cats:'Expense categories',inc_cats:'Income categories',
     add_exp_cat:'+ Add expense category',add_inc_cat:'+ Add income category',
@@ -961,7 +969,7 @@ const i18n = {
     manage_cats:'จัดการหมวดหมู่',manage_cats_sub:'เพิ่ม แก้ไข ลบ',
     export:'ส่งออก CSV',export_sub:'ดาวน์โหลดรายการทั้งหมด',
     clear:'ลบข้อมูลทั้งหมด',clear_sub:'ไม่สามารถกู้คืนได้',
-    version:'เวอร์ชัน 2.4 · ใช้งานส่วนตัว',privacy:'ความเป็นส่วนตัว 100%',privacy_sub:'ข้อมูลอยู่ในอุปกรณ์ของคุณเท่านั้น',
+    version:'เวอร์ชัน 2.5 · ใช้งานส่วนตัว',privacy:'ความเป็นส่วนตัว 100%',privacy_sub:'ข้อมูลอยู่ในอุปกรณ์ของคุณเท่านั้น',
     cats_title:'หมวดหมู่',cats_sub:'จัดการรายการ',
     exp_cats:'หมวดหมู่รายจ่าย',inc_cats:'หมวดหมู่รายรับ',
     add_exp_cat:'+ เพิ่มหมวดหมู่รายจ่าย',add_inc_cat:'+ เพิ่มหมวดหมู่รายรับ',
@@ -1004,8 +1012,8 @@ function loadCats(type){
   return def;
 }
 function saveCats(type,data){ localStorage.setItem(type==='expense'?'ff_exp_cats':'ff_inc_cats',JSON.stringify(data)); }
-function fmt(n){ return '฿'+Math.round(Math.abs(n)).toLocaleString(); }
-function fmtShort(n){ if(n>=1000)return '฿'+(Math.round(n/100)/10)+'k'; return '฿'+Math.round(n); }
+function fmt(n){ const v=Math.abs(n); return '฿'+v.toLocaleString('en-US',{minimumFractionDigits:v%1?2:0,maximumFractionDigits:2}); }
+function fmtShort(n){ if(n>=1000)return '฿'+(Math.round(n/100)/10)+'k'; return fmt(n); }
 
 // =================== NAVIGATION ===================
 const NAV_PAGES = ['home','scan','add','analytics','settings'];
@@ -1021,7 +1029,7 @@ function goPage(p){
   if(nb) nb.classList.add('active');
   if(p==='home') renderHome();
   if(p==='analytics'){ renderAnalytics(); }
-  if(p==='add'){ populateCatSelect(); document.getElementById('f-amount').focus(); }
+  if(p==='add'){ populateCatSelect(); const _n=new Date(); const _ft=document.getElementById('f-time'); if(_ft) _ft.value=`${String(_n.getHours()).padStart(2,'0')}:${String(_n.getMinutes()).padStart(2,'0')}`; document.getElementById('f-amount').focus(); }
   if(p==='categories') renderCategoryManager();
   if(p==='scan') resetScan();
   if(p==='all'){ txFilterType='all'; allTxMonth=currentMonth; allTxYear=currentYear; renderAllTx(); }
@@ -1044,7 +1052,7 @@ function applyLang(){
     'lbl-analytics-q':'analytics','lbl-settings-q':'settings','lbl-recent':'recent',
     'lbl-add-title':'add_title','lbl-add-sub':'add_sub',
     'btn-income':'btn_income','btn-expense':'btn_expense',
-    'lbl-amount':'amount','lbl-desc':'description','lbl-cat':'category','lbl-date':'date','lbl-save-btn':'save',
+    'lbl-amount':'amount','lbl-desc':'description','lbl-cat':'category','lbl-date':'date','lbl-add-time':'ex_time','lbl-save-btn':'save',
     'lbl-scan-title':'scan_title','lbl-scan-sub':'scan_sub',
     'lbl-pick-bank':'pick_bank',
     'lbl-upload-title':'upload_title','lbl-upload-sub':'upload_sub',
@@ -1104,7 +1112,7 @@ function renderHome(){
   const income = txs.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
   const expense = txs.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
   const bal = income - expense;
-  document.getElementById('hero-balance').textContent = Math.round(Math.abs(bal)).toLocaleString();
+  const balAbs=Math.abs(bal); document.getElementById('hero-balance').textContent=balAbs.toLocaleString('en-US',{minimumFractionDigits:balAbs%1?2:0,maximumFractionDigits:2});
   document.getElementById('hero-balance').style.color = bal<0?'var(--red)':'var(--text)';
   document.getElementById('hero-income').textContent = fmt(income);
   document.getElementById('hero-expense').textContent = fmt(expense);
@@ -1302,6 +1310,29 @@ function setAllTxMonthFromPicker(val){
   if(!val) return;
   const [y,m] = val.split('-');
   allTxYear=parseInt(y); allTxMonth=parseInt(m)-1;
+  // clear day filter when month picker changes
+  const df=document.getElementById('all-tx-date-filter');
+  if(df) df.value='';
+  const cb=document.getElementById('btn-clear-date');
+  if(cb) cb.style.display='none';
+  renderAllTx();
+}
+function onDateFilterChange(val){
+  const cb=document.getElementById('btn-clear-date');
+  if(cb) cb.style.display=val?'flex':'none';
+  if(val){
+    const [y,m]=val.split('-');
+    allTxYear=parseInt(y); allTxMonth=parseInt(m)-1;
+    const picker=document.getElementById('all-tx-month-picker');
+    if(picker) picker.value=val.slice(0,7);
+  }
+  renderAllTx();
+}
+function clearDateFilter(){
+  const df=document.getElementById('all-tx-date-filter');
+  if(df) df.value='';
+  const cb=document.getElementById('btn-clear-date');
+  if(cb) cb.style.display='none';
   renderAllTx();
 }
 
@@ -1322,9 +1353,11 @@ function renderAllTx(){
   const picker = document.getElementById('all-tx-month-picker');
   if(picker) picker.value = `${allTxYear}-${String(allTxMonth+1).padStart(2,'0')}`;
   const query = (searchEl?.value||'').toLowerCase().trim();
+  const dateFilter=(document.getElementById('all-tx-date-filter')?.value||'');
   let txs = getMonthTx(allTxYear, allTxMonth);
   if(txFilterType!=='all') txs = txs.filter(tx=>tx.type===txFilterType);
   if(query) txs = txs.filter(tx=>tx.name.toLowerCase().includes(query)||tx.cat.toLowerCase().includes(query));
+  if(dateFilter) txs = txs.filter(tx=>tx.date===dateFilter);
   txs.sort((a,b)=>(new Date(b.date)-new Date(a.date))||b.id-a.id);
   const monthIncome = txs.filter(tx=>tx.type==='income').reduce((s,tx)=>s+tx.amount,0);
   const monthExpense = txs.filter(tx=>tx.type==='expense').reduce((s,tx)=>s+tx.amount,0);
@@ -1392,7 +1425,8 @@ function saveTransaction(){
   if(!amount||amount<=0||!name||!catRaw||!date){ showToast(t('fill_all'),'⚠️'); return; }
   const [emoji,cat] = catRaw.split('|');
   const txs = loadTx();
-  txs.push({id:Date.now(),type:txType,amount,name,cat,emoji,date});
+  const timeVal=(document.getElementById('f-time')?.value||'').trim()||null;
+  txs.push({id:Date.now(),type:txType,amount,name,cat,emoji,date,time:timeVal});
   saveTxData(txs);
   document.getElementById('f-amount').value='';
   document.getElementById('f-name').value='';
@@ -1919,7 +1953,10 @@ function showToast(msg,icon='✓'){
 
 // =================== INIT ===================
 document.addEventListener('DOMContentLoaded',()=>{
-  document.getElementById('f-date').value=new Date().toISOString().split('T')[0];
+  const _now=new Date();
+  document.getElementById('f-date').value=_now.toISOString().split('T')[0];
+  const _ft=document.getElementById('f-time');
+  if(_ft) _ft.value=`${String(_now.getHours()).padStart(2,'0')}:${String(_now.getMinutes()).padStart(2,'0')}`;
   document.getElementById('lang-th').classList.toggle('active',lang==='th');
   document.getElementById('lang-en').classList.toggle('active',lang==='en');
   setTxType('income');
