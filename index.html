@@ -490,6 +490,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
           <div class="field-label" id="lbl-add-time">Time</div>
           <input type="time" id="f-time"/>
         </div>
+        <div class="field">
+          <div class="field-label" id="lbl-add-note">Note</div>
+          <input type="text" id="f-note" placeholder="Optional note / memo"/>
+        </div>
         <button class="submit-btn" id="lbl-save-btn" onclick="saveTransaction()">Save transaction</button>
       </div>
     </div>
@@ -596,6 +600,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
           <div class="stat-box"><div class="stat-box-label" id="lbl-biggest-exp">Biggest expense</div><div class="stat-box-val red" id="an-biggest">—</div></div>
           <div class="stat-box"><div class="stat-box-label" id="lbl-tx-count">Transactions</div><div class="stat-box-val" id="an-tx-count">—</div></div>
         </div>
+        <div class="stat-row">
+          <div class="stat-box"><div class="stat-box-label" id="lbl-all-time-net">All-time net</div><div class="stat-box-val" id="an-net-worth">—</div></div>
+          <div class="stat-box"><div class="stat-box-label" id="lbl-all-time-txs">Total records</div><div class="stat-box-val" id="an-all-count">—</div></div>
+        </div>
         <div class="chart-card" id="budget-card" style="display:none">
           <div class="chart-title" id="lbl-budget-card-title">Monthly Budget</div>
           <div class="chart-subtitle" id="lbl-budget-card-sub">Spending vs target</div>
@@ -625,8 +633,16 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
           <div class="heatmap-grid" id="heatmap"></div>
         </div>
         <div class="chart-card">
-          <div class="chart-title" id="lbl-chart-top">Top expense categories</div>
-          <div class="chart-subtitle" id="lbl-chart-top-sub">By amount this month</div>
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">
+            <div>
+              <div class="chart-title" id="lbl-chart-top">Top categories</div>
+              <div class="chart-subtitle" id="lbl-chart-top-sub">By amount this month</div>
+            </div>
+            <div style="display:flex;gap:4px;flex-shrink:0">
+              <button id="cat-toggle-exp" onclick="setCatBarType('expense')" style="padding:4px 10px;border-radius:100px;font-size:11px;font-weight:700;cursor:pointer;border:0.5px solid var(--red);background:var(--red-dim);color:var(--red);transition:all 0.15s" id="lbl-cat-toggle-exp">Out</button>
+              <button id="cat-toggle-inc" onclick="setCatBarType('income')" style="padding:4px 10px;border-radius:100px;font-size:11px;font-weight:700;cursor:pointer;border:0.5px solid var(--border);background:var(--bg3);color:var(--text3);transition:all 0.15s" id="lbl-cat-toggle-inc">In</button>
+            </div>
+          </div>
           <div id="cat-bars"></div>
         </div>
       </div>
@@ -672,6 +688,20 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
               </div>
               <button onclick="saveBudget()" style="padding:10px 16px;background:var(--green-dim);border:0.5px solid var(--green);border-radius:8px;color:var(--green);font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0" id="lbl-save-budget">Save</button>
             </div>
+          </div>
+        </div>
+
+        <div class="s-label" id="lbl-recurring-section">Recurring</div>
+        <div style="background:var(--card);border-radius:var(--r-lg);border:0.5px solid var(--border);overflow:hidden;margin-bottom:12px">
+          <div style="padding:14px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer" onclick="goPage('recurring')">
+            <div class="settings-left">
+              <div class="settings-icon blue">🔄</div>
+              <div class="settings-text">
+                <div class="settings-title" id="lbl-rec-setting">Recurring transactions</div>
+                <div class="settings-sub" id="lbl-rec-setting-sub">Auto-add salary, rent, bills</div>
+              </div>
+            </div>
+            <span class="chev">›</span>
           </div>
         </div>
 
@@ -741,7 +771,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
               <div class="settings-icon purple">💎</div>
               <div class="settings-text">
                 <div class="settings-title">FinFlow</div>
-                <div class="settings-sub" id="lbl-version">Version 2.8 · Personal use</div>
+                <div class="settings-sub" id="lbl-version">Version 2.9 · Personal use</div>
               </div>
             </div>
           </div>
@@ -775,6 +805,25 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
         <div class="s-label" id="lbl-inc-cats">Income categories</div>
         <div class="cat-grid" id="inc-cat-grid"></div>
         <button class="add-cat-btn" id="lbl-add-inc-cat" onclick="openAddCat('income')">+ Add income category</button>
+      </div>
+    </div>
+
+    <!-- RECURRING -->
+    <div class="page" id="page-recurring">
+      <div class="status-spacer"></div>
+      <div class="page-header" style="display:flex;align-items:center;gap:12px">
+        <button onclick="goPage('settings')" style="background:var(--bg3);border:0.5px solid var(--border);border-radius:10px;width:36px;height:36px;cursor:pointer;color:var(--text);font-size:18px;flex-shrink:0">‹</button>
+        <div>
+          <h1 id="lbl-rec-title">Recurring</h1>
+          <p id="lbl-rec-sub">Auto-add monthly transactions</p>
+        </div>
+      </div>
+      <div style="padding:0 16px">
+        <div id="rec-list"></div>
+        <button class="add-cat-btn" id="lbl-add-rec-btn" onclick="openAddRecurring()">+ Add recurring</button>
+        <div style="margin-top:4px;padding:12px 14px;background:var(--bg3);border-radius:var(--r-md);border:0.5px solid var(--border)">
+          <p style="font-size:12px;color:var(--text3);line-height:1.6" id="lbl-rec-info">Items are auto-added on the chosen day each month when you open the app.</p>
+        </div>
       </div>
     </div>
 
@@ -902,6 +951,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
         <input type="date" id="ed-date"/>
       </div>
       <div class="field">
+        <div class="field-label" id="tx-ed-date-time-lbl">Time</div>
+        <input type="time" id="ed-time"/>
+      </div>
+      <div class="field">
         <div class="field-label" id="tx-ed-note-lbl">Note</div>
         <input type="text" id="ed-note" placeholder="Note / Memo"/>
       </div>
@@ -932,6 +985,53 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
       <button class="btn-cancel" onclick="closeModalDirect()">Cancel</button>
       <button class="btn-save" onclick="saveCategory()">Save</button>
     </div>
+  </div>
+</div>
+
+<!-- CONFIRM MODAL -->
+<div class="modal-overlay" id="confirm-overlay">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div style="font-size:15px;font-weight:600;color:var(--text);line-height:1.5;margin-bottom:20px;text-align:center" id="confirm-msg"></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" id="confirm-cancel-btn">Cancel</button>
+      <button id="confirm-ok-btn" style="padding:14px;border:none;border-radius:var(--r-md);font-size:15px;font-weight:800;cursor:pointer;background:var(--red);color:#fff">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- RECURRING ADD SHEET -->
+<div class="tx-detail-overlay" id="rec-add-overlay" onclick="closeRecAddOutside(event)">
+  <div class="tx-detail-sheet">
+    <div class="tx-detail-handle"></div>
+    <div style="padding:14px 0 14px;border-bottom:0.5px solid var(--border);margin-bottom:16px">
+      <span style="font-size:16px;font-weight:700;color:var(--text)" id="lbl-rec-add-title">Add Recurring</span>
+    </div>
+    <div class="type-toggle" style="margin-bottom:14px">
+      <button class="type-btn income-t active" id="rec-type-income" onclick="setRecType('income')" id="lbl-rec-type-inc">+ Income</button>
+      <button class="type-btn expense-t" id="rec-type-expense" onclick="setRecType('expense')" id="lbl-rec-type-exp">− Expense</button>
+    </div>
+    <div class="field">
+      <div class="field-label" id="lbl-rec-amount">Amount</div>
+      <div class="amount-prefix"><input class="amount-field" type="number" id="rec-amount" placeholder="0.00" inputmode="decimal" min="0"/></div>
+    </div>
+    <div class="field">
+      <div class="field-label" id="lbl-rec-name">Description</div>
+      <input type="text" id="rec-name" placeholder="e.g. Salary, Rent, Netflix..."/>
+    </div>
+    <div class="field">
+      <div class="field-label" id="lbl-rec-cat">Category</div>
+      <div class="select-arrow"><select id="rec-cat"></select></div>
+    </div>
+    <div class="field">
+      <div class="field-label" id="lbl-rec-day">Day of month (1–28)</div>
+      <input type="number" id="rec-day" placeholder="e.g. 25" min="1" max="28" inputmode="numeric"/>
+    </div>
+    <div class="field">
+      <div class="field-label" id="lbl-rec-note">Note (optional)</div>
+      <input type="text" id="rec-note" placeholder="Note / memo"/>
+    </div>
+    <button class="submit-btn" onclick="saveRecurringItem()" id="lbl-rec-save-btn">Save recurring</button>
   </div>
 </div>
 
@@ -984,7 +1084,7 @@ const i18n = {
     confirm_restore:'Replace all current data with this backup?',
     export:'Export to CSV',export_sub:'Download all transactions',
     clear:'Clear all data',clear_sub:'Cannot be undone',
-    version:'Version 2.8 · Personal use',privacy:'100% Private',privacy_sub:'Data stays on your device only',
+    version:'Version 2.9 · Personal use',privacy:'100% Private',privacy_sub:'Data stays on your device only',
     cats_title:'Categories',cats_sub:'Manage your lists',
     exp_cats:'Expense categories',inc_cats:'Income categories',
     add_exp_cat:'+ Add expense category',add_inc_cat:'+ Add income category',
@@ -1002,6 +1102,12 @@ const i18n = {
     budget_section:'Monthly Budget',budget_setting_title:'Monthly spend limit',budget_setting_sub:'Progress shown in Analytics',save_budget:'Save',
     budget_card:'Monthly Budget',budget_card_sub:'Spending vs target',
     savings_rate:'Savings rate',avg_daily:'Avg / day',biggest_exp:'Biggest expense',tx_count:'Transactions',
+    all_time_net:'All-time net',all_time_txs:'Total records',
+    recurring_section:'Recurring',rec_setting:'Recurring transactions',rec_setting_sub:'Auto-add salary, rent, bills',
+    rec_title:'Recurring',rec_sub:'Auto-add monthly transactions',add_rec:'+ Add recurring',
+    rec_info:'Items are auto-added on the chosen day each month when you open the app.',
+    rec_add_title:'Add Recurring',
+    lbl_add_note:'Note',
     day_filter:'📅 Filter by day'
   },
   th: {
@@ -1035,7 +1141,7 @@ const i18n = {
     confirm_restore:'แทนที่ข้อมูลปัจจุบันทั้งหมดด้วย backup นี้?',
     export:'ส่งออก CSV',export_sub:'ดาวน์โหลดรายการทั้งหมด',
     clear:'ลบข้อมูลทั้งหมด',clear_sub:'ไม่สามารถกู้คืนได้',
-    version:'เวอร์ชัน 2.8 · ใช้งานส่วนตัว',privacy:'ความเป็นส่วนตัว 100%',privacy_sub:'ข้อมูลอยู่ในอุปกรณ์ของคุณเท่านั้น',
+    version:'เวอร์ชัน 2.9 · ใช้งานส่วนตัว',privacy:'ความเป็นส่วนตัว 100%',privacy_sub:'ข้อมูลอยู่ในอุปกรณ์ของคุณเท่านั้น',
     cats_title:'หมวดหมู่',cats_sub:'จัดการรายการ',
     exp_cats:'หมวดหมู่รายจ่าย',inc_cats:'หมวดหมู่รายรับ',
     add_exp_cat:'+ เพิ่มหมวดหมู่รายจ่าย',add_inc_cat:'+ เพิ่มหมวดหมู่รายรับ',
@@ -1053,6 +1159,12 @@ const i18n = {
     budget_section:'งบประมาณรายเดือน',budget_setting_title:'วงเงินใช้จ่ายต่อเดือน',budget_setting_sub:'ดูความคืบหน้าได้ในหน้าวิเคราะห์',save_budget:'บันทึก',
     budget_card:'งบประมาณรายเดือน',budget_card_sub:'ยอดใช้จ่าย เทียบ งบประมาณ',
     savings_rate:'อัตราการออม',avg_daily:'เฉลี่ยต่อวัน',biggest_exp:'รายจ่ายสูงสุด',tx_count:'รายการทั้งหมด',
+    all_time_net:'ยอดสะสมทั้งหมด',all_time_txs:'รายการทั้งหมด',
+    recurring_section:'รายการประจำ',rec_setting:'รายการประจำเดือน',rec_setting_sub:'เพิ่มอัตโนมัติ เช่น เงินเดือน ค่าเช่า',
+    rec_title:'รายการประจำ',rec_sub:'เพิ่มอัตโนมัติทุกเดือน',add_rec:'+ เพิ่มรายการประจำ',
+    rec_info:'รายการจะถูกเพิ่มอัตโนมัติในวันที่กำหนดของทุกเดือน เมื่อเปิดแอป',
+    rec_add_title:'เพิ่มรายการประจำ',
+    lbl_add_note:'หมายเหตุ',
     day_filter:'📅 กรองตามวันที่'
   }
 };
@@ -1101,6 +1213,7 @@ function goPage(p){
   if(p==='analytics'){ renderAnalytics(); }
   if(p==='add'){ populateCatSelect(); const _n=new Date(); const _ft=document.getElementById('f-time'); if(_ft) _ft.value=`${String(_n.getHours()).padStart(2,'0')}:${String(_n.getMinutes()).padStart(2,'0')}`; document.getElementById('f-amount').focus(); }
   if(p==='categories') renderCategoryManager();
+  if(p==='recurring') renderRecurringPage();
   if(p==='scan') resetScan();
   if(p==='all'){ txFilterType='all'; allTxMonth=currentMonth; allTxYear=currentYear; renderAllTx(); }
 }
@@ -1134,6 +1247,10 @@ function applyLang(){
     'lbl-budget-section':'budget_section','lbl-budget-setting-title':'budget_setting_title','lbl-budget-setting-sub':'budget_setting_sub','lbl-save-budget':'save_budget',
     'lbl-budget-card-title':'budget_card','lbl-budget-card-sub':'budget_card_sub',
     'lbl-savings-rate':'savings_rate','lbl-avg-daily':'avg_daily','lbl-biggest-exp':'biggest_exp','lbl-tx-count':'tx_count',
+    'lbl-all-time-net':'all_time_net','lbl-all-time-txs':'all_time_txs',
+    'lbl-recurring-section':'recurring_section','lbl-rec-setting':'rec_setting','lbl-rec-setting-sub':'rec_setting_sub',
+    'lbl-rec-title':'rec_title','lbl-rec-sub':'rec_sub','lbl-add-rec-btn':'add_rec','lbl-rec-info':'rec_info',
+    'lbl-rec-add-title':'rec_add_title','lbl-add-note':'lbl_add_note',
     'lbl-day-filter':'day_filter',
     'lbl-total-spent':'total_spent','lbl-vs-last':'vs_last',
     'lbl-chart-donut':'chart_donut','lbl-chart-donut-sub':'chart_donut_sub',
@@ -1304,6 +1421,7 @@ function openEditPanel(){
   document.getElementById('ed-amount').value = tx.amount;
   document.getElementById('ed-name').value = tx.name;
   document.getElementById('ed-date').value = tx.date;
+  if(document.getElementById('ed-time')) document.getElementById('ed-time').value = tx.time||'';
   document.getElementById('ed-note').value = tx.note||'';
   editTypeCurrent = tx.type;
   populateEditCatSelect(tx.type, `${tx.emoji}|${tx.cat}`);
@@ -1355,7 +1473,8 @@ function saveEditTx(){
   const idx = txs.findIndex(t=>t.id===detailTxId);
   if(idx===-1){ showToast('Error','⚠️'); return; }
   const noteVal = (document.getElementById('ed-note')?.value||'').trim();
-  txs[idx] = {...txs[idx], amount, name, cat, emoji, date, type:editTypeCurrent, note:noteVal};
+  const timeVal2 = (document.getElementById('ed-time')?.value||'').trim()||null;
+  txs[idx] = {...txs[idx], amount, name, cat, emoji, date, type:editTypeCurrent, note:noteVal, time:timeVal2};
   saveTxData(txs);
   closeTxDetail();
   renderHome();
@@ -1502,10 +1621,12 @@ function saveTransaction(){
   const [emoji,cat] = catRaw.split('|');
   const txs = loadTx();
   const timeVal=(document.getElementById('f-time')?.value||'').trim()||null;
-  txs.push({id:Date.now(),type:txType,amount,name,cat,emoji,date,time:timeVal});
+  const noteVal=(document.getElementById('f-note')?.value||'').trim()||null;
+  txs.push({id:Date.now(),type:txType,amount,name,cat,emoji,date,time:timeVal,note:noteVal});
   saveTxData(txs);
   document.getElementById('f-amount').value='';
   document.getElementById('f-name').value='';
+  if(document.getElementById('f-note')) document.getElementById('f-note').value='';
   showToast(t('saved'),'✅');
   goPage('home');
 }
@@ -1874,6 +1995,15 @@ function renderAnalytics(){
   // transaction count
   const tcEl=document.getElementById('an-tx-count');
   if(tcEl) tcEl.textContent=txs.length;
+  // all-time net worth
+  const allTxsNet=loadTx();
+  const totalInc=allTxsNet.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
+  const totalExp=allTxsNet.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
+  const net=totalInc-totalExp;
+  const netEl=document.getElementById('an-net-worth');
+  if(netEl){ netEl.textContent=fmt(net); netEl.style.color=net>=0?'var(--green)':'var(--red)'; }
+  const allCntEl=document.getElementById('an-all-count');
+  if(allCntEl) allCntEl.textContent=allTxsNet.length;
   // budget progress
   renderBudget(expense);
   renderDonut(txs);
@@ -1881,6 +2011,8 @@ function renderAnalytics(){
   renderLineChart();
   renderHeatmap();
   renderCatBars(txs);
+  // reset cat bar toggle to expense when switching months
+  setCatBarType(catBarType);
 }
 
 function renderDonut(txs){
@@ -1985,11 +2117,12 @@ function renderHeatmap(){
 
 function renderCatBars(txs){
   const container = document.getElementById('cat-bars');
-  const expTxs = txs.filter(t=>t.type==='expense');
-  if(!expTxs.length){ container.innerHTML=`<div style="text-align:center;padding:16px;font-size:13px;color:var(--text3)">${t('no_expense')}</div>`; return; }
+  const filterType = catBarType || 'expense';
+  const filtered = txs.filter(t=>t.type===filterType);
+  if(!filtered.length){ container.innerHTML=`<div style="text-align:center;padding:16px;font-size:13px;color:var(--text3)">${filterType==='expense'?t('no_expense'):(lang==='th'?'ไม่มีรายรับเดือนนี้':'No income this month')}</div>`; return; }
   const catTotals={};
   const catEmoji={};
-  expTxs.forEach(tx=>{ catTotals[tx.cat]=(catTotals[tx.cat]||0)+tx.amount; catEmoji[tx.cat]=tx.emoji||'📦'; });
+  filtered.forEach(tx=>{ catTotals[tx.cat]=(catTotals[tx.cat]||0)+tx.amount; catEmoji[tx.cat]=tx.emoji||'📦'; });
   const entries=Object.entries(catTotals).sort((a,b)=>b[1]-a[1]).slice(0,6);
   const max=entries[0][1];
   container.innerHTML=entries.map(([name,val])=>`
@@ -1997,7 +2130,7 @@ function renderCatBars(txs){
       <div class="cat-bar-icon">${catEmoji[name]}</div>
       <div class="cat-bar-info">
         <div class="cat-bar-name">${name}</div>
-        <div class="cat-bar-track"><div class="cat-bar-fill" style="width:${Math.round(val/max*100)}%"></div></div>
+        <div class="cat-bar-track"><div class="cat-bar-fill ${filterType==='income'?'income-fill':''}" style="width:${Math.round(val/max*100)}%"></div></div>
       </div>
       <div class="cat-bar-amt">${fmt(val)}</div>
     </div>`).join('');
@@ -2086,23 +2219,153 @@ function restoreData(e){
     try{
       const data=JSON.parse(ev.target.result);
       if(!data.transactions) throw new Error('invalid');
-      if(!confirm(t('confirm_restore'))) return;
-      localStorage.setItem('ff_tx',JSON.stringify(data.transactions));
-      if(data.expense_cats) localStorage.setItem('ff_exp_cats',JSON.stringify(data.expense_cats));
-      if(data.income_cats) localStorage.setItem('ff_inc_cats',JSON.stringify(data.income_cats));
-      if(data.budget) localStorage.setItem('ff_budget',data.budget);
-      showToast(t('restore_done'),'📥');
-      renderHome();
+      showConfirm(t('confirm_restore'),()=>{
+        localStorage.setItem('ff_tx',JSON.stringify(data.transactions));
+        if(data.expense_cats) localStorage.setItem('ff_exp_cats',JSON.stringify(data.expense_cats));
+        if(data.income_cats) localStorage.setItem('ff_inc_cats',JSON.stringify(data.income_cats));
+        if(data.budget) localStorage.setItem('ff_budget',data.budget);
+        showToast(t('restore_done'),'📥');
+        renderHome();
+      },lang==='th'?'กู้คืน':'Restore');
     }catch(_){ showToast(t('restore_err'),'⚠️'); }
   };
   reader.readAsText(file);
   e.target.value='';
 }
 function clearData(){
-  if(!confirm(t('confirm_clear'))) return;
-  localStorage.removeItem('ff_tx');
-  showToast(t('cleared'),'🗑️');
-  renderHome();
+  showConfirm(t('confirm_clear'),()=>{
+    localStorage.removeItem('ff_tx');
+    showToast(t('cleared'),'🗑️');
+    renderHome();
+  },lang==='th'?'ลบทั้งหมด':'Delete all');
+}
+
+// =================== CONFIRM MODAL ===================
+let _confirmCb = null;
+function showConfirm(msg, onOk, okLabel){
+  document.getElementById('confirm-msg').textContent = msg;
+  const okBtn = document.getElementById('confirm-ok-btn');
+  okBtn.textContent = okLabel || (lang==='th'?'ยืนยัน':'Confirm');
+  document.getElementById('confirm-cancel-btn').textContent = lang==='th'?'ยกเลิก':'Cancel';
+  _confirmCb = onOk;
+  document.getElementById('confirm-overlay').classList.add('open');
+}
+document.addEventListener('DOMContentLoaded',()=>{
+  document.getElementById('confirm-ok-btn').addEventListener('click',()=>{
+    document.getElementById('confirm-overlay').classList.remove('open');
+    if(_confirmCb){ _confirmCb(); _confirmCb=null; }
+  });
+  document.getElementById('confirm-cancel-btn').addEventListener('click',()=>{
+    document.getElementById('confirm-overlay').classList.remove('open');
+    _confirmCb=null;
+  });
+});
+
+// =================== RECURRING ===================
+let recType = 'income';
+function loadRecurring(){ return JSON.parse(localStorage.getItem('ff_recurring')||'[]'); }
+function saveRecurringData(d){ localStorage.setItem('ff_recurring',JSON.stringify(d)); }
+
+function setRecType(type){
+  recType = type;
+  document.getElementById('rec-type-income').classList.toggle('active',type==='income');
+  document.getElementById('rec-type-expense').classList.toggle('active',type==='expense');
+  populateRecCatSelect(type);
+}
+function populateRecCatSelect(type){
+  const sel=document.getElementById('rec-cat');
+  if(!sel) return;
+  const cats=loadCats(type||recType);
+  sel.innerHTML=cats.map(c=>`<option value="${c.emoji}|${c.name}">${c.emoji} ${c.name}</option>`).join('');
+}
+function openAddRecurring(){
+  setRecType('income');
+  ['rec-amount','rec-name','rec-day','rec-note'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  document.getElementById('rec-add-overlay').classList.add('open');
+  setTimeout(()=>document.getElementById('rec-name').focus(),300);
+}
+function closeRecAddOutside(e){ if(e.target===document.getElementById('rec-add-overlay')) closeRecAdd(); }
+function closeRecAdd(){ document.getElementById('rec-add-overlay').classList.remove('open'); }
+
+function saveRecurringItem(){
+  const amount=parseFloat(document.getElementById('rec-amount').value);
+  const name=(document.getElementById('rec-name').value||'').trim();
+  const catRaw=document.getElementById('rec-cat').value;
+  const day=parseInt(document.getElementById('rec-day').value);
+  if(!amount||amount<=0||!name||!catRaw||!day||day<1||day>28){ showToast(t('fill_all'),'⚠️'); return; }
+  const [emoji,cat]=catRaw.split('|');
+  const note=(document.getElementById('rec-note')?.value||'').trim();
+  const recs=loadRecurring();
+  recs.push({id:Date.now(),type:recType,amount,name,cat,emoji,note,day});
+  saveRecurringData(recs);
+  closeRecAdd();
+  renderRecurringPage();
+  showToast(t('saved'),'✅');
+}
+function deleteRecurringItem(id){
+  showConfirm(lang==='th'?'ลบรายการประจำนี้?':'Delete this recurring item?',()=>{
+    saveRecurringData(loadRecurring().filter(r=>r.id!==id));
+    renderRecurringPage();
+    showToast(t('deleted'),'✓');
+  });
+}
+function renderRecurringPage(){
+  const recs=loadRecurring();
+  const container=document.getElementById('rec-list');
+  if(!container) return;
+  if(!recs.length){
+    container.innerHTML=`<div class="empty" style="padding:32px 0"><div class="empty-icon">🔄</div><div class="empty-title">${lang==='th'?'ยังไม่มีรายการประจำ':'No recurring items'}</div><div class="empty-sub">${lang==='th'?'เพิ่มเงินเดือน ค่าเช่า หรือค่าสมัครสมาชิก':'Add salary, rent, subscriptions'}</div></div>`;
+    return;
+  }
+  container.innerHTML=recs.map(r=>{
+    const dayLabel=lang==='th'?`ทุกวันที่ ${r.day}`:`Every ${r.day}${[,'st','nd','rd'][r.day]||'th'}`;
+    return `<div style="background:var(--card);border-radius:var(--r-md);border:0.5px solid var(--border);padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;gap:12px">
+      <div style="width:40px;height:40px;border-radius:13px;background:${r.type==='income'?'var(--green-dim)':'var(--red-dim)'};display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">${r.emoji}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:14px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.name}</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:2px">${r.cat} · ${dayLabel}</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0;margin-right:8px">
+        <div style="font-size:15px;font-weight:700;color:${r.type==='income'?'var(--green)':'var(--red)'}">${r.type==='income'?'+':'-'}${fmt(r.amount)}</div>
+      </div>
+      <button onclick="deleteRecurringItem(${r.id})" style="background:none;border:none;color:var(--text3);font-size:16px;cursor:pointer;padding:4px;flex-shrink:0">✕</button>
+    </div>`;
+  }).join('');
+}
+function applyRecurring(){
+  const rec=loadRecurring();
+  if(!rec.length) return;
+  const now=new Date();
+  const nowDay=now.getDate(), nowY=now.getFullYear(), nowM=now.getMonth();
+  let txs=loadTx();
+  let added=0;
+  rec.forEach(r=>{
+    if(nowDay<r.day) return;
+    const already=txs.some(tx=>tx.recurringId===r.id&&new Date(tx.date).getFullYear()===nowY&&new Date(tx.date).getMonth()===nowM);
+    if(!already){
+      const dd=Math.min(r.day,new Date(nowY,nowM+1,0).getDate());
+      txs.push({id:Date.now()+(added*997),type:r.type,amount:r.amount,name:r.name,
+        cat:r.cat,emoji:r.emoji,note:r.note||'',
+        date:`${nowY}-${String(nowM+1).padStart(2,'0')}-${String(dd).padStart(2,'0')}`,
+        time:null,recurringId:r.id});
+      added++;
+    }
+  });
+  if(added){
+    saveTxData(txs);
+    setTimeout(()=>showToast(lang==='th'?`เพิ่มรายการประจำ ${added} รายการ`:`${added} recurring added`,'🔄'),500);
+  }
+}
+
+// =================== ALL-TIME NET + CAT BARS TOGGLE ===================
+let catBarType = 'expense';
+function setCatBarType(type){
+  catBarType = type;
+  const expBtn=document.getElementById('cat-toggle-exp');
+  const incBtn=document.getElementById('cat-toggle-inc');
+  if(expBtn){ expBtn.style.background=type==='expense'?'var(--red-dim)':'var(--bg3)'; expBtn.style.borderColor=type==='expense'?'var(--red)':'var(--border)'; expBtn.style.color=type==='expense'?'var(--red)':'var(--text3)'; }
+  if(incBtn){ incBtn.style.background=type==='income'?'var(--green-dim)':'var(--bg3)'; incBtn.style.borderColor=type==='income'?'var(--green)':'var(--border)'; incBtn.style.color=type==='income'?'var(--green)':'var(--text3)'; }
+  renderCatBars(getMonthTx(currentYear,currentMonth));
 }
 
 // =================== TOAST ===================
@@ -2127,6 +2390,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('lang-en').classList.toggle('active',lang==='en');
   setTxType('income');
   applyLang();
+  applyRecurring();
   renderHome();
 });
 </script>
