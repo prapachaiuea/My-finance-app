@@ -771,7 +771,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
               <div class="settings-icon purple">💎</div>
               <div class="settings-text">
                 <div class="settings-title">FinFlow</div>
-                <div class="settings-sub" id="lbl-version">Version 2.9 · Personal use</div>
+                <div class="settings-sub" id="lbl-version">Version 3.0 · Personal use</div>
               </div>
             </div>
           </div>
@@ -1055,7 +1055,7 @@ const CHART_COLORS = ['#00D28F','#60A5FA','#A78BFA','#FFB347','#FF6B6B','#34D399
 const i18n = {
   en: {
     greeting_morning:'Good morning',greeting_afternoon:'Good afternoon',greeting_evening:'Good evening',
-    finflow:'FinFlow',balance:'Balance',income:'Income',expense:'Expense',
+    finflow:'FinFlow',balance:'Total Balance',income:'Income',expense:'Expense',
     quick_actions:'Quick actions',add:'Add',scan_slip:'Scan slip',analytics:'Analytics',settings:'Settings',
     recent:'Recent transactions',no_tx:'No transactions yet',no_tx_sub:'Tap Add to record your first one',
     add_title:'Add transaction',add_sub:'Record income or expense',
@@ -1084,7 +1084,7 @@ const i18n = {
     confirm_restore:'Replace all current data with this backup?',
     export:'Export to CSV',export_sub:'Download all transactions',
     clear:'Clear all data',clear_sub:'Cannot be undone',
-    version:'Version 2.9 · Personal use',privacy:'100% Private',privacy_sub:'Data stays on your device only',
+    version:'Version 3.0 · Personal use',privacy:'100% Private',privacy_sub:'Data stays on your device only',
     cats_title:'Categories',cats_sub:'Manage your lists',
     exp_cats:'Expense categories',inc_cats:'Income categories',
     add_exp_cat:'+ Add expense category',add_inc_cat:'+ Add income category',
@@ -1112,7 +1112,7 @@ const i18n = {
   },
   th: {
     greeting_morning:'อรุณสวัสดิ์',greeting_afternoon:'สวัสดีตอนบ่าย',greeting_evening:'สวัสดีตอนเย็น',
-    finflow:'FinFlow',balance:'ยอดคงเหลือ',income:'รายรับ',expense:'รายจ่าย',
+    finflow:'FinFlow',balance:'ยอดรวมทั้งหมด',income:'รายรับ',expense:'รายจ่าย',
     quick_actions:'เมนูด่วน',add:'เพิ่ม',scan_slip:'สแกนสลิป',analytics:'วิเคราะห์',settings:'ตั้งค่า',
     recent:'รายการล่าสุด',no_tx:'ยังไม่มีรายการ',no_tx_sub:'แตะ เพิ่ม เพื่อบันทึกรายการแรก',
     add_title:'เพิ่มรายการ',add_sub:'บันทึกรายรับหรือรายจ่าย',
@@ -1141,7 +1141,7 @@ const i18n = {
     confirm_restore:'แทนที่ข้อมูลปัจจุบันทั้งหมดด้วย backup นี้?',
     export:'ส่งออก CSV',export_sub:'ดาวน์โหลดรายการทั้งหมด',
     clear:'ลบข้อมูลทั้งหมด',clear_sub:'ไม่สามารถกู้คืนได้',
-    version:'เวอร์ชัน 2.9 · ใช้งานส่วนตัว',privacy:'ความเป็นส่วนตัว 100%',privacy_sub:'ข้อมูลอยู่ในอุปกรณ์ของคุณเท่านั้น',
+    version:'เวอร์ชัน 3.0 · ใช้งานส่วนตัว',privacy:'ความเป็นส่วนตัว 100%',privacy_sub:'ข้อมูลอยู่ในอุปกรณ์ของคุณเท่านั้น',
     cats_title:'หมวดหมู่',cats_sub:'จัดการรายการ',
     exp_cats:'หมวดหมู่รายจ่าย',inc_cats:'หมวดหมู่รายรับ',
     add_exp_cat:'+ เพิ่มหมวดหมู่รายจ่าย',add_inc_cat:'+ เพิ่มหมวดหมู่รายรับ',
@@ -1304,13 +1304,17 @@ function renderHome(){
   const txs = getMonthTx(currentYear,currentMonth);
   const income = txs.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
   const expense = txs.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
-  const bal = income - expense;
+  const allTxsForBal = loadTx();
+  const totalIncome = allTxsForBal.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
+  const totalExpense = allTxsForBal.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
+  const bal = totalIncome - totalExpense;
   const balAbs=Math.abs(bal); document.getElementById('hero-balance').textContent=balAbs.toLocaleString('en-US',{minimumFractionDigits:balAbs%1?2:0,maximumFractionDigits:2});
   document.getElementById('hero-balance').style.color = bal<0?'var(--red)':'var(--text)';
   document.getElementById('hero-income').textContent = fmt(income);
   document.getElementById('hero-expense').textContent = fmt(expense);
   const list = document.getElementById('home-tx-list');
-  const sorted = [...txs].sort((a,b)=>(new Date(b.date)-new Date(a.date))||b.id-a.id);
+  const allSorted = [...allTxsForBal].sort((a,b)=>(new Date(b.date)-new Date(a.date))||b.id-a.id);
+  const sorted = allSorted;
   if(!sorted.length){
     list.innerHTML=`<div class="empty"><div class="empty-icon">💸</div><div class="empty-title">${t('no_tx')}</div><div class="empty-sub">${t('no_tx_sub')}</div></div>`;
     const badge=document.getElementById('tx-total-count');
@@ -1352,9 +1356,8 @@ function renderHome(){
       </div>`).join('')}</div>
     </div>`;
   }).join('');
-  const allTxs = loadTx();
   const badge = document.getElementById('tx-total-count');
-  if(badge) badge.textContent = allTxs.length || '';
+  if(badge) badge.textContent = allTxsForBal.length || '';
   const lbl = document.getElementById('lbl-see-all-top');
   if(lbl) lbl.textContent = t('see_all');
 }
