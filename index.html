@@ -138,8 +138,9 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 .tx-amount.expense{color:var(--red)}
 .tx-amount.income{color:var(--green)}
 .tx-date{font-size:10px;color:var(--text3);margin-top:2px}
-.tx-del{background:none;border:none;padding:4px 0 4px 8px;cursor:pointer;color:var(--text3);font-size:16px;opacity:0.6;transition:opacity 0.15s}
-.tx-del:hover{opacity:1}
+.tx-del{display:none}
+.swipe-del-zone{position:absolute;right:0;top:0;bottom:0;width:80px;background:var(--red);display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:0 var(--r-md) var(--r-md) 0;cursor:pointer;color:#fff;font-size:20px;gap:3px;z-index:1;user-select:none}
+.swipe-del-zone span{font-size:10px;font-weight:700;letter-spacing:0.03em}
 
 /* EMPTY STATE */
 .empty{display:flex;flex-direction:column;align-items:center;padding:48px 24px;text-align:center}
@@ -869,7 +870,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
               <div class="settings-icon purple">💎</div>
               <div class="settings-text">
                 <div class="settings-title">FinFlow</div>
-                <div class="settings-sub" id="lbl-version">Version 3.1 · Personal use</div>
+                <div class="settings-sub" id="lbl-version">Version 3.2 · Personal use</div>
               </div>
             </div>
           </div>
@@ -1258,7 +1259,7 @@ const i18n = {
     confirm_restore:'Replace all current data with this backup?',
     export:'Export to CSV',export_sub:'Download all transactions',
     clear:'Clear all data',clear_sub:'Cannot be undone',
-    version:'Version 3.1 · Personal use',privacy:'100% Private',privacy_sub:'Data stays on your device only',
+    version:'Version 3.2 · Personal use',privacy:'100% Private',privacy_sub:'Data stays on your device only',
     cats_title:'Categories',cats_sub:'Manage your lists',
     exp_cats:'Expense categories',inc_cats:'Income categories',
     add_exp_cat:'+ Add expense category',add_inc_cat:'+ Add income category',
@@ -1320,7 +1321,7 @@ const i18n = {
     confirm_restore:'แทนที่ข้อมูลปัจจุบันทั้งหมดด้วย backup นี้?',
     export:'ส่งออก CSV',export_sub:'ดาวน์โหลดรายการทั้งหมด',
     clear:'ลบข้อมูลทั้งหมด',clear_sub:'ไม่สามารถกู้คืนได้',
-    version:'เวอร์ชัน 3.1 · ใช้งานส่วนตัว',privacy:'ความเป็นส่วนตัว 100%',privacy_sub:'ข้อมูลอยู่ในอุปกรณ์ของคุณเท่านั้น',
+    version:'เวอร์ชัน 3.2 · ใช้งานส่วนตัว',privacy:'ความเป็นส่วนตัว 100%',privacy_sub:'ข้อมูลอยู่ในอุปกรณ์ของคุณเท่านั้น',
     cats_title:'หมวดหมู่',cats_sub:'จัดการรายการ',
     exp_cats:'หมวดหมู่รายจ่าย',inc_cats:'หมวดหมู่รายรับ',
     add_exp_cat:'+ เพิ่มหมวดหมู่รายจ่าย',add_inc_cat:'+ เพิ่มหมวดหมู่รายรับ',
@@ -2661,21 +2662,68 @@ function renderHomeInsight(income,expense){
 }
 
 // =================== SWIPE TO DELETE ===================
+let _swipeOpenItem=null;
+function _closeSwipeItem(){
+  if(_swipeOpenItem){
+    _swipeOpenItem.style.transition='transform 0.2s';
+    _swipeOpenItem.style.transform='';
+    _swipeOpenItem=null;
+  }
+}
 function addSwipeToDelete(){
+  // Close open item on page scroll
+  document.querySelectorAll('.page').forEach(pg=>{
+    if(pg._swipeScrollInit)return;pg._swipeScrollInit=true;
+    pg.addEventListener('scroll',_closeSwipeItem,{passive:true});
+  });
   document.querySelectorAll('.tx-item').forEach(item=>{
-    if(item._swipeInit) return;
+    if(item._swipeInit)return;
     item._swipeInit=true;
-    let sx=0,moved=false;
-    item.addEventListener('touchstart',e=>{sx=e.touches[0].clientX;moved=false;item.style.transition='none';},{passive:true});
+    // Inject delete zone once
+    if(!item.querySelector('.swipe-del-zone')){
+      const zone=document.createElement('div');
+      zone.className='swipe-del-zone';
+      zone.innerHTML='🗑️<span>DELETE</span>';
+      zone.addEventListener('click',e=>{
+        e.stopPropagation();
+        _closeSwipeItem();
+        const btn=item.querySelector('.tx-del');if(btn)btn.click();
+      });
+      item.appendChild(zone);
+    }
+    let sx=0,sy=0,dragging=false;
+    item.addEventListener('touchstart',e=>{
+      if(_swipeOpenItem&&_swipeOpenItem!==item)_closeSwipeItem();
+      sx=e.touches[0].clientX;sy=e.touches[0].clientY;dragging=false;
+      item.style.transition='none';
+    },{passive:true});
     item.addEventListener('touchmove',e=>{
       const dx=sx-e.touches[0].clientX;
-      if(dx>10){moved=true;item.style.transform=`translateX(-${Math.min(80,dx)}px)`;}
+      const dy=Math.abs(sy-e.touches[0].clientY);
+      if(dy>dx&&!dragging)return; // vertical scroll wins
+      if(Math.abs(dx)>8){
+        dragging=true;
+        if(dx>0) item.style.transform=`translateX(-${Math.min(80,dx)}px)`;
+        else if(dx<0) item.style.transform='translateX(0)';
+      }
     },{passive:true});
     item.addEventListener('touchend',e=>{
       item.style.transition='transform 0.2s';
       const dx=sx-e.changedTouches[0].clientX;
-      if(moved&&dx>65){ const btn=item.querySelector('.tx-del');if(btn)btn.click(); }
-      else{ item.style.transform=''; }
+      if(dx>40){
+        item.style.transform='translateX(-80px)';
+        _swipeOpenItem=item;
+      } else {
+        item.style.transform='';
+        if(_swipeOpenItem===item)_swipeOpenItem=null;
+      }
+    });
+    // Tap item body while open → close without deleting
+    item.addEventListener('click',e=>{
+      if(_swipeOpenItem===item&&!e.target.closest('.swipe-del-zone')){
+        e.preventDefault();e.stopPropagation();
+        _closeSwipeItem();
+      }
     });
   });
 }
