@@ -41,6 +41,13 @@
   --nav-h: 72px;
   --safe-bottom: env(safe-area-inset-bottom, 0px);
 }
+[data-theme="light"]{
+  --bg:#F5F5F7;--bg2:#FFFFFF;--bg3:#EBEBEB;--bg4:#DCDCDC;
+  --card:#FFFFFF;--border:rgba(0,0,0,0.08);--border2:rgba(0,0,0,0.12);
+  --text:#1A1A1A;--text2:#6B6B6B;--text3:#A0A0A0;
+}
+[data-theme="light"] .bottom-nav{background:rgba(245,245,247,0.95)!important}
+[data-theme="light"] .page-header{background:var(--bg)!important}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-family:-apple-system,'Helvetica Neue',Arial,'Noto Sans Thai','Noto Sans Thai UI',sans-serif;color:var(--text)}
 #root{width:100%;height:100%;display:flex;flex-direction:column;max-width:430px;margin:0 auto;position:relative;overflow:hidden}
@@ -101,11 +108,11 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 .hp-amount.red{color:var(--red)}
 
 /* QUICK ACTIONS */
-.quick-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:0 16px}
-.qa{display:flex;flex-direction:column;align-items:center;gap:7px;cursor:pointer;transition:transform 0.15s}
+.quick-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;padding:0 12px}
+.qa{display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;transition:transform 0.15s}
 .qa:active{transform:scale(0.9)}
-.qa-circle{width:54px;height:54px;border-radius:18px;display:flex;align-items:center;justify-content:center;border:0.5px solid var(--border)}
-.qa-circle svg{width:22px;height:22px;stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.qa-circle{width:48px;height:48px;border-radius:16px;display:flex;align-items:center;justify-content:center;border:0.5px solid var(--border)}
+.qa-circle svg{width:20px;height:20px;stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round}
 .qa-circle.green{background:var(--green-dim);border-color:rgba(0,210,143,0.2)}
 .qa-circle.green svg{stroke:var(--green)}
 .qa-circle.blue{background:var(--blue-dim);border-color:rgba(96,165,250,0.2)}
@@ -376,6 +383,49 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 .tx-day-net.pos{color:var(--green)}
 .tx-day-net.neg{color:var(--red)}
 .tx-day-items{display:flex;flex-direction:column;gap:6px}
+/* HERO BUDGET BAR */
+.hero-budget{margin-top:14px;padding-top:14px;border-top:0.5px solid var(--border)}
+.hero-budget-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px}
+.hero-budget-lbl{font-size:11px;color:var(--text3)}
+.hero-budget-pct{font-size:12px;font-weight:700}
+.hero-budget-bar{height:5px;background:var(--bg4);border-radius:100px;overflow:hidden}
+.hero-budget-fill{height:100%;border-radius:100px;transition:width 0.5s ease}
+.hero-insight{font-size:11px;color:var(--text3);margin-top:10px;text-align:center;min-height:14px}
+/* SWIPE DELETE */
+.tx-item{position:relative;overflow:hidden;transition:transform 0.2s}
+/* NET WORTH TREND */
+.nw-trend-labels{display:flex;margin-top:10px}
+/* SAVINGS GOALS */
+.goal-card{background:var(--card);border-radius:var(--r-lg);border:0.5px solid var(--border);padding:16px;margin-bottom:10px}
+.goal-card-header{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.goal-emoji-big{font-size:24px}
+.goal-name{font-size:14px;font-weight:700;color:var(--text);flex:1}
+.goal-del-btn{background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:4px}
+.goal-amounts-row{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:8px}
+.goal-saved-amt{font-size:20px;font-weight:800}
+.goal-target-lbl{font-size:12px;color:var(--text3);margin-bottom:2px}
+.goal-track{height:8px;background:var(--bg3);border-radius:100px;overflow:hidden;margin-bottom:8px}
+.goal-fill{height:100%;border-radius:100px;transition:width 0.5s ease}
+.goal-meta{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--text3)}
+.goal-contrib-btn{width:100%;padding:10px;background:var(--green-dim);border:0.5px solid var(--green);border-radius:var(--r-md);color:var(--green);font-size:13px;font-weight:700;cursor:pointer;margin-top:10px;transition:all 0.15s}
+.goal-contrib-btn:active{background:var(--green-dim2)}
+/* AMOUNT RANGE FILTER */
+.amt-range-wrap{display:flex;gap:6px;margin-top:6px}
+.amt-range-input{flex:1;background:var(--bg3);border:0.5px solid var(--border2);border-radius:var(--r-md);color:var(--text);font-size:12px;padding:7px 10px;font-family:inherit}
+.amt-range-input::placeholder{color:var(--text3)}
+/* PIN OVERLAY */
+.pin-overlay{position:fixed;inset:0;background:var(--bg);z-index:2000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px}
+.pin-overlay.hidden{display:none}
+.pin-title{font-size:22px;font-weight:800;color:var(--text);margin-bottom:8px;margin-top:16px}
+.pin-sub{font-size:13px;color:var(--text2);margin-bottom:32px;text-align:center}
+.pin-dots{display:flex;gap:16px;margin-bottom:32px}
+.pin-dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--border2);background:transparent;transition:all 0.12s}
+.pin-dot.filled{background:var(--green);border-color:var(--green)}
+.pin-keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;width:260px}
+.pin-key{height:62px;border-radius:var(--r-lg);background:var(--bg3);border:0.5px solid var(--border);color:var(--text);font-size:22px;font-weight:700;cursor:pointer;transition:all 0.1s;display:flex;align-items:center;justify-content:center}
+.pin-key:active{transform:scale(0.92);background:var(--bg4)}
+.pin-key.empty{background:transparent;border:none;cursor:default}
+.pin-key.del{font-size:18px}
 </style>
 </head>
 <body>
@@ -414,6 +464,14 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
             <div class="hp-amount red" id="hero-expense">฿0</div>
           </div>
         </div>
+        <div class="hero-budget" id="hero-budget-wrap" style="display:none">
+          <div class="hero-budget-row">
+            <span class="hero-budget-lbl" id="lbl-hero-budget">Budget</span>
+            <span class="hero-budget-pct" id="hero-budget-pct">0%</span>
+          </div>
+          <div class="hero-budget-bar"><div class="hero-budget-fill" id="hero-budget-fill" style="width:0%"></div></div>
+        </div>
+        <div class="hero-insight" id="hero-insight"></div>
       </div>
 
       <div class="s-label" id="lbl-quickactions">Quick actions</div>
@@ -428,7 +486,13 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
           <div class="qa-circle blue">
             <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
           </div>
-          <span class="qa-label" id="lbl-scan">Scan slip</span>
+          <span class="qa-label" id="lbl-scan">Scan</span>
+        </div>
+        <div class="qa" onclick="goPage('goals')">
+          <div class="qa-circle amber">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+          </div>
+          <span class="qa-label" id="lbl-goals-q">Goals</span>
         </div>
         <div class="qa" onclick="goPage('analytics')">
           <div class="qa-circle purple">
@@ -437,8 +501,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
           <span class="qa-label" id="lbl-analytics-q">Analytics</span>
         </div>
         <div class="qa" onclick="goPage('settings')">
-          <div class="qa-circle amber">
-            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          <div class="qa-circle" style="background:var(--bg4)">
+            <svg viewBox="0 0 24 24" style="stroke:var(--text2)"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
           </div>
           <span class="qa-label" id="lbl-settings-q">Settings</span>
         </div>
@@ -628,6 +692,12 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
           <svg class="line-svg" id="line-svg" height="90"></svg>
         </div>
         <div class="chart-card">
+          <div class="chart-title" id="lbl-chart-nw">Net worth trend</div>
+          <div class="chart-subtitle" id="lbl-chart-nw-sub">Running balance · last 6 months</div>
+          <svg style="width:100%;overflow:visible" id="nw-svg" height="60"></svg>
+          <div class="nw-trend-labels" id="nw-trend-labels"></div>
+        </div>
+        <div class="chart-card">
           <div class="chart-title" id="lbl-chart-heat">Daily spending heatmap</div>
           <div class="chart-subtitle" id="lbl-chart-heat-sub">Darker = more spent</div>
           <div class="heatmap-grid" id="heatmap"></div>
@@ -669,6 +739,34 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
               <div class="lang-opt-name">English</div>
               <div class="lang-opt-sub">English</div>
             </div>
+          </div>
+        </div>
+
+        <div class="s-label" id="lbl-appearance-section">Appearance</div>
+        <div class="settings-group">
+          <div class="settings-row">
+            <div class="settings-left">
+              <div class="settings-icon amber" id="lbl-theme-icon-wrap">🌙</div>
+              <div class="settings-text">
+                <div class="settings-title" id="lbl-theme-title">Dark mode</div>
+                <div class="settings-sub" id="lbl-theme-sub">Toggle dark / light theme</div>
+              </div>
+            </div>
+            <button class="toggle-switch on" id="theme-toggle" onclick="toggleTheme()"></button>
+          </div>
+        </div>
+
+        <div class="s-label" id="lbl-security-section">Security</div>
+        <div class="settings-group">
+          <div class="settings-row">
+            <div class="settings-left">
+              <div class="settings-icon red">🔐</div>
+              <div class="settings-text">
+                <div class="settings-title" id="lbl-pin-title">PIN Lock</div>
+                <div class="settings-sub" id="lbl-pin-sub">Protect with 4-digit PIN</div>
+              </div>
+            </div>
+            <button class="toggle-switch" id="pin-toggle" onclick="togglePinSetup()"></button>
           </div>
         </div>
 
@@ -771,7 +869,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
               <div class="settings-icon purple">💎</div>
               <div class="settings-text">
                 <div class="settings-title">FinFlow</div>
-                <div class="settings-sub" id="lbl-version">Version 3.0 · Personal use</div>
+                <div class="settings-sub" id="lbl-version">Version 3.1 · Personal use</div>
               </div>
             </div>
           </div>
@@ -854,6 +952,11 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
           <input type="date" id="all-tx-date-filter" onchange="onDateFilterChange(this.value)" style="flex:1;background:var(--bg3);border:0.5px solid var(--border2);border-radius:var(--r-md);color:var(--text);font-size:13px;padding:8px 10px;font-family:inherit;cursor:pointer"/>
           <button id="btn-clear-date" onclick="clearDateFilter()" style="display:none;width:32px;height:32px;border-radius:8px;border:0.5px solid var(--border2);background:var(--bg3);color:var(--text3);font-size:15px;cursor:pointer;flex-shrink:0;align-items:center;justify-content:center">✕</button>
         </div>
+        <div class="amt-range-wrap">
+          <input class="amt-range-input" type="number" id="amt-min" placeholder="Min ฿" inputmode="decimal" min="0" oninput="renderAllTx()"/>
+          <input class="amt-range-input" type="number" id="amt-max" placeholder="Max ฿" inputmode="decimal" min="0" oninput="renderAllTx()"/>
+          <button onclick="clearAmtFilter()" style="padding:7px 10px;border-radius:var(--r-md);border:0.5px solid var(--border2);background:var(--bg3);color:var(--text3);font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0">✕ Amt</button>
+        </div>
         <div class="filter-tabs">
           <button class="filter-tab active" id="ftab-all" onclick="setTxFilter('all')">All</button>
           <button class="filter-tab" id="ftab-income" onclick="setTxFilter('income')">Income</button>
@@ -861,6 +964,22 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
         </div>
       </div>
       <div class="all-tx-list" id="all-tx-list"></div>
+    </div>
+
+    <!-- SAVINGS GOALS -->
+    <div class="page" id="page-goals">
+      <div class="status-spacer"></div>
+      <div class="page-header" style="display:flex;align-items:center;gap:12px">
+        <button onclick="goPage('home')" style="background:var(--bg3);border:0.5px solid var(--border);border-radius:10px;width:36px;height:36px;cursor:pointer;color:var(--text);font-size:18px;flex-shrink:0">‹</button>
+        <div>
+          <h1 id="lbl-goals-title">Savings Goals</h1>
+          <p id="lbl-goals-sub">Track your targets</p>
+        </div>
+      </div>
+      <div style="padding:0 16px">
+        <div id="goals-list"></div>
+        <button class="add-cat-btn" id="lbl-add-goal-btn" onclick="openAddGoal()">+ Add goal</button>
+      </div>
     </div>
 
   </div><!-- /pages -->
@@ -988,6 +1107,61 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
   </div>
 </div>
 
+<!-- PIN OVERLAY -->
+<div class="pin-overlay hidden" id="pin-overlay">
+  <div style="font-size:48px">🔐</div>
+  <div class="pin-title">FinFlow</div>
+  <div class="pin-sub" id="pin-prompt">Enter PIN</div>
+  <div class="pin-dots">
+    <div class="pin-dot" id="pd0"></div>
+    <div class="pin-dot" id="pd1"></div>
+    <div class="pin-dot" id="pd2"></div>
+    <div class="pin-dot" id="pd3"></div>
+  </div>
+  <div class="pin-keypad">
+    <button class="pin-key" onclick="pinInput('1')">1</button>
+    <button class="pin-key" onclick="pinInput('2')">2</button>
+    <button class="pin-key" onclick="pinInput('3')">3</button>
+    <button class="pin-key" onclick="pinInput('4')">4</button>
+    <button class="pin-key" onclick="pinInput('5')">5</button>
+    <button class="pin-key" onclick="pinInput('6')">6</button>
+    <button class="pin-key" onclick="pinInput('7')">7</button>
+    <button class="pin-key" onclick="pinInput('8')">8</button>
+    <button class="pin-key" onclick="pinInput('9')">9</button>
+    <div class="pin-key empty"></div>
+    <button class="pin-key" onclick="pinInput('0')">0</button>
+    <button class="pin-key del" onclick="pinBackspace()">⌫</button>
+  </div>
+</div>
+
+<!-- GOAL ADD MODAL -->
+<div class="modal-overlay" id="goal-add-overlay" onclick="if(event.target===this)closeGoalModalDirect()">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="lbl-goal-modal-title">Add Goal</div>
+    <input type="text" id="goal-emoji-input" placeholder="🎯 Emoji" maxlength="2"/>
+    <input type="text" id="goal-name-input" placeholder="Goal name (e.g. New laptop)"/>
+    <div class="amount-prefix"><input type="number" id="goal-target-input" placeholder="Target amount" inputmode="decimal" min="0"/></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeGoalModalDirect()" id="lbl-goal-cancel">Cancel</button>
+      <button class="btn-save" onclick="saveGoal()" id="lbl-goal-save">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- GOAL CONTRIBUTE MODAL -->
+<div class="modal-overlay" id="goal-contrib-overlay" onclick="if(event.target===this)closeContribModalDirect()">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="contrib-title">Add savings</div>
+    <div class="amount-prefix"><input type="number" id="contrib-amount-input" placeholder="Amount" inputmode="decimal" min="0"/></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeContribModalDirect()">Cancel</button>
+      <button class="btn-save" onclick="saveContrib()">Add</button>
+    </div>
+  </div>
+</div>
+
 <!-- CONFIRM MODAL -->
 <div class="modal-overlay" id="confirm-overlay">
   <div class="modal">
@@ -1084,7 +1258,7 @@ const i18n = {
     confirm_restore:'Replace all current data with this backup?',
     export:'Export to CSV',export_sub:'Download all transactions',
     clear:'Clear all data',clear_sub:'Cannot be undone',
-    version:'Version 3.0 · Personal use',privacy:'100% Private',privacy_sub:'Data stays on your device only',
+    version:'Version 3.1 · Personal use',privacy:'100% Private',privacy_sub:'Data stays on your device only',
     cats_title:'Categories',cats_sub:'Manage your lists',
     exp_cats:'Expense categories',inc_cats:'Income categories',
     add_exp_cat:'+ Add expense category',add_inc_cat:'+ Add income category',
@@ -1108,7 +1282,12 @@ const i18n = {
     rec_info:'Items are auto-added on the chosen day each month when you open the app.',
     rec_add_title:'Add Recurring',
     lbl_add_note:'Note',
-    day_filter:'📅 Filter by day'
+    day_filter:'📅 Filter by day',
+    appearance_section:'Appearance',theme_title:'Dark mode',theme_sub:'Toggle dark / light theme',
+    security_section:'Security',pin_title:'PIN Lock',pin_sub:'Protect with 4-digit PIN',
+    goals_q:'Goals',goals_title:'Savings Goals',goals_sub:'Track your targets',add_goal:'+ Add goal',
+    chart_nw:'Net worth trend',chart_nw_sub:'Running balance · last 6 months',
+    budget_lbl:'Budget'
   },
   th: {
     greeting_morning:'อรุณสวัสดิ์',greeting_afternoon:'สวัสดีตอนบ่าย',greeting_evening:'สวัสดีตอนเย็น',
@@ -1141,7 +1320,7 @@ const i18n = {
     confirm_restore:'แทนที่ข้อมูลปัจจุบันทั้งหมดด้วย backup นี้?',
     export:'ส่งออก CSV',export_sub:'ดาวน์โหลดรายการทั้งหมด',
     clear:'ลบข้อมูลทั้งหมด',clear_sub:'ไม่สามารถกู้คืนได้',
-    version:'เวอร์ชัน 3.0 · ใช้งานส่วนตัว',privacy:'ความเป็นส่วนตัว 100%',privacy_sub:'ข้อมูลอยู่ในอุปกรณ์ของคุณเท่านั้น',
+    version:'เวอร์ชัน 3.1 · ใช้งานส่วนตัว',privacy:'ความเป็นส่วนตัว 100%',privacy_sub:'ข้อมูลอยู่ในอุปกรณ์ของคุณเท่านั้น',
     cats_title:'หมวดหมู่',cats_sub:'จัดการรายการ',
     exp_cats:'หมวดหมู่รายจ่าย',inc_cats:'หมวดหมู่รายรับ',
     add_exp_cat:'+ เพิ่มหมวดหมู่รายจ่าย',add_inc_cat:'+ เพิ่มหมวดหมู่รายรับ',
@@ -1165,7 +1344,12 @@ const i18n = {
     rec_info:'รายการจะถูกเพิ่มอัตโนมัติในวันที่กำหนดของทุกเดือน เมื่อเปิดแอป',
     rec_add_title:'เพิ่มรายการประจำ',
     lbl_add_note:'หมายเหตุ',
-    day_filter:'📅 กรองตามวันที่'
+    day_filter:'📅 กรองตามวันที่',
+    appearance_section:'รูปแบบ',theme_title:'โหมดมืด',theme_sub:'สลับโหมดมืด / สว่าง',
+    security_section:'ความปลอดภัย',pin_title:'PIN Lock',pin_sub:'ป้องกันด้วย PIN 4 หลัก',
+    goals_q:'เป้าหมาย',goals_title:'เป้าหมายการออม',goals_sub:'ติดตามเป้าหมาย',add_goal:'+ เพิ่มเป้าหมาย',
+    chart_nw:'แนวโน้มเงินสุทธิ',chart_nw_sub:'ยอดสะสม · 6 เดือนย้อนหลัง',
+    budget_lbl:'งบประมาณ'
   }
 };
 
@@ -1214,6 +1398,7 @@ function goPage(p){
   if(p==='add'){ populateCatSelect(); const _n=new Date(); const _ft=document.getElementById('f-time'); if(_ft) _ft.value=`${String(_n.getHours()).padStart(2,'0')}:${String(_n.getMinutes()).padStart(2,'0')}`; document.getElementById('f-amount').focus(); }
   if(p==='categories') renderCategoryManager();
   if(p==='recurring') renderRecurringPage();
+  if(p==='goals') renderGoalsPage();
   if(p==='scan') resetScan();
   if(p==='all'){ txFilterType='all'; allTxMonth=currentMonth; allTxYear=currentYear; renderAllTx(); }
 }
@@ -1271,7 +1456,13 @@ function applyLang(){
     'lbl-exp-cats':'exp_cats','lbl-inc-cats':'inc_cats',
     'lbl-add-exp-cat':'add_exp_cat','lbl-add-inc-cat':'add_inc_cat',
     'nav-lbl-home':'nav_home','nav-lbl-scan':'nav_scan','nav-lbl-add':'nav_add',
-    'nav-lbl-analytics':'nav_analytics','nav-lbl-settings':'nav_settings'
+    'nav-lbl-analytics':'nav_analytics','nav-lbl-settings':'nav_settings',
+    'lbl-appearance-section':'appearance_section','lbl-theme-title':'theme_title','lbl-theme-sub':'theme_sub',
+    'lbl-security-section':'security_section','lbl-pin-title':'pin_title','lbl-pin-sub':'pin_sub',
+    'lbl-goals-q':'goals_q','lbl-goals-title':'goals_title','lbl-goals-sub':'goals_sub',
+    'lbl-add-goal-btn':'add_goal',
+    'lbl-chart-nw':'chart_nw','lbl-chart-nw-sub':'chart_nw_sub',
+    'lbl-hero-budget':'budget_lbl'
   };
   Object.entries(ids).forEach(([id,key])=>{ const el=document.getElementById(id); if(el) el.textContent=t(key); });
   updateGreeting();
@@ -1312,6 +1503,8 @@ function renderHome(){
   document.getElementById('hero-balance').style.color = bal<0?'var(--red)':'var(--text)';
   document.getElementById('hero-income').textContent = fmt(income);
   document.getElementById('hero-expense').textContent = fmt(expense);
+  renderHomeBudget(expense);
+  renderHomeInsight(income, expense);
   const list = document.getElementById('home-tx-list');
   const allSorted = [...allTxsForBal].sort((a,b)=>(new Date(b.date)-new Date(a.date))||b.id-a.id);
   const sorted = allSorted;
@@ -1360,6 +1553,7 @@ function renderHome(){
   if(badge) badge.textContent = allTxsForBal.length || '';
   const lbl = document.getElementById('lbl-see-all-top');
   if(lbl) lbl.textContent = t('see_all');
+  setTimeout(addSwipeToDelete, 50);
 }
 
 function deleteTx(id){
@@ -1556,6 +1750,10 @@ function renderAllTx(){
   if(txFilterType!=='all') txs = txs.filter(tx=>tx.type===txFilterType);
   if(query) txs = txs.filter(tx=>tx.name.toLowerCase().includes(query)||tx.cat.toLowerCase().includes(query)||(tx.note||'').toLowerCase().includes(query));
   if(dateFilter) txs = txs.filter(tx=>tx.date===dateFilter);
+  const amtMin=parseFloat(document.getElementById('amt-min')?.value||'');
+  const amtMax=parseFloat(document.getElementById('amt-max')?.value||'');
+  if(!isNaN(amtMin)&&amtMin>0) txs=txs.filter(tx=>tx.amount>=amtMin);
+  if(!isNaN(amtMax)&&amtMax>0) txs=txs.filter(tx=>tx.amount<=amtMax);
   txs.sort((a,b)=>(new Date(b.date)-new Date(a.date))||b.id-a.id);
   const monthIncome = txs.filter(tx=>tx.type==='income').reduce((s,tx)=>s+tx.amount,0);
   const monthExpense = txs.filter(tx=>tx.type==='expense').reduce((s,tx)=>s+tx.amount,0);
@@ -1601,6 +1799,13 @@ function renderAllTx(){
       </div>`).join('')}</div>
     </div>`;
   }).join('');
+  setTimeout(addSwipeToDelete, 50);
+}
+
+function clearAmtFilter(){
+  const mn=document.getElementById('amt-min'); if(mn) mn.value='';
+  const mx=document.getElementById('amt-max'); if(mx) mx.value='';
+  renderAllTx();
 }
 
 // =================== ADD TRANSACTION ===================
@@ -2012,6 +2217,7 @@ function renderAnalytics(){
   renderDonut(txs);
   renderBarChart();
   renderLineChart();
+  renderNWTrend();
   renderHeatmap();
   renderCatBars(txs);
   // reset cat bar toggle to expense when switching months
@@ -2204,7 +2410,8 @@ function backupData(){
     transactions:JSON.parse(localStorage.getItem('ff_tx')||'[]'),
     expense_cats:JSON.parse(localStorage.getItem('ff_exp_cats')||'[]'),
     income_cats:JSON.parse(localStorage.getItem('ff_inc_cats')||'[]'),
-    budget:localStorage.getItem('ff_budget')||'0'
+    budget:localStorage.getItem('ff_budget')||'0',
+    goals:JSON.parse(localStorage.getItem('ff_goals')||'[]')
   };
   const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
   const a=document.createElement('a');
@@ -2227,6 +2434,7 @@ function restoreData(e){
         if(data.expense_cats) localStorage.setItem('ff_exp_cats',JSON.stringify(data.expense_cats));
         if(data.income_cats) localStorage.setItem('ff_inc_cats',JSON.stringify(data.income_cats));
         if(data.budget) localStorage.setItem('ff_budget',data.budget);
+        if(data.goals) localStorage.setItem('ff_goals',JSON.stringify(data.goals));
         showToast(t('restore_done'),'📥');
         renderHome();
       },lang==='th'?'กู้คืน':'Restore');
@@ -2328,9 +2536,10 @@ function renderRecurringPage(){
         <div style="font-size:14px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.name}</div>
         <div style="font-size:11px;color:var(--text2);margin-top:2px">${r.cat} · ${dayLabel}</div>
       </div>
-      <div style="text-align:right;flex-shrink:0;margin-right:8px">
+      <div style="text-align:right;flex-shrink:0;margin-right:4px">
         <div style="font-size:15px;font-weight:700;color:${r.type==='income'?'var(--green)':'var(--red)'}">${r.type==='income'?'+':'-'}${fmt(r.amount)}</div>
       </div>
+      <button onclick="quickAddRecurring(${r.id})" style="background:var(--green-dim);border:0.5px solid var(--green);border-radius:8px;color:var(--green);font-size:13px;font-weight:700;cursor:pointer;padding:5px 10px;flex-shrink:0" title="Add now">+</button>
       <button onclick="deleteRecurringItem(${r.id})" style="background:none;border:none;color:var(--text3);font-size:16px;cursor:pointer;padding:4px;flex-shrink:0">✕</button>
     </div>`;
   }).join('');
@@ -2381,6 +2590,297 @@ function showToast(msg,icon='✓'){
   toastTimer=setTimeout(()=>document.getElementById('toast').classList.remove('show'),2500);
 }
 
+// =================== THEME ===================
+let isDark = localStorage.getItem('ff_theme') !== 'light';
+function toggleTheme(){
+  isDark = !isDark;
+  localStorage.setItem('ff_theme', isDark?'dark':'light');
+  applyTheme();
+}
+function applyTheme(){
+  if(isDark){
+    document.documentElement.removeAttribute('data-theme');
+    const mc=document.querySelector('meta[name="theme-color"]');if(mc)mc.content='#0A0A0A';
+  } else {
+    document.documentElement.setAttribute('data-theme','light');
+    const mc=document.querySelector('meta[name="theme-color"]');if(mc)mc.content='#F5F5F7';
+  }
+  const btn=document.getElementById('theme-toggle');if(btn)btn.classList.toggle('on',isDark);
+  const iconWrap=document.getElementById('lbl-theme-icon-wrap');if(iconWrap)iconWrap.textContent=isDark?'🌙':'☀️';
+}
+
+// =================== BUDGET NOTIFICATION ===================
+const _budgetNotifSent={p80:false,p100:false};
+function checkBudgetNotification(expense){
+  const budget=parseFloat(localStorage.getItem('ff_budget')||'0');
+  if(!budget) return;
+  const pct=expense/budget*100;
+  if(pct>=100&&!_budgetNotifSent.p100){
+    _budgetNotifSent.p100=true;
+    _sendBudgetNotif(lang==='th'?'⚠️ เกินงบประมาณ!':'⚠️ Over budget!', lang==='th'?`คุณใช้เกินงบ ${fmt(budget)} แล้ว`:`You exceeded your ${fmt(budget)} budget.`);
+  } else if(pct>=80&&!_budgetNotifSent.p80){
+    _budgetNotifSent.p80=true;
+    _sendBudgetNotif(lang==='th'?'⚡ ใกล้ถึงงบแล้ว':`⚡ Budget alert`, lang==='th'?`ใช้ไปแล้ว ${Math.round(pct)}% ของงบประมาณ`:`${Math.round(pct)}% of monthly budget used.`);
+  }
+}
+function _sendBudgetNotif(title,body){
+  if(!('Notification' in window)) return;
+  if(Notification.permission==='granted'){ new Notification(title,{body,icon:'icon.png'}); }
+  else if(Notification.permission!=='denied'){ Notification.requestPermission().then(p=>{ if(p==='granted') new Notification(title,{body,icon:'icon.png'}); }); }
+}
+
+// =================== HOME BUDGET BAR ===================
+function renderHomeBudget(expense){
+  const budget=parseFloat(localStorage.getItem('ff_budget')||'0');
+  const wrap=document.getElementById('hero-budget-wrap');
+  if(!wrap) return;
+  if(!budget){ wrap.style.display='none'; return; }
+  wrap.style.display='';
+  const pct=Math.min(100,Math.round(expense/budget*100));
+  const over=expense>budget;
+  const barColor=over?'var(--red)':pct>=80?'#F5A623':'var(--green)';
+  const pctEl=document.getElementById('hero-budget-pct');
+  const fillEl=document.getElementById('hero-budget-fill');
+  if(pctEl){ pctEl.textContent=pct+'%'; pctEl.style.color=barColor; }
+  if(fillEl){ fillEl.style.width=pct+'%'; fillEl.style.background=barColor; }
+  checkBudgetNotification(expense);
+}
+function renderHomeInsight(income,expense){
+  const el=document.getElementById('hero-insight');
+  if(!el) return;
+  const budget=parseFloat(localStorage.getItem('ff_budget')||'0');
+  if(budget&&(income>0||expense>0)){
+    const left=budget-expense;
+    if(left>=0){ el.textContent=lang==='th'?`เหลืองบ ${fmt(left)} เดือนนี้`:`${fmt(left)} budget left this month`; el.style.color=left/budget<0.2?'#F5A623':'var(--text3)'; }
+    else{ el.textContent=lang==='th'?`เกินงบ ${fmt(-left)}`:`Over budget by ${fmt(-left)}`; el.style.color='var(--red)'; }
+  } else if(income>0||expense>0){
+    const net=income-expense;
+    el.textContent=(net>=0?'+':'')+fmt(net)+' '+(lang==='th'?'เดือนนี้':'this month');
+    el.style.color='var(--text3)';
+  } else { el.textContent=''; }
+}
+
+// =================== SWIPE TO DELETE ===================
+function addSwipeToDelete(){
+  document.querySelectorAll('.tx-item').forEach(item=>{
+    if(item._swipeInit) return;
+    item._swipeInit=true;
+    let sx=0,moved=false;
+    item.addEventListener('touchstart',e=>{sx=e.touches[0].clientX;moved=false;item.style.transition='none';},{passive:true});
+    item.addEventListener('touchmove',e=>{
+      const dx=sx-e.touches[0].clientX;
+      if(dx>10){moved=true;item.style.transform=`translateX(-${Math.min(80,dx)}px)`;}
+    },{passive:true});
+    item.addEventListener('touchend',e=>{
+      item.style.transition='transform 0.2s';
+      const dx=sx-e.changedTouches[0].clientX;
+      if(moved&&dx>65){ const btn=item.querySelector('.tx-del');if(btn)btn.click(); }
+      else{ item.style.transform=''; }
+    });
+  });
+}
+
+// =================== NET WORTH TREND ===================
+function renderNWTrend(){
+  const svg=document.getElementById('nw-svg');
+  const labelsEl=document.getElementById('nw-trend-labels');
+  if(!svg) return;
+  const W=svg.parentElement.offsetWidth-4;
+  const H=60;
+  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  const allTxs=loadTx();
+  const points=[],labels=[];
+  for(let i=5;i>=0;i--){
+    let m=currentMonth-i,y=currentYear;
+    if(m<0){m+=12;y--;}
+    const upTo=new Date(y,m+1,0,23,59,59);
+    const bal=allTxs.filter(tx=>new Date(tx.date)<=upTo).reduce((s,tx)=>s+(tx.type==='income'?tx.amount:-tx.amount),0);
+    points.push(bal);
+    labels.push(lang==='th'?MONTH_NAMES_TH[m]:MONTH_NAMES_EN[m]);
+  }
+  const minVal=Math.min(...points);
+  const maxVal=Math.max(...points);
+  const range=maxVal-minVal||1;
+  const pad=10;
+  const xStep=(W-pad*2)/5;
+  const yOf=v=>H-pad-Math.round((v-minVal)/range*(H-pad*2));
+  const pts=points.map((v,i)=>`${pad+i*xStep},${yOf(v)}`).join(' ');
+  const last=points[5];
+  const col=last>=0?'var(--green)':'var(--red)';
+  const areaBot=H+4;
+  const areaPts=`${pad},${yOf(points[0])} ${pts} ${pad+5*xStep},${yOf(last)} ${pad+5*xStep},${areaBot} ${pad},${areaBot}`;
+  svg.innerHTML=`<defs><linearGradient id="nwg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${col}" stop-opacity="0.25"/><stop offset="100%" stop-color="${col}" stop-opacity="0"/></linearGradient></defs>
+    <polygon points="${areaPts}" fill="url(#nwg)"/>
+    <polyline points="${pts}" fill="none" stroke="${col}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+    ${points.map((v,i)=>`<circle cx="${pad+i*xStep}" cy="${yOf(v)}" r="3" fill="${col}"/>`).join('')}
+    <text x="${pad+5*xStep}" y="${Math.max(14,yOf(last)-6)}" text-anchor="end" fill="${col}" font-size="10" font-family="inherit" font-weight="700">${fmtShort(last)}</text>`;
+  if(labelsEl) labelsEl.innerHTML=labels.map(l=>`<span style="flex:1;text-align:center;font-size:9px;color:var(--text3)">${l}</span>`).join('');
+}
+
+// =================== QUICK ADD FROM RECURRING ===================
+function quickAddRecurring(id){
+  const r=loadRecurring().find(r=>r.id===id);
+  if(!r) return;
+  const now=new Date();
+  const dateStr=now.toISOString().split('T')[0];
+  const txs=loadTx();
+  txs.push({id:Date.now(),type:r.type,amount:r.amount,name:r.name,cat:r.cat,emoji:r.emoji,note:r.note||'',
+    date:dateStr,time:`${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`,recurringId:null});
+  saveTxData(txs);
+  showToast((lang==='th'?'เพิ่มแล้ว: ':'')+r.name,'✅');
+  renderHome();
+}
+
+// =================== SAVINGS GOALS ===================
+function loadGoals(){ return JSON.parse(localStorage.getItem('ff_goals')||'[]'); }
+function saveGoals(d){ localStorage.setItem('ff_goals',JSON.stringify(d)); }
+const GOAL_COLORS=['var(--green)','var(--blue)','var(--purple)','var(--amber)','var(--red)'];
+let _contribGoalId=null;
+
+function renderGoalsPage(){
+  const goals=loadGoals();
+  const container=document.getElementById('goals-list');
+  if(!container) return;
+  if(!goals.length){
+    container.innerHTML=`<div class="empty" style="padding:32px 0"><div class="empty-icon">🎯</div><div class="empty-title">${lang==='th'?'ยังไม่มีเป้าหมาย':'No goals yet'}</div><div class="empty-sub">${lang==='th'?'ตั้งเป้าหมายการออมของคุณ':'Set a target and track your progress'}</div></div>`;
+    return;
+  }
+  container.innerHTML=goals.map((g,i)=>{
+    const pct=Math.min(100,g.target>0?Math.round(g.saved/g.target*100):0);
+    const col=GOAL_COLORS[i%GOAL_COLORS.length];
+    const reached=g.saved>=g.target;
+    return `<div class="goal-card">
+      <div class="goal-card-header">
+        <span class="goal-emoji-big">${g.emoji||'🎯'}</span>
+        <span class="goal-name">${g.name}</span>
+        <button class="goal-del-btn" onclick="deleteGoal(${g.id})">✕</button>
+      </div>
+      <div class="goal-amounts-row">
+        <span class="goal-saved-amt" style="color:${col}">${fmt(g.saved)}</span>
+        <span class="goal-target-lbl">of ${fmt(g.target)}</span>
+      </div>
+      <div class="goal-track"><div class="goal-fill" style="width:${pct}%;background:${col}"></div></div>
+      <div class="goal-meta">
+        <span>${pct}% complete</span>
+        ${reached?`<span style="color:${col};font-weight:700">🎉 ${lang==='th'?'ถึงเป้าหมายแล้ว!':'Goal reached!'}</span>`:`<span>${fmt(g.target-g.saved)} ${lang==='th'?'อีก':'to go'}</span>`}
+      </div>
+      ${!reached?`<button class="goal-contrib-btn" style="border-color:${col};color:${col}" onclick="openContributeGoal(${g.id})">+ ${lang==='th'?'เพิ่มเงินออม':'Add savings'}</button>`:''}
+    </div>`;
+  }).join('');
+}
+
+function openAddGoal(){
+  const emoji=document.getElementById('goal-emoji-input');
+  const name=document.getElementById('goal-name-input');
+  const tgt=document.getElementById('goal-target-input');
+  if(emoji)emoji.value='🎯';if(name)name.value='';if(tgt)tgt.value='';
+  document.getElementById('goal-add-overlay').classList.add('open');
+  setTimeout(()=>document.getElementById('goal-name-input').focus(),300);
+}
+function closeGoalModalDirect(){ document.getElementById('goal-add-overlay').classList.remove('open'); }
+function saveGoal(){
+  const emoji=(document.getElementById('goal-emoji-input').value||'🎯').trim()||'🎯';
+  const name=(document.getElementById('goal-name-input').value||'').trim();
+  const target=parseFloat(document.getElementById('goal-target-input').value||'0');
+  if(!name||!target||target<=0){ showToast(t('fill_all'),'⚠️'); return; }
+  const goals=loadGoals();
+  goals.push({id:Date.now(),emoji,name,target,saved:0});
+  saveGoals(goals);
+  closeGoalModalDirect();
+  renderGoalsPage();
+  showToast(lang==='th'?'เพิ่มเป้าหมายแล้ว':'Goal added','🎯');
+}
+function deleteGoal(id){
+  showConfirm(lang==='th'?'ลบเป้าหมายนี้?':'Delete this goal?',()=>{
+    saveGoals(loadGoals().filter(g=>g.id!==id));
+    renderGoalsPage();
+    showToast(t('deleted'),'✓');
+  });
+}
+function openContributeGoal(id){
+  _contribGoalId=id;
+  const g=loadGoals().find(g=>g.id===id);if(!g)return;
+  const el=document.getElementById('contrib-title');
+  if(el)el.textContent=lang==='th'?`ออมไปที่: ${g.name}`:`Save towards: ${g.name}`;
+  const inp=document.getElementById('contrib-amount-input');if(inp)inp.value='';
+  document.getElementById('goal-contrib-overlay').classList.add('open');
+  setTimeout(()=>document.getElementById('contrib-amount-input').focus(),300);
+}
+function closeContribModalDirect(){ document.getElementById('goal-contrib-overlay').classList.remove('open'); }
+function saveContrib(){
+  const amt=parseFloat(document.getElementById('contrib-amount-input').value||'0');
+  if(!amt||amt<=0){ showToast(t('fill_all'),'⚠️'); return; }
+  const goals=loadGoals();
+  const idx=goals.findIndex(g=>g.id===_contribGoalId);
+  if(idx===-1) return;
+  goals[idx].saved=Math.min(goals[idx].target,goals[idx].saved+amt);
+  saveGoals(goals);
+  closeContribModalDirect();
+  renderGoalsPage();
+  if(goals[idx].saved>=goals[idx].target) showToast(lang==='th'?'ถึงเป้าหมายแล้ว! 🎉':'Goal reached! 🎉','🎉');
+  else showToast(lang==='th'?'เพิ่มเงินออมแล้ว':'Savings added','✅');
+}
+
+// =================== PIN LOCK ===================
+let pinBuffer='',pinMode='verify',pinTemp='';
+function initPin(){
+  const savedPin=localStorage.getItem('ff_pin');
+  const enabled=localStorage.getItem('ff_pin_enabled')==='true';
+  const btn=document.getElementById('pin-toggle');if(btn)btn.classList.toggle('on',enabled&&!!savedPin);
+  if(enabled&&savedPin){
+    const overlay=document.getElementById('pin-overlay');
+    if(overlay){overlay.classList.remove('hidden');pinBuffer='';pinMode='verify';updatePinDots();}
+    const prompt=document.getElementById('pin-prompt');if(prompt)prompt.textContent=lang==='th'?'ใส่ PIN':'Enter PIN';
+  }
+}
+function togglePinSetup(){
+  const enabled=localStorage.getItem('ff_pin_enabled')==='true';
+  const savedPin=localStorage.getItem('ff_pin');
+  if(enabled&&savedPin){
+    showConfirm(lang==='th'?'ปิด PIN lock?':'Disable PIN lock?',()=>{
+      localStorage.removeItem('ff_pin_enabled');localStorage.removeItem('ff_pin');
+      const btn=document.getElementById('pin-toggle');if(btn)btn.classList.remove('on');
+      showToast(lang==='th'?'ปิด PIN แล้ว':'PIN disabled','🔓');
+    });
+  } else {
+    pinMode='set';pinTemp='';pinBuffer='';
+    const overlay=document.getElementById('pin-overlay');if(overlay)overlay.classList.remove('hidden');
+    const prompt=document.getElementById('pin-prompt');if(prompt){prompt.textContent=lang==='th'?'ตั้ง PIN ใหม่ (4 ตัวเลข)':'Set new PIN (4 digits)';prompt.style.color='';}
+    updatePinDots();
+  }
+}
+function pinInput(d){
+  if(pinBuffer.length>=4)return;
+  pinBuffer+=d;updatePinDots();
+  if(pinBuffer.length===4)setTimeout(processPinEntry,180);
+}
+function pinBackspace(){ pinBuffer=pinBuffer.slice(0,-1);updatePinDots(); }
+function updatePinDots(){ for(let i=0;i<4;i++){const d=document.getElementById('pd'+i);if(d)d.classList.toggle('filled',i<pinBuffer.length);} }
+function processPinEntry(){
+  const savedPin=localStorage.getItem('ff_pin');
+  const prompt=document.getElementById('pin-prompt');
+  if(pinMode==='verify'){
+    if(pinBuffer===savedPin){ document.getElementById('pin-overlay').classList.add('hidden'); }
+    else {
+      pinBuffer='';updatePinDots();
+      if(prompt){prompt.textContent=lang==='th'?'PIN ไม่ถูก ลองอีกครั้ง':'Wrong PIN, try again';prompt.style.color='var(--red)';setTimeout(()=>{prompt.style.color='';prompt.textContent=lang==='th'?'ใส่ PIN':'Enter PIN';},1200);}
+    }
+  } else if(pinMode==='set'){
+    pinTemp=pinBuffer;pinBuffer='';pinMode='confirm';updatePinDots();
+    if(prompt){prompt.textContent=lang==='th'?'ยืนยัน PIN อีกครั้ง':'Confirm PIN';prompt.style.color='';}
+  } else if(pinMode==='confirm'){
+    if(pinBuffer===pinTemp){
+      localStorage.setItem('ff_pin',pinBuffer);localStorage.setItem('ff_pin_enabled','true');
+      const btn=document.getElementById('pin-toggle');if(btn)btn.classList.add('on');
+      document.getElementById('pin-overlay').classList.add('hidden');
+      showToast(lang==='th'?'ตั้ง PIN แล้ว':'PIN set','🔐');
+    } else {
+      pinBuffer='';pinTemp='';pinMode='set';updatePinDots();
+      if(prompt){prompt.textContent=lang==='th'?'PIN ไม่ตรงกัน ลองใหม่':'PINs don\'t match, try again';prompt.style.color='var(--red)';setTimeout(()=>{prompt.style.color='';prompt.textContent=lang==='th'?'ตั้ง PIN ใหม่ (4 ตัวเลข)':'Set new PIN (4 digits)';},1200);}
+    }
+  }
+}
+
 // =================== INIT ===================
 document.addEventListener('DOMContentLoaded',()=>{
   const _now=new Date();
@@ -2392,9 +2892,11 @@ document.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('lang-th').classList.toggle('active',lang==='th');
   document.getElementById('lang-en').classList.toggle('active',lang==='en');
   setTxType('income');
+  applyTheme();
   applyLang();
   applyRecurring();
   renderHome();
+  initPin();
 });
 </script>
 </body>
