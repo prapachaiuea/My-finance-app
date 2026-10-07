@@ -14,7 +14,10 @@ A mobile-first personal finance tracker — client-side only, installable as a h
 - **Transactions** — income, expense and **transfer** (between accounts); search across all months, day / amount / type filters, swipe-to-delete with **undo**
 - **Accounts / wallets** — cash, bank, cards with opening balances (single account works exactly like before)
 - **Budgets** — monthly limit plus per-category limits, alerts at 80 % / 100 %
-- **Analytics & report** — category donut, 6-month trends, balance trend, heat-map, monthly / yearly summary you can print or save as PDF
+- **Analytics** — every chart is tappable and drills down to the matching transactions; fair same-period comparison while a month is running; end-of-month forecast that does not multiply one-off big bills; changes per category, weekday pattern, most frequent / biggest things you pay for, budget suggestion, over-income warning
+- **Paybacks** — mark an income category (e.g. money friends pay back) as *refund*: it reduces spending instead of inflating income and savings rate
+- **Lists** — filter by category / account / day / amount, select several to delete or re-categorise (with undo), one-tap *frequent* shortcuts and *repeat* a transaction
+- **Report** — monthly / yearly summary you can print or save as PDF
 - **Recurring transactions** — back-fills missed months, never adds the same month twice (even if you delete one), day 29–31 handled
 - **Savings goals** — add, withdraw, edit
 - **Safety** — hashed PIN with lock-out and auto-lock, backup / restore (JSON, v1 files still load), CSV export, automatic snapshot so "clear all" and "restore" can be undone, storage-persistence request

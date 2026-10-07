@@ -6,6 +6,7 @@
 
   function boot() {
     S.migrate();
+    root.C.setRefunds(S.refundNames()); S.on('change', k => { if (k === S.K.inc) root.C.setRefunds(S.refundNames()); });
     I18N.setLang(S.rawGet(S.K.lang) === 'en' ? 'en' : 'th');
     S.on('error', () => UI.toast(t('storage_full'), '⚠️', { ms: 6000 }));
     UI.applyTheme(); UI.applyLang();

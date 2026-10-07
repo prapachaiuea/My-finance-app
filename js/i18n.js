@@ -72,7 +72,7 @@
       an_title: 'วิเคราะห์', an_sub: 'สรุปการใช้จ่ายของคุณ',
       total_spent: 'รายจ่ายรวม', vs_last: 'เทียบเดือนก่อน', savings_rate: 'อัตราการออม', avg_day: 'เฉลี่ย/วัน', biggest: 'จ่ายสูงสุด', tx_count: 'จำนวนรายการ',
       all_net: 'ยอดสะสมทั้งหมด', all_records: 'รายการทั้งหมด',
-      c_donut: 'รายจ่ายตามหมวดหมู่', c_donut_sub: 'สรุปของเดือนที่เลือก', c_bar: 'แนวโน้มรายจ่าย', c_bar_sub: '6 เดือนล่าสุด',
+      c_donut: 'สัดส่วนตามหมวดหมู่', c_donut_sub: 'เดือนที่เลือก · แตะเพื่อดูรายการ', c_bar: 'แนวโน้มรายจ่าย', c_bar_sub: '6 เดือนล่าสุด',
       c_line: 'รายรับเทียบรายจ่าย', c_line_sub: '6 เดือนล่าสุด', c_nw: 'แนวโน้มยอดเงิน', c_nw_sub: 'ยอดสะสม 6 เดือนล่าสุด',
       c_heat: 'ปฏิทินการใช้จ่าย', c_heat_sub: 'สีเข้ม = ใช้จ่ายมาก', c_top: 'หมวดหมู่สูงสุด', c_top_sub: 'ตามยอดเงินของเดือนที่เลือก',
       out: 'จ่าย', in: 'รับ', no_data: 'ไม่มีข้อมูล', no_exp_month: 'เดือนนี้ไม่มีรายจ่าย', no_inc_month: 'เดือนนี้ไม่มีรายรับ',
@@ -142,7 +142,20 @@
 
       /* misc */
       install_hint: 'ติดตั้งลงหน้าจอโฮม: แตะแชร์ → "เพิ่มลงหน้าจอโฮม" เพื่อใช้งานออฟไลน์และข้อมูลไม่ถูกล้าง',
-      months_short: ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'],
+      /* v4.1 analytics */
+      an_vs_period: 'เทียบ {d} วันแรกของเดือนก่อน', an_refund_sub: 'หักเงินคืนแล้ว {v}',
+      fc_lump: 'รวมก้อนใหญ่ที่จ่ายไปแล้ว {v} (ไม่คูณเพิ่มตามจำนวนวัน และไม่รวมก้อนใหญ่ที่อาจเกิดอีก)',
+      fc_title: 'คาดการณ์สิ้นเดือน', fc_sub: 'จากค่าเฉลี่ยต่อวันที่ผ่านมา', fc_spent: 'ใช้ไปแล้ว', fc_projected: 'คาดว่าทั้งเดือนจะใช้', fc_per_day: 'เฉลี่ยวันละ {v}',
+      fc_vs_last: 'เทียบรายจ่ายเดือนก่อน: {p}', fc_left_income: 'จากรายรับเดือนนี้ จะเหลือประมาณ {v}', fc_over_income: 'จะเกินรายรับเดือนนี้ประมาณ {v}', fc_budget_ok: 'อยู่ในงบ (เหลือประมาณ {v})', fc_budget_over: 'จะเกินงบประมาณ {v}',
+      al_over_income: 'เดือนนี้จ่ายเกินรายรับอยู่ {v}', al_set_budget: 'ยังไม่ได้ตั้งงบ — แนะนำ {v}/เดือน (เฉลี่ย 3 เดือนล่าสุด) แตะเพื่อตั้ง', al_budget_set: 'ตั้งงบ {v} ต่อเดือนแล้ว', al_budget_q: 'ตั้งงบประมาณเดือนละ {v}?',
+      c_weekday: 'จ่ายเฉลี่ยตามวันในสัปดาห์', c_weekday_sub: '3 เดือนล่าสุด · เฉลี่ยต่อวัน', c_labels: 'จ่ายบ่อย / จ่ายมากสุด', c_labels_sub: 'จัดกลุ่มตามที่คุณจด (โน้ต/ชื่อ) ในเดือนที่เลือก · แตะเพื่อดูรายการ',
+      lbl_top_amount: 'มากสุด', lbl_top_count: 'บ่อยสุด', times_n: '{n} ครั้ง', view_tx: 'ดูรายการ', info_line: '{a} · {v} · {n} รายการ', tap_hint: 'แตะแท่ง/ช่องเพื่อดูยอด', no_spend: 'ไม่มีรายจ่าย', vs_prev_cat: 'เทียบช่วงก่อน',
+      legend_tap: 'แตะเพื่อดูรายการ',
+      /* v4.1 lists */
+      f_cat: 'ทุกหมวดหมู่', f_acct: 'ทุกบัญชี', sel_mode: 'เลือก', sel_n: 'เลือก {n}', sel_all: 'ทั้งหมด', sel_del: 'ลบ', sel_cat: 'เปลี่ยนหมวด', sel_done: 'เสร็จ',
+      bulk_del_confirm: 'ลบ {n} รายการที่เลือก?', bulk_deleted: 'ลบแล้ว {n} รายการ', bulk_cat_title: 'เปลี่ยนหมวดของ {n} รายการ', bulk_mixed: 'เลือกรายการประเภทเดียวกัน (รายรับหรือรายจ่าย) จึงจะเปลี่ยนหมวดได้', bulk_done: 'เปลี่ยนหมวดแล้ว {n} รายการ',
+      add_quick: 'ใช้บ่อย', repeat: 'ทำซ้ำ', repeat_done: 'คัดลอกมาให้แล้ว ตรวจจำนวน/วันที่แล้วบันทึก',
+      cat_refund: 'เงินคืน (หักจากรายจ่าย)', cat_refund_sub: 'เงินที่เพื่อนโอนคืน ไม่นับเป็นรายได้ แต่หักออกจากรายจ่าย', cat_refund_tag: '↩ เงินคืน', rep_refunds: 'หักเงินคืน',      months_short: ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'],
       months_long: ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'],
       wd_short: ['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'], wd_long: ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'],
       error_generic: 'เกิดข้อผิดพลาด ลองใหม่อีกครั้ง'
@@ -212,7 +225,7 @@
       an_title: 'Analytics', an_sub: 'Your spending insights',
       total_spent: 'Total spent', vs_last: 'vs last month', savings_rate: 'Savings rate', avg_day: 'Avg / day', biggest: 'Biggest expense', tx_count: 'Transactions',
       all_net: 'All-time net', all_records: 'Total records',
-      c_donut: 'Spending by category', c_donut_sub: 'Selected month', c_bar: 'Spending trend', c_bar_sub: 'Last 6 months',
+      c_donut: 'Share by category', c_donut_sub: 'Selected month · tap to see transactions', c_bar: 'Spending trend', c_bar_sub: 'Last 6 months',
       c_line: 'Income vs expense', c_line_sub: 'Last 6 months', c_nw: 'Balance trend', c_nw_sub: 'Running balance, last 6 months',
       c_heat: 'Daily spending', c_heat_sub: 'Darker = more spent', c_top: 'Top categories', c_top_sub: 'By amount, selected month',
       out: 'Out', in: 'In', no_data: 'No data', no_exp_month: 'No expenses this month', no_inc_month: 'No income this month',
@@ -273,7 +286,20 @@
       notif_denied: 'Notifications are blocked by the browser (in-app alerts still work)',
 
       install_hint: 'Install to Home Screen: tap Share → "Add to Home Screen" for offline use and safer storage.',
-      months_short: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+      /* v4.1 analytics */
+      an_vs_period: 'vs first {d} days of last month', an_refund_sub: 'net of {v} refunds',
+      fc_lump: 'Includes {v} of big one-off bills already paid (not multiplied by days left; further big bills are not predicted)',
+      fc_title: 'End-of-month forecast', fc_sub: 'Based on your daily average so far', fc_spent: 'Spent so far', fc_projected: 'Projected for the month', fc_per_day: '{v} per day',
+      fc_vs_last: 'vs last month’s spending: {p}', fc_left_income: 'Of this month’s income you would keep about {v}', fc_over_income: 'You would overspend this month’s income by about {v}', fc_budget_ok: 'Within budget (about {v} left)', fc_budget_over: 'Would exceed the budget by {v}',
+      al_over_income: 'You are spending more than this month’s income by {v}', al_set_budget: 'No budget yet — suggested {v}/month (3-month average). Tap to set', al_budget_set: 'Monthly budget set to {v}', al_budget_q: 'Set a monthly budget of {v}?',
+      c_weekday: 'Average spend by weekday', c_weekday_sub: 'Last 3 months · per day', c_labels: 'Most frequent / biggest', c_labels_sub: 'Grouped by what you typed (note/name), selected month · tap to see transactions',
+      lbl_top_amount: 'Biggest', lbl_top_count: 'Most often', times_n: '{n}×', view_tx: 'View transactions', info_line: '{a} · {v} · {n} items', tap_hint: 'Tap a bar / day for details', no_spend: 'No spending', vs_prev_cat: 'vs previous period',
+      legend_tap: 'Tap to see transactions',
+      /* v4.1 lists */
+      f_cat: 'All categories', f_acct: 'All accounts', sel_mode: 'Select', sel_n: '{n} selected', sel_all: 'All', sel_del: 'Delete', sel_cat: 'Change category', sel_done: 'Done',
+      bulk_del_confirm: 'Delete the {n} selected transactions?', bulk_deleted: '{n} deleted', bulk_cat_title: 'Change category of {n} transactions', bulk_mixed: 'Select only income or only expenses to change their category', bulk_done: 'Category changed for {n}',
+      add_quick: 'Frequent', repeat: 'Repeat', repeat_done: 'Copied — check amount/date, then save',
+      cat_refund: 'Refund (reduces spending)', cat_refund_sub: 'Money friends pay back: not counted as income, but deducted from spending', cat_refund_tag: '↩ refund', rep_refunds: 'Refunds deducted',      months_short: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
       months_long: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
       wd_short: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'], wd_long: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
       error_generic: 'Something went wrong. Please try again.'

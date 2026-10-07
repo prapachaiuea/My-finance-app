@@ -82,7 +82,7 @@
   let catEdit = null;     // {type, old}
   function renderCategories() {
     ['expense', 'income'].forEach(type => {
-      $(type === 'expense' ? 'exp-cat-grid' : 'inc-cat-grid').innerHTML = S.cats(type).map(c => `<div class="cat-chip" data-act="catEdit" data-arg="${type}|${esc(c.name)}" role="button" tabindex="0"><span class="cat-chip-emoji">${esc(c.emoji)}</span><span class="cat-chip-name">${esc(I18N.catLabel(c.name))}</span><button class="cat-chip-del" data-act="catDelete" data-arg="${type}|${esc(c.name)}" aria-label="${esc(t('delete'))}">✕</button></div>`).join('');
+      $(type === 'expense' ? 'exp-cat-grid' : 'inc-cat-grid').innerHTML = S.cats(type).map(c => `<div class="cat-chip" data-act="catEdit" data-arg="${type}|${esc(c.name)}" role="button" tabindex="0"><span class="cat-chip-emoji">${esc(c.emoji)}</span><span class="cat-chip-name">${esc(I18N.catLabel(c.name))}${c.refund ? `<span class="tx-badge">${esc(t('cat_refund_tag'))}</span>` : ''}</span><button class="cat-chip-del" data-act="catDelete" data-arg="${type}|${esc(c.name)}" aria-label="${esc(t('delete'))}">✕</button></div>`).join('');
     });
   }
   UI.page('categories', { show: renderCategories });
@@ -94,6 +94,7 @@
     $('cat-emoji').value = c ? c.emoji : ''; $('cat-name').value = c ? c.name : ''; $('cat-note').hidden = !old;
     UI.openSheet('sheet-cat'); setTimeout(() => $('cat-name').focus(), 250);
   }
+  UI.act('catRefundToggle', () => { catEdit.refund = !catEdit.refund; cat-refund.classList.toggle('on', catEdit.refund); cat-refund.setAttribute('aria-checked', catEdit.refund); });
   UI.act('catAdd', type => openCat(type, null));
   UI.act('catEdit', (a, el, e) => { if (e.target.closest('.cat-chip-del')) return; const [type, name] = splitArg(a); openCat(type, name); });
   UI.act('catSave', () => {
@@ -102,7 +103,7 @@
     const cats = S.cats(type).map(c => ({ ...c }));
     if (cats.some(c => c.name.toLowerCase() === name.toLowerCase() && c.name !== old)) return UI.toast(t('cat_exists'), '⚠️');
     if (old) {
-      const c = cats.find(x => x.name === old); c.name = name; c.emoji = emoji; S.setCats(type, cats);
+      const c = cats.find(x => x.name === old); c.name = name; c.emoji = emoji; if (type === 'income') { if (catEdit.refund) c.refund = true; else delete c.refund; } S.setCats(type, cats);
       if (old !== name || true) {   // propagate rename/emoji to existing transactions, budgets and learned payees
         const txs = S.txs().map(x => (x.type === type && x.cat === old) ? { ...x, cat: name, emoji } : x); S.setTxs(txs);
         if (old !== name) {
@@ -110,7 +111,7 @@
           const L = S.learn(); ['byAcct', 'byName'].forEach(k => Object.values(L[k] || {}).forEach(e => { if (e.type === type && e.cat === old) e.cat = name; })); S.setLearn(L);
         }
       }
-    } else { cats.push({ emoji, name }); S.setCats(type, cats); }
+    } else { cats.push(type === 'income' && catEdit.refund ? { emoji, name, refund: true } : { emoji, name }); S.setCats(type, cats); }
     UI.closeSheet('sheet-cat'); renderCategories(); UI.toast(t('saved'), '✅');
   });
   UI.act('catDelete', async a => {

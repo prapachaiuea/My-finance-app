@@ -50,13 +50,12 @@
   function openSheet(id) {
     const el = $(id); if (!el) return;
     el.classList.add('open');
-    if (!openSheets.includes(id)) { openSheets.push(id); try { history.pushState({ p: current, sheet: id }, ''); } catch (_) { } }
+    if (!openSheets.includes(id)) openSheets.push(id);       // no history entry: the Android back button is intercepted in the popstate handler instead
   }
   function closeSheet(id, fromPop) {
     const el = $(id); if (!el) return;
     el.classList.remove('open');
     const i = openSheets.indexOf(id); if (i >= 0) openSheets.splice(i, 1);
-    if (!fromPop && history.state && history.state.sheet === id) { try { history.back(); } catch (_) { } }
   }
   function closeAllSheets(silent) { openSheets.slice().forEach(id => { $(id).classList.remove('open'); }); openSheets.length = 0; }
   UI.openSheet = openSheet; UI.closeSheet = closeSheet;
@@ -134,12 +133,16 @@
 
   UI.dayLabel = ds => ds === U.dateStr() ? t('today') : ds === U.addDays(U.dateStr(), -1) ? t('yesterday') : I18N.weekday(ds) + ' ' + I18N.dateLabel(ds, { noYear: true });
 
-  UI.txRow = tx => {
+  UI.txRow = (tx, opt) => {
     const multi = S.accts().length > 1;
     let meta = esc(I18N.catLabel(tx.cat) || (tx.type === 'transfer' ? t('transfer_cat') : '')) + (tx.time ? `<span class="dot">·</span>${esc(tx.time)}` : '');
     if (tx.type === 'transfer') meta = esc(t('transfer')) + (multi || tx.toAcct ? `<span class="dot">·</span>${esc(UI.acctName(tx.acct))} → ${tx.toAcct ? esc(UI.acctName(tx.toAcct)) : '↗'}` : '') + (tx.time ? `<span class="dot">·</span>${esc(tx.time)}` : '');
     else if (multi) meta += `<span class="dot">·</span>${esc(UI.acctName(tx.acct))}`;
     const sign = tx.type === 'income' ? '+' : tx.type === 'expense' ? '−' : '';
+    if (opt && opt.selMode) {                              // multi-select: a tick box instead of swipe
+      const on = opt.sel && opt.sel.has(tx.id);
+      return `<div class="tx-swipe"><div class="tx-item sel-row${on ? ' on' : ''}" data-id="${tx.id}" data-act="selPick" data-arg="${tx.id}" role="checkbox" aria-checked="${!!on}" tabindex="0"><span class="sel-box">${on ? '✓' : ''}</span><div class="tx-emoji ${tx.type}">${esc(tx.emoji || '💳')}</div><div class="tx-info"><div class="tx-name">${esc(tx.name || I18N.catLabel(tx.cat))}</div><div class="tx-meta">${meta}</div></div><div class="tx-right"><div class="tx-amount ${tx.type}">${sign}${U.fmt(tx.amount)}</div></div></div></div>`;
+    }
     // .tx-swipe = clipping wrapper; .swipe-bg = red action layer revealed underneath; .tx-item = the card that slides
     return `<div class="tx-swipe" data-id="${tx.id}">
       <div class="swipe-bg" data-act="swipeDelete" data-arg="${tx.id}" role="button" aria-label="${esc(t('delete'))}"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg><span>${esc(t('swipe_delete'))}</span></div>
@@ -150,13 +153,13 @@
       </div>
     </div>`;
   };
-  UI.groupedList = list => {
+  UI.groupedList = (list, opt) => {
     const seen = [], g = {};
     list.forEach(x => { if (!g[x.date]) { g[x.date] = []; seen.push(x.date); } g[x.date].push(x); });
     return seen.map(d => {
       const day = g[d]; let net = 0; day.forEach(x => { if (x.type === 'income') net += Math.round(x.amount * 100); else if (x.type === 'expense') net -= Math.round(x.amount * 100); });
       net /= 100;
-      return `<div class="tx-day-block"><div class="tx-day-hdr"><span class="tx-day-lbl">${esc(UI.dayLabel(d))}</span><span class="tx-day-net ${net >= 0 ? 'pos' : 'neg'}">${net >= 0 ? '+' : '−'}${U.fmt(net)}</span></div><div class="tx-day-items">${day.map(UI.txRow).join('')}</div></div>`;
+      return `<div class="tx-day-block"><div class="tx-day-hdr"><span class="tx-day-lbl">${esc(UI.dayLabel(d))}</span><span class="tx-day-net ${net >= 0 ? 'pos' : 'neg'}">${net >= 0 ? '+' : '−'}${U.fmt(net)}</span></div><div class="tx-day-items">${day.map(x => UI.txRow(x, opt)).join('')}</div></div>`;
     }).join('');
   };
 

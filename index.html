@@ -114,6 +114,7 @@
           <button type="button" class="type-btn expense-t active" data-act="addType" data-arg="expense" data-i18n="t_expense"></button>
           <button type="button" class="type-btn transfer-t" data-act="addType" data-arg="transfer" data-i18n="t_transfer"></button>
         </div>
+        <div class="quick-chips" id="add-quick" hidden></div>
         <div class="field">
           <label class="field-label" for="f-amount" data-i18n="amount"></label>
           <div class="amount-prefix"><input class="amount-field" type="text" id="f-amount" inputmode="decimal" placeholder="0.00" maxlength="12"/></div>
@@ -190,9 +191,10 @@
         </div>
       </div>
       <div class="analytics-wrap">
+        <div id="an-alerts"></div>
         <div class="stat-row">
-          <div class="stat-box"><div class="stat-box-label" data-i18n="total_spent"></div><div class="stat-box-val red" id="an-expense">฿0</div></div>
-          <div class="stat-box"><div class="stat-box-label" data-i18n="vs_last"></div><div class="stat-box-val" id="an-vs">—</div></div>
+          <div class="stat-box"><div class="stat-box-label" data-i18n="total_spent"></div><div class="stat-box-val red" id="an-expense">฿0</div><div class="stat-sub" id="an-expense-sub" hidden></div></div>
+          <div class="stat-box"><div class="stat-box-label" id="an-vs-label" data-i18n="vs_last"></div><div class="stat-box-val" id="an-vs">—</div><div class="stat-sub" id="an-vs-sub" hidden></div></div>
         </div>
         <div class="stat-row">
           <div class="stat-box"><div class="stat-box-label" data-i18n="savings_rate"></div><div class="stat-box-val" id="an-savings-rate">—</div></div>
@@ -206,6 +208,11 @@
           <div class="stat-box"><div class="stat-box-label" data-i18n="all_net"></div><div class="stat-box-val" id="an-net-worth">—</div></div>
           <div class="stat-box"><div class="stat-box-label" data-i18n="all_records"></div><div class="stat-box-val" id="an-all-count">—</div></div>
         </div>
+        <div class="chart-card" id="forecast-card" hidden>
+          <div class="chart-title" data-i18n="fc_title"></div>
+          <div class="chart-subtitle" data-i18n="fc_sub"></div>
+          <div id="forecast-body"></div>
+        </div>
         <div class="chart-card" id="budget-card" hidden>
           <div class="chart-title" data-i18n="budget_card"></div>
           <div class="chart-subtitle" data-i18n="budget_card_sub"></div>
@@ -213,8 +220,10 @@
           <div id="cat-budget-content" style="margin-top:14px"></div>
         </div>
         <div class="chart-card">
-          <div class="chart-title" data-i18n="c_donut"></div>
-          <div class="chart-subtitle" data-i18n="c_donut_sub"></div>
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;gap:8px">
+            <div><div class="chart-title" data-i18n="c_donut"></div><div class="chart-subtitle" data-i18n="c_donut_sub"></div></div>
+            <div class="seg" id="cat-seg"><button data-act="catBarType" data-arg="expense" class="active" data-i18n="out"></button><button data-act="catBarType" data-arg="income" data-i18n="in"></button></div>
+          </div>
           <div class="donut-wrap">
             <svg class="donut-svg" width="110" height="110" viewBox="0 0 110 110" id="donut-svg" role="img"></svg>
             <div class="donut-legend" id="donut-legend"></div>
@@ -224,15 +233,15 @@
           <div class="chart-title" data-i18n="c_bar"></div>
           <div class="chart-subtitle" data-i18n="c_bar_sub"></div>
           <div class="bar-chart" id="bar-chart"></div>
+          <div class="pick-info" id="bar-info" data-i18n="tap_hint"></div>
         </div>
         <div class="chart-card">
-          <div class="chart-title" data-i18n="c_line"></div>
-          <div class="chart-subtitle" data-i18n="c_line_sub"></div>
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px"><div><div class="chart-title" data-i18n="c_line"></div><div class="chart-subtitle" data-i18n="c_line_sub"></div></div>
+            <div class="chart-legend"><span><i style="background:var(--green)"></i><b data-i18n="income"></b></span><span><i style="background:var(--red)"></i><b data-i18n="expense"></b></span></div></div>
           <svg class="line-svg" id="line-svg" height="90"></svg>
         </div>
         <div class="chart-card">
-          <div class="chart-title" data-i18n="c_nw"></div>
-          <div class="chart-subtitle" data-i18n="c_nw_sub"></div>
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px"><div><div class="chart-title" data-i18n="c_nw"></div><div class="chart-subtitle" data-i18n="c_nw_sub"></div></div><div class="chart-val" id="nw-now"></div></div>
           <svg style="width:100%;overflow:visible" id="nw-svg" height="60"></svg>
           <div class="nw-trend-labels" id="nw-trend-labels"></div>
         </div>
@@ -240,18 +249,28 @@
           <div class="chart-title" data-i18n="c_heat"></div>
           <div class="chart-subtitle" data-i18n="c_heat_sub"></div>
           <div class="heatmap-grid" id="heatmap"></div>
+          <div class="pick-info" id="hm-info" data-i18n="tap_hint"></div>
         </div>
         <div class="chart-card">
-          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">
-            <div><div class="chart-title" data-i18n="c_top"></div><div class="chart-subtitle" data-i18n="c_top_sub"></div></div>
-            <div class="seg" id="cat-seg"><button data-act="catBarType" data-arg="expense" class="active" data-i18n="out"></button><button data-act="catBarType" data-arg="income" data-i18n="in"></button></div>
-          </div>
+          <div class="chart-title" data-i18n="c_weekday"></div>
+          <div class="chart-subtitle" data-i18n="c_weekday_sub"></div>
+          <div class="bar-chart" id="weekday-chart"></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title" data-i18n="c_top"></div>
+          <div class="chart-subtitle" data-i18n="c_top_sub"></div>
           <div id="cat-bars"></div>
+        </div>
+        <div class="chart-card">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;gap:8px">
+            <div><div class="chart-title" data-i18n="c_labels"></div><div class="chart-subtitle" data-i18n="c_labels_sub"></div></div>
+            <div class="seg" id="lbl-seg"><button data-act="lblMode" data-arg="amount" class="active" data-i18n="lbl_top_amount"></button><button data-act="lblMode" data-arg="count" data-i18n="lbl_top_count"></button></div>
+          </div>
+          <div id="label-list"></div>
         </div>
         <button class="btn-ghost" data-go="report" data-i18n="open_report"></button>
       </div>
     </div>
-
     <!-- ================= SETTINGS ================= -->
     <div class="page" id="page-settings">
       <div class="status-spacer"></div>
@@ -327,7 +346,8 @@
       <div class="status-spacer"></div>
       <div class="page-header row">
         <button class="back-btn" data-act="back" data-i18n-title="back">‹</button>
-        <div><h1 data-i18n="all_title"></h1><p id="all-count" style="font-size:12px;color:var(--text2);margin-top:2px"></p></div>
+        <div style="flex:1"><h1 data-i18n="all_title"></h1><p id="all-count" style="font-size:12px;color:var(--text2);margin-top:2px"></p></div>
+        <button class="small-btn" id="sel-toggle" data-act="selToggle" data-i18n="sel_mode"></button>
       </div>
       <div class="search-bar-wrap">
         <div class="filter-row" id="all-month-nav" style="justify-content:space-between;margin:0 0 8px"><button class="small-btn" data-act="allPrev" aria-label="prev">‹</button><input type="month" id="all-month" class="date-input" style="text-align:center;font-weight:700"/><button class="small-btn" data-act="allNext" aria-label="next">›</button></div>
@@ -344,6 +364,7 @@
           <input class="amt-range-input" type="text" id="amt-max" data-i18n-ph="max_ph" inputmode="decimal"/>
           <button class="small-btn" data-act="clearFilters" data-i18n="clear_filters"></button>
         </div>
+        <div class="filter-row"><div class="select-arrow" style="flex:1"><select id="all-cat" class="date-input" style="width:100%;padding-right:26px" aria-label="category"></select></div><div class="select-arrow" id="all-acct-wrap" style="flex:1" hidden><select id="all-acct" class="date-input" style="width:100%;padding-right:26px" aria-label="account"></select></div></div>
         <div class="filter-tabs" id="all-types">
           <button class="filter-tab active" data-act="allType" data-arg="all" data-i18n="f_all"></button>
           <button class="filter-tab" data-act="allType" data-arg="income" data-i18n="f_income"></button>
@@ -454,6 +475,7 @@
       <div class="tx-detail-hero"><div class="tx-detail-icon" id="d-icon"></div><div class="tx-detail-name" id="d-name"></div><div class="tx-detail-amount" id="d-amount"></div></div>
       <div class="tx-detail-rows" id="d-rows"></div>
       <img id="d-img" class="detail-img" alt="" hidden/>
+      <button class="btn-ghost mt8" data-act="txRepeat" data-i18n="repeat"></button>
       <button class="tx-detail-del-btn" data-act="txDelete" data-i18n="delete"></button>
     </div>
     <div class="tx-edit-panel" id="tx-edit">
@@ -485,6 +507,7 @@
 <div class="modal-overlay" id="sheet-cat" data-overlay><div class="modal" role="dialog" aria-modal="true"><div class="modal-handle"></div>
   <div class="modal-title" id="cat-title"></div>
   <div style="display:flex;gap:8px"><input type="text" id="cat-emoji" maxlength="4" style="width:84px;text-align:center;font-size:22px" aria-label="emoji"/><input type="text" id="cat-name" maxlength="40" data-i18n-ph="cat_name"/></div>
+  <div class="settings-row" id="cat-refund-wrap" hidden style="padding:6px 0 10px"><div class="settings-left"><div class="settings-text"><div class="settings-title" data-i18n="cat_refund"></div><div class="settings-sub" data-i18n="cat_refund_sub"></div></div></div><button class="toggle-switch" id="cat-refund" data-act="catRefundToggle" role="switch" aria-label="refund"></button></div>
   <div class="flag-note" id="cat-note" hidden data-i18n="cat_rename_note"></div>
   <div class="modal-actions"><button class="btn-cancel" data-act="closeSheet" data-i18n="cancel"></button><button class="btn-save" data-act="catSave" data-i18n="save"></button></div>
 </div></div>
@@ -554,6 +577,10 @@
 </div>
 
 <!-- TOAST -->
+<div class="sel-bar" id="sel-bar" hidden><span id="sel-count"></span><button class="small-btn" data-act="selAll" data-i18n="sel_all"></button><button class="small-btn" data-act="selCat" data-i18n="sel_cat"></button><button class="small-btn danger" data-act="selDelete" data-i18n="sel_del"></button><button class="small-btn primary" data-act="selToggle" data-i18n="sel_done"></button></div>
+
+<div class="modal-overlay" id="sheet-bulkcat" data-overlay><div class="modal" role="dialog" aria-modal="true"><div class="modal-handle"></div><div class="modal-title" id="bulkcat-title"></div><div class="select-arrow"><select id="bulkcat-sel"></select></div><div class="modal-actions"><button class="btn-cancel" data-act="closeSheet" data-i18n="cancel"></button><button class="btn-save" data-act="bulkCatSave" data-i18n="save"></button></div></div></div>
+
 <div class="toast" id="toast" role="status" aria-live="polite"><span class="toast-icon" id="toast-icon"></span><span class="toast-msg" id="toast-msg"></span><button class="toast-action" id="toast-action" hidden></button></div>
 
 <script src="js/version.js"></script>

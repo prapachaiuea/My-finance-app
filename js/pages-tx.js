@@ -89,14 +89,33 @@
     if (ty === 'transfer' && !$('f-name').value) $('f-name').placeholder = t('transfer_cat');
     else $('f-name').placeholder = t('ph_desc');
   }
-  UI.act('addType', ty => { setAddType(ty); });
+  /* "frequent" shortcuts: the things you pay for again and again, with their usual amount and category */
+  let quick = [], pendingPrefill = null;
+  function renderQuick() {
+    const box = $('add-quick');
+    quick = addType === 'expense' ? C.frequentRecent(S.txs(), U.dateStr(), 90, 6) : [];
+    box.hidden = !quick.length;
+    box.innerHTML = quick.length ? `<span class="qc-lbl">${esc(t('add_quick'))}</span>` + quick.map((q, i) => `<button type="button" class="chip" data-act="quickAdd" data-arg="${i}">${esc(q.emoji || '🍜')} ${esc(q.name)} <b>${U.fmt(q.amount)}</b></button>`).join('') : '';
+  }
+  function fillAdd(o) {                                        // o: {type, amount, name, cat, acct, note}
+    if (o.type && o.type !== addType) setAddType(o.type);
+    $('f-amount').value = o.amount || ''; $('f-name').value = o.name || ''; $('f-note').value = o.note || '';
+    if (o.type !== 'transfer' && o.cat) { addCatTouched = true; $('f-cat').innerHTML = UI.catOptions(addType, o.cat); $('f-cat').value = o.cat; }
+    if (o.acct && [...$('f-acct').options].some(x => x.value === o.acct)) $('f-acct').value = o.acct;
+    $('f-date').value = U.dateStr(); $('f-time').value = U.timeStr();
+  }
+  UI.act('quickAdd', i => { const q = quick[+i]; if (!q) return; fillAdd({ type: 'expense', amount: q.amount, name: q.name, cat: q.cat, acct: q.acct }); try { $('f-amount').focus(); $('f-amount').select(); } catch (_) { } });
+  UI.act('txRepeat', () => { const tx = curTx; if (!tx) return; pendingPrefill = tx; UI.closeSheet('sheet-tx'); UI.go('add', { force: true }); UI.toast(t('repeat_done'), '📋', { ms: 3500 }); });
+  UI.act('addType', ty => { setAddType(ty); renderQuick(); });
   function resetAddDateTime(force) {
     if (force || !$('f-amount').value) { $('f-date').value = U.dateStr(); $('f-time').value = U.timeStr(); }
   }
   UI.page('add', { show() {
     nameSuggestions();
     if (!$('f-amount').value && !$('f-name').value) addCatTouched = false;
-    setAddType(addType); resetAddDateTime(false);
+    if (pendingPrefill) { const p = pendingPrefill; pendingPrefill = null; addType = p.type; setAddType(p.type); fillAdd({ type: p.type, amount: p.amount, name: p.name, cat: p.cat, acct: p.acct, note: p.note }); if (p.type === 'transfer' && p.toAcct) $('f-acct2').value = p.toAcct; }
+    else { setAddType(addType); resetAddDateTime(false); }
+    renderQuick();
     setTimeout(() => { try { $('f-amount').focus({ preventScroll: true }); } catch (_) { } }, 60);
   } });
   $('f-cat').addEventListener('change', () => { addCatTouched = true; });
@@ -206,35 +225,89 @@
   $('sheet-tx').addEventListener('transitionend', () => { if (!$('sheet-tx').classList.contains('open') && imgUrl) { URL.revokeObjectURL(imgUrl); imgUrl = null; } });
 
   /* =========================================================== ALL TRANSACTIONS */
-  const F = { type: 'all', scope: 'month', y: UI.month.y, m: UI.month.m, limit: 150 };
+  const F = { type: 'all', scope: 'month', y: UI.month.y, m: UI.month.m, limit: 150, cat: '', acct: '', selMode: false, sel: new Set(), list: [] };
+  let preset = null;
+  /** open the list with filters preset (used by every drill-down in Analytics): {cat,type,q,date,month:{y,m}} */
+  UI.openAll = f => { preset = f || {}; UI.go('all', { force: true }); };
+  function fillSelects() {
+    const names = []; [...S.cats('expense'), ...S.cats('income')].forEach(c => { if (!names.some(x => x.name === c.name)) names.push(c); });
+    S.txs().forEach(x => { if (x.cat && !names.some(c => c.name === x.cat)) names.push({ name: x.cat, emoji: x.emoji || '📦' }); });
+    $('all-cat').innerHTML = `<option value="">${esc(t('f_cat'))}</option>` + names.map(c => `<option value="${esc(c.name)}">${esc(c.emoji)} ${esc(I18N.catLabel(c.name))}</option>`).join('');
+    $('all-cat').value = F.cat;
+    const multi = S.accts().length > 1; $('all-acct-wrap').hidden = !multi;
+    $('all-acct').innerHTML = `<option value="">${esc(t('f_acct'))}</option>` + S.accts().map(a => `<option value="${esc(a.id)}">${esc(a.emoji)} ${esc(a.name || t('acct_main'))}</option>`).join(''); $('all-acct').value = F.acct;
+  }
+  function syncControls() {
+    document.querySelectorAll('#all-scope button').forEach(b => b.classList.toggle('active', b.getAttribute('data-arg') === F.scope));
+    document.querySelectorAll('#all-types .filter-tab').forEach(b => b.classList.toggle('active', b.getAttribute('data-arg') === F.type));
+  }
+  function applyPreset() {
+    if (!preset) return false; const p = preset; preset = null;
+    F.type = p.type || 'all'; F.cat = p.cat || ''; F.acct = ''; F.scope = 'month';
+    $('all-search').value = p.q || ''; $('all-day').value = p.date || ''; $('amt-min').value = ''; $('amt-max').value = '';
+    if (p.date) { F.y = +p.date.slice(0, 4); F.m = +p.date.slice(5, 7) - 1; } else if (p.month) { F.y = p.month.y; F.m = p.month.m; } else { F.y = UI.month.y; F.m = UI.month.m; }
+    return true;
+  }
   function readFilters() {
-    const f = { type: F.type, q: $('all-search').value, date: $('all-day').value, min: U.parseMoney($('amt-min').value) || 0, max: U.parseMoney($('amt-max').value) || 0 };
-    if (F.scope === 'month' && !f.date) f.from = U.monthKey(F.y, F.m) + '-01', f.to = U.monthKey(F.y, F.m) + '-31';
-    if (F.scope === 'month' && f.date) { /* a specific day overrides the month */ }
+    const f = { type: F.type, cat: F.cat, acct: F.acct, q: $('all-search').value, date: $('all-day').value, min: U.parseMoney($('amt-min').value) || 0, max: U.parseMoney($('amt-max').value) || 0 };
+    if (F.scope === 'month' && !f.date) { f.from = U.monthKey(F.y, F.m) + '-01'; f.to = U.monthKey(F.y, F.m) + '-31'; }
     return f;
   }
+  function selBar() { const n = F.sel.size; $('sel-bar').hidden = !F.selMode; $('sel-count').textContent = t('sel_n', { n }); $('sel-toggle').textContent = F.selMode ? t('sel_done') : t('sel_mode'); document.body.classList.toggle('selecting', F.selMode); }
   function renderAll() {
-    $('all-month').value = U.monthKey(F.y, F.m); $('all-month-nav').hidden = F.scope !== 'month';
-    const list = C.sortTx(C.filterTx(S.txs(), readFilters())), tot = C.totals(list);
+    $('all-month').value = U.monthKey(F.y, F.m); $('all-month-nav').hidden = F.scope !== 'month'; syncControls();
+    const list = C.sortTx(C.filterTx(S.txs(), readFilters())), tot = C.totals(list); F.list = list;
     $('all-count').textContent = t('items', { n: list.length }) + ' · ' + t('in_out', { i: U.fmt(tot.income), o: U.fmt(tot.expense) });
     const box = $('all-tx-list');
-    if (!list.length) { box.innerHTML = `<div class="empty"><div class="empty-icon">🗓️</div><div class="empty-title">${esc(t('no_results'))}</div><div class="empty-sub">${F.scope === 'month' ? esc(I18N.monthLabelLong(F.y, F.m)) : ''}</div></div>`; return; }
+    if (!list.length) { box.innerHTML = `<div class="empty"><div class="empty-icon">🗓️</div><div class="empty-title">${esc(t('no_results'))}</div><div class="empty-sub">${F.scope === 'month' ? esc(I18N.monthLabelLong(F.y, F.m)) : ''}</div></div>`; selBar(); return; }
     const shown = list.slice(0, F.limit);
-    box.innerHTML = UI.groupedList(shown) + (list.length > shown.length ? `<button class="btn-ghost mt12" data-act="allMore">${esc(t('see_all'))} (${list.length - shown.length})</button>` : '');
-    UI.attachSwipe(box);
+    box.innerHTML = UI.groupedList(shown, { selMode: F.selMode, sel: F.sel }) + (list.length > shown.length ? `<button class="btn-ghost mt12" data-act="allMore">${esc(t('see_all'))} (${list.length - shown.length})</button>` : '');
+    if (!F.selMode) UI.attachSwipe(box);
+    selBar();
   }
-  UI.page('all', { show() { F.y = UI.month.y; F.m = UI.month.m; F.limit = 150; renderAll(); } });
+  UI.page('all', { show() {
+    if (!applyPreset()) { F.y = UI.month.y; F.m = UI.month.m; F.type = 'all'; F.cat = ''; F.acct = ''; F.scope = 'month'; ['all-search', 'all-day', 'amt-min', 'amt-max'].forEach(id => { $(id).value = ''; }); }   // a plain visit starts clean
+    F.limit = 150; F.selMode = false; F.sel.clear(); fillSelects(); renderAll();
+  } });
   UI.act('allMore', () => { F.limit += 300; renderAll(); });
   UI.act('allPrev', () => { F.m--; if (F.m < 0) { F.m = 11; F.y--; } $('all-day').value = ''; F.limit = 150; renderAll(); });
   UI.act('allNext', () => { F.m++; if (F.m > 11) { F.m = 0; F.y++; } $('all-day').value = ''; F.limit = 150; renderAll(); });
-  UI.act('allScope', s => { F.scope = s; document.querySelectorAll('#all-scope button').forEach(b => b.classList.toggle('active', b.getAttribute('data-arg') === s)); F.limit = 150; renderAll(); });
-  UI.act('allType', ty => { F.type = ty; document.querySelectorAll('#all-types .filter-tab').forEach(b => b.classList.toggle('active', b.getAttribute('data-arg') === ty)); F.limit = 150; renderAll(); });
-  UI.act('clearFilters', () => { $('all-search').value = ''; $('all-day').value = ''; $('amt-min').value = ''; $('amt-max').value = ''; F.type = 'all'; document.querySelectorAll('#all-types .filter-tab').forEach(b => b.classList.toggle('active', b.getAttribute('data-arg') === 'all')); F.limit = 150; renderAll(); });
+  UI.act('allScope', s => { F.scope = s; F.limit = 150; renderAll(); });
+  UI.act('allType', ty => { F.type = ty; F.limit = 150; renderAll(); });
+  UI.act('clearFilters', () => { $('all-search').value = ''; $('all-day').value = ''; $('amt-min').value = ''; $('amt-max').value = ''; F.type = 'all'; F.cat = ''; F.acct = ''; $('all-cat').value = ''; $('all-acct').value = ''; F.limit = 150; renderAll(); });
   $('all-month').addEventListener('change', e => { const v = e.target.value; if (/^\d{4}-\d{2}$/.test(v)) { F.y = +v.slice(0, 4); F.m = +v.slice(5) - 1; $('all-day').value = ''; F.limit = 150; renderAll(); } });
   $('all-day').addEventListener('change', () => { const v = $('all-day').value; if (v) { F.y = +v.slice(0, 4); F.m = +v.slice(5, 7) - 1; } F.limit = 150; renderAll(); });
+  $('all-cat').addEventListener('change', () => { F.cat = $('all-cat').value; F.limit = 150; renderAll(); });
+  $('all-acct').addEventListener('change', () => { F.acct = $('all-acct').value; F.limit = 150; renderAll(); });
   const rerender = U.debounce(() => { F.limit = 150; renderAll(); }, 120);
   ['all-search', 'amt-min', 'amt-max'].forEach(id => $(id).addEventListener('input', rerender));
   UI.moneyInput($('amt-min')); UI.moneyInput($('amt-max'));
 
+  /* ---------- select several: delete / change category ---------- */
+  UI.act('selToggle', () => { F.selMode = !F.selMode; F.sel.clear(); renderAll(); });
+  UI.act('selPick', id => {
+    id = +id; if (F.sel.has(id)) F.sel.delete(id); else F.sel.add(id);
+    const row = document.querySelector(`#all-tx-list .sel-row[data-id="${id}"]`); if (row) { row.classList.toggle('on', F.sel.has(id)); row.querySelector('.sel-box').textContent = F.sel.has(id) ? '✓' : ''; }
+    selBar();
+  });
+  UI.act('selAll', () => { if (F.sel.size === F.list.length) F.sel.clear(); else F.list.forEach(x => F.sel.add(x.id)); renderAll(); });
+  UI.act('selDelete', async () => {
+    const ids = [...F.sel]; if (!ids.length) return;
+    if (!(await UI.confirm(t('bulk_del_confirm', { n: ids.length }), t('delete')))) return;
+    const gone = ids.map(id => S.delTx(id)).filter(Boolean); let undone = false;
+    F.sel.clear();
+    UI.toast(t('bulk_deleted', { n: gone.length }), '🗑️', { action: { label: t('undo'), fn: () => { undone = true; S.addTxs(gone); renderAll(); } }, onExpire: () => { if (!undone) gone.forEach(x => x.hasImg && S.delImg(x.id)); } });
+    renderAll();
+  });
+  UI.act('selCat', () => {
+    const picked = F.list.filter(x => F.sel.has(x.id)); if (!picked.length) return;
+    const ty = picked[0].type; if (ty === 'transfer' || picked.some(x => x.type !== ty)) return UI.toast(t('bulk_mixed'), '⚠️', { ms: 4000 });
+    $('bulkcat-title').textContent = t('bulk_cat_title', { n: picked.length }); $('bulkcat-sel').innerHTML = UI.catOptions(ty, picked[0].cat); $('bulkcat-sel').setAttribute('data-type', ty); UI.openSheet('sheet-bulkcat');
+  });
+  UI.act('bulkCatSave', () => {
+    const ty = $('bulkcat-sel').getAttribute('data-type'), cat = $('bulkcat-sel').value, emoji = UI.catEmoji(ty, cat); let n = 0;
+    const all = S.txs().map(x => { if (F.sel.has(x.id) && x.type === ty) { n++; return { ...x, cat, emoji }; } return x; }); S.setTxs(all);
+    UI.closeSheet('sheet-bulkcat'); F.sel.clear(); UI.toast(t('bulk_done', { n }), '✅'); renderAll();
+  });
   root.FFTx = { openTx, renderHome, suggestNames: nameSuggestions };
 })(window);

@@ -54,7 +54,7 @@ test('parseBackup rejects non-backups', () => { assert.throws(() => S.parseBacku
 test('v3 data migrates (notes, recurring start, schema stamp)', () => {
   localStorage.setItem('ff_tx', JSON.stringify([{ id: 5, type: 'expense', amount: 10, name: 'n', cat: 'Food', emoji: 'f', date: '2026-02-02', time: '09:00', note: '' }]));
   localStorage.setItem('ff_recurring', JSON.stringify([{ id: 7, type: 'income', amount: 9, name: 's', cat: 'Salary', emoji: 'x', day: 3 }]));
-  S.migrate(); assert.strictEqual(S.txs()[0].note, null); assert(S.recurring()[0].start); assert.strictEqual(S.rawGet('ff_schema'), '2');
+  S.migrate(); assert.strictEqual(S.txs()[0].note, null); assert(S.recurring()[0].start); assert.strictEqual(S.rawGet('ff_schema'), '3');
 });
 test('corrupted storage never throws', () => { localStorage.setItem('ff_tx', '{not json'); assert.deepStrictEqual(S.txs(), []); localStorage.setItem('ff_tx', '[]'); });
 
@@ -94,5 +94,32 @@ test('learned payee is reused; same last-4 with a different name is not trusted'
 });
 test('category from keywords when there is no history', () => { S.setCats('expense', [{ emoji: '🚗', name: 'Transport' }, { emoji: '📦', name: 'Other' }]); assert.strictEqual(LRN.suggest({ recipient: 'BTS TIM TVM', recipientKey: '', note: '', ownHint: false }, []).cat, 'Transport'); });
 
+console.log('analytics helpers (v4.1)');
+test('refund categories reduce spending instead of counting as income', () => {
+  C.setRefunds(['PayBack']);
+  const l = [T({ type: 'income', amount: 1000, cat: 'Salary', date: '2026-10-01' }), T({ type: 'income', amount: 200, cat: 'PayBack', date: '2026-10-02' }), T({ type: 'expense', amount: 500, date: '2026-10-03' })];
+  const t = C.totals(l); assert.strictEqual(t.income, 1000); assert.strictEqual(t.expense, 300); assert.strictEqual(t.gross, 500); assert.strictEqual(t.refunds, 200); assert.strictEqual(t.net, 700);
+  C.setRefunds([]);
+});
+test('v4.1 migration flags payback income categories once', () => {
+  localStorage.setItem('ff_schema', '2'); S.setCats('income', [{ emoji: '💼', name: 'Salary' }, { emoji: '🫂', name: 'เงินคืน' }]); S.migrate();
+  assert.deepStrictEqual(S.refundNames(), ['เงินคืน']);
+});
+test('month comparison uses the same days while the month is still running', () => {
+  const l = [T({ type: 'expense', amount: 300, date: '2026-09-02' }), T({ type: 'expense', amount: 900, date: '2026-09-20' }), T({ type: 'expense', amount: 150, date: '2026-10-03' })];
+  const c = C.comparePeriod(l, 2026, 9, '2026-10-07'); assert.strictEqual(c.prev, 300); assert.strictEqual(c.now, 150); assert.strictEqual(c.pct, -50); assert(c.partial);
+  assert.strictEqual(C.comparePeriod(l, 2026, 8, '2026-10-07').partial, false);
+});
+test('projection: daily rate x days left (no history)', () => { const l = [1, 2, 3, 4].map(i => T({ type: 'expense', amount: 100, date: '2026-10-0' + i })); const p = C.projection(l, 2026, 9, '2026-10-07'); assert.strictEqual(p.spent, 400); assert.strictEqual(p.perDay, 57.14); assert.strictEqual(p.projected, 1771.43); assert(p.running); });
+test('projection: a one-off lump is NOT multiplied by the days left', () => {
+  const base = Array.from({ length: 40 }, (_, i) => T({ type: 'expense', amount: 100, date: '2026-09-' + U.p2(1 + (i % 28)) }));
+  const l = base.concat([T({ type: 'expense', amount: 3000, date: '2026-10-02', cat: 'Rent' }), T({ type: 'expense', amount: 100, date: '2026-10-03' })]);
+  const p = C.projection(l, 2026, 9, '2026-10-07'); assert.strictEqual(p.lump, 3000); assert(p.projected < 3000 + 100 + 24 * 150, 'projected ' + p.projected); assert(p.projected > 3100);
+});
+test('weekday averages divide by the number of such days', () => { const a = C.weekdayAvg([T({ type: 'expense', amount: 100, date: '2026-10-04' })], 2026, 9, 1, '2026-10-31'); assert.strictEqual(a[0], 25); assert.strictEqual(a[1], 0); });  // 4 Sundays in Oct 2026
+test('top labels group by what you typed, ignoring case/spaces', () => { const l = C.topLabels([T({ type: 'expense', amount: 10, note: 'Seven' }), T({ type: 'expense', amount: 15, note: ' seven ' }), T({ type: 'expense', amount: 99, note: 'Bolt' })]); assert.strictEqual(l.find(x => x.key === 'seven').n, 2); assert.strictEqual(l.find(x => x.key === 'seven').total, 25); });
+test('frequent recent: needs >= 2 uses and picks the usual amount', () => { const l = [1, 2, 3].map(i => T({ type: 'expense', amount: 65, name: 'BTS', date: '2026-10-0' + i, cat: 'Transport' })).concat([T({ type: 'expense', amount: 50, name: 'Once', date: '2026-10-05' })]); const f = C.frequentRecent(l, '2026-10-07', 90, 6); assert.strictEqual(f.length, 1); assert.strictEqual(f[0].amount, 65); });
+test('budget suggestion = rounded average of last 3 months', () => { const l = [T({ type: 'expense', amount: 1200, date: '2026-07-05' }), T({ type: 'expense', amount: 1800, date: '2026-08-05' }), T({ type: 'expense', amount: 1500, date: '2026-09-05' })]; assert.strictEqual(C.suggestBudget(l, 2026, 9), 1500); });
+test('category filter', () => assert.strictEqual(C.filterTx([T({ type: 'expense', amount: 1, date: '2026-01-01', cat: 'A' }), T({ type: 'expense', amount: 1, date: '2026-01-01', cat: 'B' })], { cat: 'A' }).length, 1));
 console.log('\n' + pass + ' passed, ' + fail + ' failed');
 process.exit(fail ? 1 : 0);

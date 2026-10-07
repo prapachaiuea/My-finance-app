@@ -10,7 +10,7 @@
     learn: 'ff_learn', prefs: 'ff_prefs', lang: 'ff_lang', theme: 'ff_theme', schema: 'ff_schema',
     pin: 'ff_pin', pinHash: 'ff_pin_h', pinSalt: 'ff_pin_s', pinOn: 'ff_pin_enabled', pinFail: 'ff_pin_fail'
   };
-  const SCHEMA = 2;
+  const SCHEMA = 3;
 
   const DEFAULT_EXP = [
     { emoji: '🍜', name: 'Food' }, { emoji: '🚗', name: 'Transport' }, { emoji: '💊', name: 'Health' },
@@ -94,6 +94,8 @@
     set(k, d); return d;
   }
   function setCats(type, arr) { return set(type === 'income' ? K.inc : K.exp, arr); }
+  /** income categories that are paybacks (friends returning money): they reduce spending instead of counting as income */
+  const refundNames = () => cats('income').filter(c => c.refund).map(c => c.name);
   function catEmoji(type, name) { const c = cats(type).find(x => x.name === name); return c ? c.emoji : null; }
 
   /* ---------- accounts ---------- */
@@ -170,7 +172,7 @@
       while (seen.has(t.id)) t.id++;
       seen.add(t.id); out.push(t);
     }
-    const okCats = a => Array.isArray(a) ? a.filter(c => c && typeof c.name === 'string' && c.name.trim()).map(c => ({ emoji: str(c.emoji, 8) || '📦', name: str(c.name, 60) })) : null;
+    const okCats = a => Array.isArray(a) ? a.filter(c => c && typeof c.name === 'string' && c.name.trim()).map(c => (c.refund ? { emoji: str(c.emoji, 8) || '📦', name: str(c.name, 60), refund: true } : { emoji: str(c.emoji, 8) || '📦', name: str(c.name, 60) })) : null;
     const data = {
       tx: out,
       exp: okCats(o.expense_cats), inc: okCats(o.income_cats),
@@ -243,6 +245,11 @@
       all.forEach(t => { if (t.recurringId) { const k = String(t.recurringId); (done[k] = done[k] || []); const ym = U.ymOf(t.date); if (!done[k].includes(ym)) done[k].push(ym); } });
       setRecDone(done);
     }
+    if (cur < 3) {      // v4.1: auto-flag the usual payback categories once (user can change it in Categories)
+      const inc = cats('income'); let ch = false;
+      inc.forEach(c => { if (/เงินคืน|คืนเงิน|โอนคืน|refund|reimburs|pay ?back/i.test(c.name) && c.refund === undefined) { c.refund = true; ch = true; } });
+      if (ch) setCats('income', inc);
+    }
     try { localStorage.setItem(K.schema, String(SCHEMA)); } catch (_) { }
   }
 
@@ -264,7 +271,7 @@
   const S = {
     K, DEFAULT_EXP, DEFAULT_INC, get, set, remove, rawGet, normTx,
     txs, setTxs, addTx, addTxs, putTx, delTx, getTx,
-    cats, setCats, catEmoji, accts, setAccts,
+    cats, setCats, catEmoji, refundNames, accts, setAccts,
     budgetTotal, setBudgetTotal, catBudgets, setCatBudgets, goals, setGoals, recurring, setRecurring, recDone, setRecDone,
     learn, setLearn, prefs, setPrefs, patchPrefs,
     putImg, getImg, delImg, clearImgs, exportAll, parseBackup, applyBackup, snapshot, snapshots, migrate, wipeAll,

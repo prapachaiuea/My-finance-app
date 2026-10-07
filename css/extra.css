@@ -172,3 +172,48 @@ html,body{height:100%}
 .nav-btn{justify-content:center;padding-top:0}
 .nav-btn.active::after{bottom:6px;top:auto}
 .toast{top:calc(max(env(safe-area-inset-top,0px),44px) + 12px)}
+/* ===== v4.1: analytics drill-down, forecast, bulk select, quick chips ===== */
+.stat-sub{font-size:10px;color:var(--text3);margin-top:3px;line-height:1.3}
+.tap-row{cursor:pointer;border-radius:8px;transition:background .15s}
+.tap-row:active{background:var(--bg3)}
+.bar-col.tap-row{padding:2px 0}
+.bar-fill.picked{outline:2px solid var(--text);outline-offset:1px}
+.hm-cell.tap-row{cursor:pointer}
+.pick-info{font-size:12px;color:var(--text2);margin-top:12px;min-height:30px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.chart-legend{display:flex;flex-direction:column;gap:3px;font-size:11px;color:var(--text2);flex-shrink:0}
+.chart-legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px}
+.chart-legend b{font-weight:600}
+.chart-val{font-size:16px;font-weight:800;letter-spacing:-.3px;flex-shrink:0}
+.legend-item.tap-row{padding:3px 4px;margin:-3px -4px}
+.legend-amt{font-size:11px;color:var(--text3);margin-right:6px}
+.delta{font-size:10px;font-weight:700;margin-left:6px;padding:1px 6px;border-radius:100px}
+.delta.up{background:var(--red-dim);color:var(--red)}
+.delta.down{background:var(--green-dim);color:var(--green)}
+.fc-row{display:flex;justify-content:space-between;gap:12px;margin-bottom:12px}
+.fc-lbl{font-size:11px;color:var(--text3)}
+.fc-val{font-size:22px;font-weight:800;letter-spacing:-.5px;margin-top:2px}
+.fc-sub{font-size:11px;color:var(--text3);margin-top:2px}
+.fc-note{font-size:12px;color:var(--text2);margin-top:8px;line-height:1.5}
+.list-row{display:flex;align-items:center;gap:10px;padding:10px 4px;border-bottom:0.5px solid var(--border)}
+.list-row:last-child{border-bottom:none}
+.lr-name{flex:1;min-width:0;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lr-n{font-size:11px;color:var(--text3);flex-shrink:0}
+.lr-amt{font-size:13px;font-weight:700;flex-shrink:0;min-width:64px;text-align:right}
+.quick-chips{display:flex;gap:8px;overflow-x:auto;padding:0 0 12px;scrollbar-width:none;align-items:center}
+.quick-chips::-webkit-scrollbar{display:none}
+.qc-lbl{font-size:11px;color:var(--text3);flex-shrink:0;text-transform:uppercase;letter-spacing:.08em}
+.chip{flex:0 0 auto;background:var(--bg3);border:0.5px solid var(--border2);border-radius:100px;color:var(--text);font-size:12px;padding:8px 12px;cursor:pointer;white-space:nowrap}
+.chip b{color:var(--green);margin-left:4px}
+.chip:active{background:var(--bg4);transform:scale(.97)}
+.small-btn.danger{background:var(--red-dim);border-color:var(--red);color:var(--red)}
+/* bulk select */
+.sel-bar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--nav-h) + var(--safe-bottom) + 8px);width:min(414px,calc(100% - 16px));background:var(--bg2);border:0.5px solid var(--border2);border-radius:var(--r-lg);padding:10px 12px;display:flex;align-items:center;gap:6px;z-index:120;box-shadow:0 8px 30px rgba(0,0,0,.45)}
+.sel-bar #sel-count{flex:1;font-size:12px;font-weight:700;color:var(--text);min-width:0}
+.sel-bar .small-btn{padding:7px 10px;font-size:11px}
+body.selecting #all-tx-list{padding-bottom:90px}
+.sel-row{gap:10px}
+.sel-box{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#000;flex-shrink:0;transition:all .15s}
+.sel-row.on{border-color:var(--green);background:var(--green-dim)}
+.sel-row.on .sel-box{background:var(--green);border-color:var(--green)}
+.seg button{white-space:nowrap}
+select.date-input{appearance:none;-webkit-appearance:none}
