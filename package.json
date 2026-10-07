@@ -1,6 +1,6 @@
 {
   "name": "finflow",
-  "version": "4.0.0",
+  "version": "4.0.1",
   "private": true,
   "description": "FinFlow — personal finance tracker with on-device slip scanning (static site, no build step)",
   "license": "MIT",

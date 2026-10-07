@@ -160,3 +160,16 @@ input,select,textarea{font-family:inherit}
 .tx-swipe.armed .swipe-bg{background:#e03232}
 .tx-swipe.armed .swipe-bg svg{transform:scale(1.3) rotate(-8deg)}
 .tx-swipe.open .swipe-bg:active{background:#e03232}
+/* ===== phone safe areas (notch / status bar / home indicator) + real viewport height ===== */
+html,body{height:100%;height:100dvh}
+#root{height:100%;height:100dvh}
+.status-spacer{height:max(env(safe-area-inset-top,0px),44px);min-height:44px}
+/* sticky page headers must stop BELOW the status bar, and the strip above them is painted so scrolled content never shows under the clock */
+.page-header{top:env(safe-area-inset-top,0px)}
+.search-bar-wrap{top:env(safe-area-inset-top,0px)}
+#root::before{content:'';position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:60;pointer-events:none}
+/* bottom bar: the home-indicator inset is added to its height (before, it was carved out of the 72px and squashed the icons) */
+.bottom-nav{height:calc(var(--nav-h) + var(--safe-bottom));padding-top:6px}
+.nav-btn{justify-content:flex-start;padding-top:8px}
+.nav-btn.active::after{bottom:auto;top:calc(var(--nav-h) - 14px)}
+.toast{top:calc(env(safe-area-inset-top,0px) + 12px)}
