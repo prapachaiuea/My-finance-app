@@ -7,7 +7,7 @@
   let Q = [], seq = 0, running = false, idleTimer = null;
 
   const STATUS_KEY = { wait: 'st_wait', read: 'st_read', ready: 'st_ready', check: 'st_check', dup: 'st_dup', saved: 'st_saved', err: 'st_err', skip: 'st_skip' };
-  const FIELD_OF = { f_amount_missing: 'amount', f_amount_disagree: 'amount', f_date_missing: 'date', f_date_disagree: 'date', f_date_future: 'date', f_time_missing: 'time', f_name_low: 'to', f_name_first: 'to', f_note_low: 'note', f_dup_certain: 'all', f_dup_prob: 'all', f_own: 'type', f_layout: 'all' };
+  const FIELD_OF = { f_amount_missing: 'amount', f_amount_disagree: 'amount', f_date_missing: 'date', f_date_disagree: 'date', f_date_future: 'date', f_time_missing: 'time', f_name_low: 'to', f_name_first: 'to', f_note_low: 'name', f_dup_certain: 'all', f_dup_prob: 'all', f_own: 'type', f_layout: 'all' };
 
   function flagsOf(it) { return it.flags || []; }
   function fieldFlag(it, f) { return flagsOf(it).filter(c => FIELD_OF[c] === f); }
@@ -30,8 +30,7 @@
         <div class="field${warn(it, 'date') ? ' warn' : ''}"><div class="field-label">${esc(t('sc_date'))}</div><input type="date" data-f="date" value="${esc(f.date)}"/>${noteHTML(it, 'date')}</div>
         <div class="field${warn(it, 'time') ? ' warn' : ''}"><div class="field-label">${esc(t('sc_time'))}</div><input type="time" data-f="time" value="${esc(f.time)}"/>${noteHTML(it, 'time')}</div>
         <div class="field full${warn(it, 'to') ? ' warn' : ''}"><div class="field-label">${esc(t('sc_to'))}</div><input type="text" data-f="payee" maxlength="120" value="${esc(f.payee)}"/>${noteHTML(it, 'to')}${it.learned ? `<div class="ok-note">✓ ${esc(t('f_learned'))}</div>` : ''}</div>
-        <div class="field full"><div class="field-label">${esc(t('sc_desc'))}</div><input type="text" data-f="name" maxlength="120" value="${esc(f.name)}" list="dl-names"/></div>
-        <div class="field full${warn(it, 'note') ? ' warn' : ''}"><div class="field-label">${esc(t('sc_note'))}</div><input type="text" data-f="note" maxlength="200" value="${esc(f.note)}"/>${noteHTML(it, 'note')}</div>
+        <div class="field full${warn(it, 'name') ? ' warn' : ''}"><div class="field-label">${esc(t('sc_desc'))}</div><input type="text" data-f="name" maxlength="120" value="${esc(f.name)}" list="dl-names"/>${noteHTML(it, 'name')}</div>
         ${catSel}${acctSel}
       </div>
       ${fieldFlag(it, 'all').map(c => `<div class="flag-note" style="margin-bottom:8px">⚠️ ${esc(t(c))}</div>`).join('')}
@@ -87,9 +86,9 @@
     f.amount = res.amount.value ? String(res.amount.value) : '';
     f.date = res.date || U.dateStr(); f.time = res.time || '';
     f.payee = received ? res.sender : res.recipient;
-    f.name = sug.name || res.note || f.payee || ''; f.note = sug.note || '';
+    f.name = sug.note || res.note || sug.name || f.payee || '';
     f.type = received ? 'income' : sug.type === 'transfer' || (sug.own && sug.learned) ? 'transfer' : 'expense';
-    if (f.type === 'income') { const c = S.cats('income'); f.cat = (LRN.keywordCat([f.note, f.name].join(' '), 'income', c) || (c.find(x => x.name === 'Other income') || c[0] || {}).name); }
+    if (f.type === 'income') { const c = S.cats('income'); f.cat = (LRN.keywordCat(f.name, 'income', c) || (c.find(x => x.name === 'Other income') || c[0] || {}).name); }
     else if (f.type === 'transfer') f.cat = '';
     else f.cat = sug.cat || f.cat;
     it.form = f; it.learned = sug.learned; it.own = sug.own && f.type !== 'transfer';
@@ -109,11 +108,11 @@
   $('scan-queue').addEventListener('input', e => {
     const f = e.target.getAttribute && e.target.getAttribute('data-f'), it = itemOf(e.target); if (!f || !it) return;
     it.form[f] = e.target.value;
-    const clear = { amount: ['f_amount_missing', 'f_amount_disagree'], date: ['f_date_missing', 'f_date_disagree', 'f_date_future'], time: ['f_time_missing'], payee: ['f_name_low', 'f_name_first'], note: ['f_note_low'] }[f];
+    const clear = { amount: ['f_amount_missing', 'f_amount_disagree'], date: ['f_date_missing', 'f_date_disagree', 'f_date_future'], time: ['f_time_missing'], payee: ['f_name_low', 'f_name_first'], name: ['f_note_low'] }[f];
     if (clear && it.flags.some(c => clear.includes(c))) { it.flags = it.flags.filter(c => !clear.includes(c)); e.target.closest('.field').classList.remove('warn'); e.target.classList.remove('warn-input'); const n = e.target.closest('.field').querySelectorAll('.flag-note'); n.forEach(x => x.remove()); }
   });
   $('scan-queue').addEventListener('change', e => { const f = e.target.getAttribute && e.target.getAttribute('data-f'), it = itemOf(e.target); if (f && it) it.form[f] = e.target.value; });
-  UI.act('scType', (ty, el) => { const it = itemOf(el); if (!it) return; it.form.type = ty; it.form.cat = ty === 'transfer' ? '' : (ty === 'income' ? (S.cats('income')[0] || {}).name : (it.res ? LRN.suggest({ recipient: it.form.payee, recipientKey: it.res.recipientKey, note: it.form.note, ownHint: false }, S.txs()).cat : blankForm().cat)); it.own = false; it.flags = it.flags.filter(c => c !== 'f_own'); renderCard(it); });
+  UI.act('scType', (ty, el) => { const it = itemOf(el); if (!it) return; it.form.type = ty; it.form.cat = ty === 'transfer' ? '' : (ty === 'income' ? (S.cats('income')[0] || {}).name : (it.res ? LRN.suggest({ recipient: it.form.payee, recipientKey: it.res.recipientKey, note: it.res.note, ownHint: false }, S.txs()).cat : blankForm().cat)); it.own = false; it.flags = it.flags.filter(c => c !== 'f_own'); renderCard(it); });
   UI.act('scAsTransfer', (a, el) => { const it = itemOf(el); if (!it) return; it.form.type = 'transfer'; it.form.cat = ''; it.own = false; it.flags = it.flags.filter(c => c !== 'f_own'); renderCard(it); });
   UI.act('scZoom', (a, el) => { const it = itemOf(el); if (it && it.thumbUrl) UI.viewImage(it.thumbUrl); });
   UI.act('scSkip', (a, el) => { const it = itemOf(el); if (!it) return; it.status = 'skip'; renderCard(it); setTimeout(() => { Q = Q.filter(x => x !== it); if (it.thumbUrl) URL.revokeObjectURL(it.thumbUrl); renderQueue(); }, 400); });
@@ -122,8 +121,8 @@
     const f = it.form, amount = U.parseMoney(f.amount);
     if (!(amount > 0)) { if (!silent) UI.toast(t('bad_amount'), '⚠️'); return false; }
     if (!U.isDateStr(f.date) || isNaN(U.parseDate(f.date))) { if (!silent) UI.toast(t('bad_date'), '⚠️'); return false; }
-    const type = f.type, name = (f.name || f.payee || f.note || '').trim() || (type === 'transfer' ? t('transfer_cat') : t('from_slip'));
-    const tx = { id: U.uid(), type, amount, name, date: f.date, time: U.validTime(f.time) ? f.time : null, note: (f.note || '').trim() || null, payee: (f.payee || '').trim() || undefined };
+    const type = f.type, name = (f.name || f.payee || '').trim() || (type === 'transfer' ? t('transfer_cat') : t('from_slip'));
+    const tx = { id: U.uid(), type, amount, name, date: f.date, time: U.validTime(f.time) ? f.time : null, note: null, payee: (f.payee || '').trim() || undefined };
     if (type === 'transfer') { tx.cat = ''; tx.emoji = '🔁'; tx.acct = f.acct || 'main'; if (f.toAcct) tx.toAcct = f.toAcct; if (tx.toAcct && tx.toAcct === tx.acct) { if (!silent) UI.toast(t('same_acct'), '⚠️'); return false; } }
     else { tx.cat = f.cat; tx.emoji = UI.catEmoji(type, f.cat); if (f.acct && f.acct !== 'main') tx.acct = f.acct; }
     if (it.res && it.res.slipRef) tx.slipRef = it.res.slipRef;
