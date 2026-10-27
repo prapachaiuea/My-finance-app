@@ -5,7 +5,7 @@ importScripts('js/version.js');
 const V = 'finflow-' + self.FF_VERSION;
 const SHELL = ['./', 'index.html', 'css/app.css', 'css/extra.css', 'manifest.webmanifest', 'icon.png', 'icons/icon-192.png', 'icons/icon-512.png',
   'js/version.js', 'js/util.js', 'js/i18n.js', 'js/store.js', 'js/calc.js', 'js/imgproc.js', 'js/slip.js', 'js/learn.js', 'js/ocr.js',
-  'js/ui.js', 'js/pages-tx.js', 'js/pages-scan.js', 'js/pages-analytics.js', 'js/pages-settings.js', 'js/app.js'];
+  'js/ui.js', 'js/calculator.js', 'js/pages-tx.js', 'js/pages-scan.js', 'js/pages-analytics.js', 'js/pages-settings.js', 'js/app.js'];
 const CDN = ['cdnjs.cloudflare.com', 'cdn.jsdelivr.net', 'tessdata.projectnaptha.com', 'unpkg.com'];
 
 self.addEventListener('install', e => {

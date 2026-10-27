@@ -11,6 +11,7 @@ A mobile-first personal finance tracker — client-side only, installable as a h
 - **Dashboard** — total balance across accounts, monthly income/expense, budget bar, backup reminder
 - **Slip scanning (on-device)** — pick one or many bank-transfer slips; amount, date, time, payee, note and transaction number are read in your browser. Every field stays editable and anything the reader is unsure about is highlighted. See [How slip scanning works](#how-slip-scanning-works)
 - **Learns from you** — payees, descriptions and categories you correct are remembered, so the same slip is hands-free next time; duplicate slips are detected; transfers between your own accounts are recognised
+- **Calculator in every amount field** — tap the calculator button inside any amount box (add, edit, scanned slip, recurring, goals) to work out the total on a thumb-sized keypad: live result under the formula, phone-style `%` (`1,000 + 7%` = 1,070), starts from the amount already typed, and *Use this amount* puts the answer back in the field
 - **Transactions** — income, expense and **transfer** (between accounts); search across all months, day / amount / type filters, swipe-to-delete with **undo**
 - **Accounts / wallets** — cash, bank, cards with opening balances (single account works exactly like before)
 - **Budgets** — monthly limit plus per-category limits, alerts at 80 % / 100 %

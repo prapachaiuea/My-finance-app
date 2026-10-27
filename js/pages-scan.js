@@ -26,7 +26,7 @@
       <div class="${it.own && f.type !== 'transfer' ? 'banner info' : 'hidden-x'}" ${it.own && f.type !== 'transfer' ? 'data-act="scAsTransfer"' : 'hidden'} style="margin:0 0 10px"><span>${esc(t('f_own'))}</span></div>
       <div class="type-toggle three">${typeBtns}</div>
       <div class="sc-grid">
-        <div class="field full${warn(it, 'amount') ? ' warn' : ''}"><div class="field-label">${esc(t('sc_amount'))}</div><div class="amount-prefix"><input class="amount-field" type="text" inputmode="decimal" data-f="amount" value="${esc(f.amount)}" placeholder="0.00"/></div>${noteHTML(it, 'amount')}</div>
+        <div class="field full${warn(it, 'amount') ? ' warn' : ''}"><div class="field-label">${esc(t('sc_amount'))}</div><div class="amount-prefix has-calc"><input class="amount-field" type="text" inputmode="decimal" data-f="amount" value="${esc(f.amount)}" placeholder="0.00"/>${UI.calcButton()}</div>${noteHTML(it, 'amount')}</div>
         <div class="field${warn(it, 'date') ? ' warn' : ''}"><div class="field-label">${esc(t('sc_date'))}</div><input type="date" data-f="date" value="${esc(f.date)}"/>${noteHTML(it, 'date')}</div>
         <div class="field${warn(it, 'time') ? ' warn' : ''}"><div class="field-label">${esc(t('sc_time'))}</div><input type="time" data-f="time" value="${esc(f.time)}"/>${noteHTML(it, 'time')}</div>
         <div class="field full${warn(it, 'to') ? ' warn' : ''}"><div class="field-label">${esc(t('sc_to'))}</div><input type="text" data-f="payee" maxlength="120" value="${esc(f.payee)}"/>${noteHTML(it, 'to')}${it.learned ? `<div class="ok-note">✓ ${esc(t('f_learned'))}</div>` : ''}</div>

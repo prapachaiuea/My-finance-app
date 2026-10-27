@@ -121,5 +121,17 @@ test('top labels group by what you typed, ignoring case/spaces', () => { const l
 test('frequent recent: needs >= 2 uses and picks the usual amount', () => { const l = [1, 2, 3].map(i => T({ type: 'expense', amount: 65, name: 'BTS', date: '2026-10-0' + i, cat: 'Transport' })).concat([T({ type: 'expense', amount: 50, name: 'Once', date: '2026-10-05' })]); const f = C.frequentRecent(l, '2026-10-07', 90, 6); assert.strictEqual(f.length, 1); assert.strictEqual(f[0].amount, 65); });
 test('budget suggestion = rounded average of last 3 months', () => { const l = [T({ type: 'expense', amount: 1200, date: '2026-07-05' }), T({ type: 'expense', amount: 1800, date: '2026-08-05' }), T({ type: 'expense', amount: 1500, date: '2026-09-05' })]; assert.strictEqual(C.suggestBudget(l, 2026, 9), 1500); });
 test('category filter', () => assert.strictEqual(C.filterTx([T({ type: 'expense', amount: 1, date: '2026-01-01', cat: 'A' }), T({ type: 'expense', amount: 1, date: '2026-01-01', cat: 'B' })], { cat: 'A' }).length, 1));
+console.log('calculator');
+const K = require(J('calculator.js'));
+const typed = (...ks) => ks.reduce((st, k) => K.press(st, k), { expr: '', fresh: false });
+test('calc: precedence and decimals', () => { assert.strictEqual(K.evaluate('2+3×4'), 14); assert.strictEqual(K.evaluate('0.1+0.2'), 0.3); assert.strictEqual(K.evaluate('10÷4'), 2.5); });
+test('calc: percent works like a phone calculator', () => { assert.strictEqual(K.evaluate('1000+7%'), 1070); assert.strictEqual(K.evaluate('200−10%'), 180); assert.strictEqual(K.evaluate('200×10%'), 20); assert.strictEqual(K.evaluate('50%'), 0.5); });
+test('calc: empty / dangling / impossible', () => { assert.strictEqual(K.evaluate(''), null); assert.strictEqual(K.evaluate('120+'), 120); assert(isNaN(K.evaluate('5÷0'))); assert(isNaN(K.evaluate('×5'))); assert.strictEqual(K.evaluate('−5+8'), 3); });
+test('calc: only a positive amount can be used', () => { assert(K.usable(0.01)); assert(!K.usable(0)); assert(!K.usable(-3)); assert(!K.usable(NaN)); assert(!K.usable(null)); });
+test('calc keys: leading zero, one dot, second operator replaces the first', () => { assert.strictEqual(typed('0', '0', '5').expr, '5'); assert.strictEqual(typed('1', '.', '5', '.').expr, '1.5'); assert.strictEqual(typed('.', '5').expr, '0.5'); assert.strictEqual(typed('5', '+', '×').expr, '5×'); assert.strictEqual(typed('+').expr, ''); });
+test('calc keys: = keeps the result so you can carry on, a digit starts over', () => { const r = typed('2', '0', '+', '5', '='); assert.strictEqual(r.expr, '25'); assert(r.fresh); assert.strictEqual(K.press(r, '×').expr, '25×'); assert.strictEqual(K.press(r, '7').expr, '7'); assert.strictEqual(K.press(r, 'back').expr, ''); });
+test('calc keys: backspace, percent only after a digit, length cap', () => { assert.strictEqual(typed('1', '2', 'back').expr, '1'); assert.strictEqual(typed('%').expr, ''); assert.strictEqual(typed('5', '%', '%').expr, '5%'); assert.strictEqual(typed(...'1234567890123'.split('')).expr.length, 12); });
+test('calc display: thousands separators and spaced operators', () => assert.strictEqual(K.show('1234567.5+20×3'), '1,234,567.5 + 20 × 3'));
+
 console.log('\n' + pass + ' passed, ' + fail + ' failed');
 process.exit(fail ? 1 : 0);
